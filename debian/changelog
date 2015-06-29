@@ -1,8 +1,91 @@
-qemu (1:2.3+dfsg-4~precise0+exo1) precise; urgency=medium
+qemu (1:2.3+dfsg-5ubuntu2~precise0+exo1) precise; urgency=medium
 
   * Backport to Precise.
+     - Remove acpica-tools build-dependency.
+     - Remove libseccomp-dev build-dependency.
+     - Remove libusbredirparser-dev build-dependency.
+     - Remove spice build-dependency.
+     - Remove libusb build-dependency.
+     - Keep dependency on seabios. See #757958.
+     - Fix dependency on libtool.
+     - Don't add built-using fields for qemu-user-static package.
 
- -- Vincent Bernat <bernat@debian.org>  Thu, 21 May 2015 07:24:15 +0200
+ -- Vincent Bernat <bernat@debian.org>  Mon, 29 Jun 2015 14:34:25 +0200
+
+qemu (1:2.3+dfsg-5ubuntu2) wily; urgency=medium
+
+  * SECURITY UPDATE: heap overflow in PCNET controller
+    - debian/patches/CVE-2015-3209.patch: check bounds in hw/net/pcnet.c.
+    - CVE-2015-3209
+
+ -- Marc Deslauriers <marc.deslauriers@ubuntu.com>  Thu, 11 Jun 2015 14:25:05 -0400
+
+qemu (1:2.3+dfsg-5ubuntu1) wily; urgency=medium
+
+  * Merge 1:2.3+dfsg-5 from Debian.
+  * Remaining changes:
+    - debian/rules: do not drop the init scripts loading kvm modules
+      (still needed in precise in cloud archive)
+    - qemu-system-common.postinst:
+      * remove acl placed by udev, and add udevadm trigger.
+      * reload kvm_intel if needed to set nested=1
+    - qemu-system-common.preinst: add kvm group if needed
+    - add qemu-kvm upstart job and defaults file (rules,
+      qemu-system-x86.qemu-kvm.default, qemu-system-x86.qemu-kvm.upstart)
+    - rules,qemu-system-x86.modprobe: support use under older udevs which
+      do not auto-load the kvm kernel module.  Enable nesting by default
+      on intel.
+    - d/p/ubuntu/expose-vmx_qemu64cpu.patch: enable nested kvm by default
+      in qemu64 cpu type.
+    - d/p/ubuntu/define-trusty-machine-type.patch: define a default trusty
+      machine type to ease future live vm migration.
+    - apport hook for qemu source package: d/source_qemu-kvm.py,
+      d/qemu-system-common.install
+  * Refreshed patches:
+    - ubuntu/expose-vmx_qemu64cpu.patch
+    - ubuntu/define-ubuntu-machine-types.patch
+
+ -- Serge Hallyn <serge.hallyn@ubuntu.com>  Wed, 10 Jun 2015 14:28:39 -0500
+
+qemu (1:2.3+dfsg-5) unstable; urgency=high
+
+  * slirp-use-less-predictable-directory-name-in-tmp-CVE-2015-4037.patch
+    (Closes: CVE-2015-4037)
+  * 11 patches for XEN PCI pass-through issues
+    (Closes: #787547 CVE-2015-4103 CVE-2015-4104 CVE-2015-4105 CVE-2015-4106)
+  * kbd-add-brazil-kbd-keys-*.patch, adding two keys found on Brazilian
+    keyboards (Closes: #772422)
+
+ -- Michael Tokarev <mjt@tls.msk.ru>  Wed, 03 Jun 2015 17:18:58 +0300
+
+qemu (1:2.3+dfsg-4ubuntu1) wily; urgency=medium
+
+  * Merge 1:2.3+dfsg-4 from Debian.
+  * Remaining changes:
+    - debian/rules: do not drop the init scripts loading kvm modules
+      (still needed in precise in cloud archive)
+    - qemu-system-common.postinst:
+      * remove acl placed by udev, and add udevadm trigger.
+      * reload kvm_intel if needed to set nested=1
+    - qemu-system-common.preinst: add kvm group if needed
+    - add qemu-kvm upstart job and defaults file (rules,
+      qemu-system-x86.qemu-kvm.default, qemu-system-x86.qemu-kvm.upstart)
+    - rules,qemu-system-x86.modprobe: support use under older udevs which
+      do not auto-load the kvm kernel module.  Enable nesting by default
+      on intel.
+    - d/p/ubuntu/expose-vmx_qemu64cpu.patch: enable nested kvm by default
+      in qemu64 cpu type.
+    - d/p/ubuntu/define-trusty-machine-type.patch: define a default trusty
+      machine type to ease future live vm migration.
+    - apport hook for qemu source package: d/source_qemu-kvm.py,
+      d/qemu-system-common.install
+  * Dropped all patches which are applied upstream
+  * Move the upstart jobs to a generic script
+    - add new qemu-kvm-init script
+    - call that from upstart and sysvrc qemu-kvm scripts
+    - move to qemu-system-common, which must now B/R qemu-system-{x86,ppc}
+
+ -- Serge Hallyn <serge.hallyn@ubuntu.com>  Wed, 03 Jun 2015 13:36:36 -0500
 
 qemu (1:2.3+dfsg-4) unstable; urgency=medium
 
@@ -23,20 +106,6 @@ qemu (1:2.3+dfsg-3) unstable; urgency=high
   * align binfmt magics/masks to be in single column
 
  -- Michael Tokarev <mjt@tls.msk.ru>  Tue, 12 May 2015 23:02:29 +0300
-
-qemu (1:2.3+dfsg-2~precise0+exo1) precise; urgency=medium
-
-  * Backport to Precise.
-     - Remove acpica-tools build-dependency.
-     - Remove libseccomp-dev build-dependency.
-     - Remove libusbredirparser-dev build-dependency.
-     - Remove spice build-dependency.
-     - Remove libusb build-dependency.
-     - Keep dependency on seabios. See #757958.
-     - Fix dependency on libtool.
-     - Don't add built-using fields for qemu-user-static package.
-
- -- Vincent Bernat <bernat@debian.org>  Wed, 06 May 2015 16:45:41 +0200
 
 qemu (1:2.3+dfsg-2) unstable; urgency=medium
 
@@ -78,6 +147,47 @@ qemu (1:2.2+dfsg-6exp) experimental; urgency=medium
    - add libcacard*.install and libcacard0.symbols
 
  -- Michael Tokarev <mjt@tls.msk.ru>  Fri, 17 Apr 2015 21:54:53 +0300
+
+qemu (1:2.2+dfsg-5expubuntu10) wily; urgency=medium
+
+  * SECURITY UPDATE: denial of service in vnc web
+    - debian/patches/CVE-2015-1779-1.patch: incrementally decode websocket
+      frames in ui/vnc-ws.c, ui/vnc-ws.h, ui/vnc.h.
+    - debian/patches/CVE-2015-1779-2.patch: limit size of HTTP headers from
+      websockets clients in ui/vnc-ws.c.
+    - CVE-2015-1779
+  * SECURITY UPDATE: host code execution via floppy device (VEMON)
+    - debian/patches/CVE-2015-3456.patch: force the fifo access to be in
+      bounds of the allocated buffer in hw/block/fdc.c.
+    - CVE-2015-3456
+
+ -- Marc Deslauriers <marc.deslauriers@ubuntu.com>  Wed, 13 May 2015 07:25:59 -0400
+
+qemu (1:2.2+dfsg-5expubuntu9) vivid; urgency=low
+
+  * CVE-2015-2756 / XSA-126
+    - xen: limit guest control of PCI command register
+
+ -- Stefan Bader <stefan.bader@canonical.com>  Wed, 08 Apr 2015 10:17:45 +0200
+
+qemu (1:2.2+dfsg-5expubuntu8) vivid; urgency=medium
+
+  * debian/qemu-system-x86.qemu-kvm.upstart: fix redirection to not
+    accidentally create /1
+
+ -- Steve Beattie <sbeattie@ubuntu.com>  Thu, 12 Mar 2015 16:46:51 -0700
+
+qemu (1:2.2+dfsg-5expubuntu7) vivid; urgency=low
+
+  * No-change rebuild to pull in libxl-4.5 (take 2: step to the right).
+
+ -- Stefan Bader <stefan.bader@canonical.com>  Thu, 26 Feb 2015 08:55:35 +0100
+
+qemu (1:2.2+dfsg-5expubuntu6) vivid; urgency=low
+
+  * No-change rebuild to pull in libxl-4.5.
+
+ -- Stefan Bader <stefan.bader@canonical.com>  Wed, 25 Feb 2015 13:58:37 +0100
 
 qemu (1:2.2+dfsg-5expubuntu5) vivid; urgency=medium
 
