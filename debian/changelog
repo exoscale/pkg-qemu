@@ -1,3 +1,123 @@
+qemu (1:2.3+dfsg-5ubuntu9.2~precise0+exo1) precise; urgency=medium
+
+  * Backport to Precise.
+     - No changes. See 1:2.3+dfsg-5ubuntu2~precise0+exo1.
+     - Change in 1:2.3+dfsg-5ubuntu8 was not applied.
+
+ -- Vincent Bernat <bernat@debian.org>  Thu, 04 Feb 2016 11:19:29 +0100
+
+qemu (1:2.3+dfsg-5ubuntu9.2) wily-security; urgency=medium
+
+  * SECURITY UPDATE: msi-x null pointer dereference
+    - debian/patches/CVE-2015-7549.patch: implement pba write in
+      hw/pci/msix.c.
+    - CVE-2015-7549
+  * SECURITY UPDATE: vnc floating point exception
+    - debian/patches/CVE-2015-8504.patch: handle zero values in ui/vnc.c.
+    - CVE-2015-8504
+  * SECURITY UPDATE: paravirtualized drivers incautious about shared memory
+    contents
+    - debian/patches/CVE-2015-8550-1.patch: avoid double access in
+      hw/block/xen_blkif.h.
+    - debian/patches/CVE-2015-8550-2.patch: avoid reading twice in
+      hw/display/xenfb.c.
+    - CVE-2015-8550
+  * SECURITY UPDATE: infinite loop in ehci_advance_state
+    - debian/patches/CVE-2015-8558.patch: make idt processing more robust
+      in hw/usb/hcd-ehci.c.
+    - CVE-2015-8558
+  * SECURITY UPDATE: host memory leakage in vmxnet3
+    - debian/patches/CVE-2015-856x.patch: avoid memory leakage in
+      hw/net/vmxnet3.c.
+    - CVE-2015-8567
+    - CVE-2015-8568
+  * SECURITY UPDATE: buffer overflow in megasas_ctrl_get_info
+    - debian/patches/CVE-2015-8613.patch: initialise info object with
+      appropriate size in hw/scsi/megasas.c.
+    - CVE-2015-8613
+  * SECURITY UPDATE: DoS via Human Monitor Interface
+    - debian/patches/CVE-2015-8619.patch: fix sendkey out of bounds write
+      in hmp.c, include/ui/console.h, ui/input-legacy.c.
+    - CVE-2015-8619
+  * SECURITY UPDATE: buffer overrun during VM migration
+    - debian/patches/CVE-2015-8666.patch: handle full length bytes in
+      hw/acpi/core.c.
+    - CVE-2015-8666
+  * SECURITY UPDATE: ne2000 OOB r/w in ioport operations
+    - debian/patches/CVE-2015-8743.patch: fix bounds check in ioport
+      operations in hw/net/ne2000.c.
+    - CVE-2015-8743
+  * SECURITY UPDATE: incorrect l2 header validation in vmxnet3
+    - debian/patches/CVE-2015-8744.patch: properly validate header in
+      hw/net/vmxnet3.c, hw/net/vmxnet_tx_pkt.c.
+    - CVE-2015-8744
+  * SECURITY UPDATE: crash via reading IMR registers in vmxnet3
+    - debian/patches/CVE-2015-8745.patch: support reading IMR registers in
+      hw/net/vmxnet3.c.
+    - CVE-2015-8745
+  * SECURITY UPDATE: ahci use-after-free vulnerability in aio port commands
+    - debian/patches/CVE-2016-1568.patch: reset ncq object to unused on
+      error in hw/ide/ahci.c.
+    - CVE-2016-1568
+  * SECURITY UPDATE: firmware configuration device OOB rw access
+    - debian/patches/CVE-2016-1714.patch: avoid calculating invalid current
+      entry pointer in hw/nvram/fw_cfg.c.
+    - CVE-2016-1714
+  * SECURITY UPDATE: DoS via null pointer dereference in vapic_write()
+    - debian/patches/CVE-2016-1922.patch: avoid null pointer dereference in
+      hw/i386/kvmvapic.c.
+    - CVE-2016-1922
+  * SECURITY UPDATE: e1000 infinite loop
+    - debian/patches/CVE-2016-1981.patch: eliminate infinite loops on
+      out-of-bounds transfer start in hw/net/e1000.c
+    - CVE-2016-1981
+  * SECURITY UPDATE: AHCI NULL pointer dereference when using FIS CLB
+    engines
+    - debian/patches/CVE-2016-2197.patch: add check before calling
+      dma_memory_unmap in hw/ide/ahci.c.
+    - CVE-2016-2197
+  * SECURITY UPDATE: ehci null pointer dereference in ehci_caps_write
+    - debian/patches/CVE-2016-2198.patch: add capability mmio write
+      function in hw/usb/hcd-ehci.c.
+    - CVE-2016-2198
+
+ -- Marc Deslauriers <marc.deslauriers@ubuntu.com>  Mon, 01 Feb 2016 15:30:01 -0500
+
+qemu (1:2.3+dfsg-5ubuntu9.1) wily-security; urgency=medium
+
+  * SECURITY UPDATE: denial of service via jumbo frame flood in virtio
+    - debian/patches/CVE-2015-7295.patch: drop truncated packets in
+      hw/net/virtio-net.c, hw/virtio/virtio.c, include/hw/virtio/virtio.h.
+    - CVE-2015-7295
+  * SECURITY UPDATE: loopback mode heap overflow vulnerability in pcnet
+    - debian/patches/CVE-2015-7504.patch: leave room for CRC code in
+      hw/net/pcnet.c.
+    - CVE-2015-7504
+  * SECURITY UPDATE: non-loopback mode buffer overflow in pcnet
+    - debian/patches/CVE-2015-7512.patch: check packet length in
+      hw/net/pcnet.c.
+    - CVE-2015-7512
+  * SECURITY UPDATE: infinite loop in eepro100
+    - debian/patches/CVE-2015-8345.patch: prevent endless loop in
+      hw/net/eepro100.c.
+    - CVE-2015-8345
+
+ -- Marc Deslauriers <marc.deslauriers@ubuntu.com>  Tue, 01 Dec 2015 14:06:11 -0500
+
+qemu (1:2.3+dfsg-5ubuntu9) wily; urgency=low
+
+  * debian/patches/upstream-fix-irq-route-entries.patch
+    Fix "kvm_irqchip_commit_routes: Assertion 'ret == 0' failed"
+    (LP: #1465935)
+
+ -- Stefan Bader <stefan.bader@canonical.com>  Fri, 09 Oct 2015 15:38:53 +0200
+
+qemu (1:2.3+dfsg-5ubuntu8) wily; urgency=medium
+
+  * Build using libseccomp on all architectures.
+
+ -- Matthias Klose <doko@ubuntu.com>  Sat, 03 Oct 2015 21:12:15 +0200
+
 qemu (1:2.3+dfsg-5ubuntu7~precise0+exo1) precise; urgency=medium
 
   * Backport to Precise.
