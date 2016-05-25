@@ -74,3 +74,4 @@ CVE-2016-4001.patch
 CVE-2016-4002.patch
 CVE-2016-4020.patch
 CVE-2016-4037.patch
+0001-migration-avoid-divide-by-zero-in-xbzrle-cache-miss-.patch

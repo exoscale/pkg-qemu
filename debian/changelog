@@ -1,6 +1,7 @@
 qemu (1:2.3+dfsg-5ubuntu9.4~precise0+exo1) precise; urgency=medium
 
   * Backport to Precise.
+  * Add 0001-migration-avoid-divide-by-zero-in-xbzrle-cache-miss-.patch.
 
  -- Vincent Bernat <bernat@debian.org>  Wed, 25 May 2016 14:55:07 +0200
 

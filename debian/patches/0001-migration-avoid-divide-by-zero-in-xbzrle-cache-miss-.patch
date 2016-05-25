@@ -1,0 +1,69 @@
+From 27ff42e29a1d12e9d9dbc473bbca36a50baf278b Mon Sep 17 00:00:00 2001
+From: Michael Chapman <mike@very.puzzling.org>
+Date: Wed, 15 Apr 2015 13:59:14 +1000
+Subject: [PATCH] migration: avoid divide by zero in xbzrle cache miss rate
+
+This bug manifested itself as a VM that could not be resumed by libvirt
+following a migration:
+
+  # virsh resume example
+  error: Failed to resume domain example
+  error: internal error: cannot parse json {"return":
+    {"xbzrle-cache":
+      {..., "cache-miss-rate": -nan, ...},
+      ...
+    }
+  }: lexical error: malformed number, a digit is required after the minus sign.
+
+This patch also ensures xbzrle_cache_miss_prev and iterations_prev are
+cleared at the start of the migration.
+
+Signed-off-by: Michael Chapman <mike@very.puzzling.org>
+Reviewed-by: Amit Shah <amit.shah@redhat.com>
+Signed-off-by: Juan Quintela <quintela@redhat.com>
+---
+ arch_init.c | 8 +++++---
+ 1 file changed, 5 insertions(+), 3 deletions(-)
+
+diff --git a/arch_init.c b/arch_init.c
+index 539011d2c65b..bbf0031019e0 100644
+--- a/arch_init.c
++++ b/arch_init.c
+@@ -663,12 +663,16 @@ static void migration_bitmap_sync_range(ram_addr_t start, ram_addr_t length)
+ static int64_t start_time;
+ static int64_t bytes_xfer_prev;
+ static int64_t num_dirty_pages_period;
++static uint64_t xbzrle_cache_miss_prev;
++static uint64_t iterations_prev;
+ 
+ static void migration_bitmap_sync_init(void)
+ {
+     start_time = 0;
+     bytes_xfer_prev = 0;
+     num_dirty_pages_period = 0;
++    xbzrle_cache_miss_prev = 0;
++    iterations_prev = 0;
+ }
+ 
+ /* Called with iothread lock held, to protect ram_list.dirty_memory[] */
+@@ -679,8 +683,6 @@ static void migration_bitmap_sync(void)
+     MigrationState *s = migrate_get_current();
+     int64_t end_time;
+     int64_t bytes_xfer_now;
+-    static uint64_t xbzrle_cache_miss_prev;
+-    static uint64_t iterations_prev;
+ 
+     bitmap_sync_count++;
+ 
+@@ -728,7 +730,7 @@ static void migration_bitmap_sync(void)
+              mig_throttle_on = false;
+         }
+         if (migrate_use_xbzrle()) {
+-            if (iterations_prev != 0) {
++            if (iterations_prev != acct_info.iterations) {
+                 acct_info.xbzrle_cache_miss_rate =
+                    (double)(acct_info.xbzrle_cache_miss -
+                             xbzrle_cache_miss_prev) /
+-- 
+2.8.1
+
