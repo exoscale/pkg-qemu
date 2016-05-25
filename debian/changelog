@@ -1,3 +1,9 @@
+qemu (1:2.3+dfsg-5ubuntu9.4~precise0+exo1) precise; urgency=medium
+
+  * Backport to Precise.
+
+ -- Vincent Bernat <bernat@debian.org>  Wed, 25 May 2016 14:55:07 +0200
+
 qemu (1:2.3+dfsg-5ubuntu9.4) wily-security; urgency=medium
 
   * SECURITY UPDATE: denial of service via multiple eof_timers in ohci
