@@ -1,11 +1,3 @@
-qemu (1:2.3+dfsg-5ubuntu9.2~precise0+exo1) precise; urgency=medium
-
-  * Backport to Precise.
-     - No changes. See 1:2.3+dfsg-5ubuntu2~precise0+exo1.
-     - Change in 1:2.3+dfsg-5ubuntu8 was not applied.
-
- -- Vincent Bernat <bernat@debian.org>  Thu, 04 Feb 2016 11:19:29 +0100
-
 qemu (1:2.3+dfsg-5ubuntu9.2) wily-security; urgency=medium
 
   * SECURITY UPDATE: msi-x null pointer dereference
@@ -118,13 +110,6 @@ qemu (1:2.3+dfsg-5ubuntu8) wily; urgency=medium
 
  -- Matthias Klose <doko@ubuntu.com>  Sat, 03 Oct 2015 21:12:15 +0200
 
-qemu (1:2.3+dfsg-5ubuntu7~precise0+exo1) precise; urgency=medium
-
-  * Backport to Precise.
-     - No changes. See 1:2.3+dfsg-5ubuntu2~precise0+exo1.
-
- -- Vincent Bernat <bernat@debian.org>  Mon, 28 Sep 2015 10:24:30 +0200
-
 qemu (1:2.3+dfsg-5ubuntu7) wily; urgency=medium
 
   * SECURITY UPDATE: denial of service via NE2000 driver
@@ -165,13 +150,6 @@ qemu (1:2.3+dfsg-5ubuntu5) wily; urgency=medium
 
  -- Serge Hallyn <serge.hallyn@ubuntu.com>  Fri, 04 Sep 2015 16:35:56 -0500
 
-qemu (1:2.3+dfsg-5ubuntu4~precise0+exo1) precise; urgency=medium
-
-  * Backport to Precise.
-     - No changes. See 1:2.3+dfsg-5ubuntu2~precise0+exo1.
-
- -- Vincent Bernat <bernat@debian.org>  Thu, 27 Aug 2015 15:00:49 +0200
-
 qemu (1:2.3+dfsg-5ubuntu4) wily; urgency=medium
 
   * SECURITY UPDATE: process heap memory disclosure
@@ -192,13 +170,6 @@ qemu (1:2.3+dfsg-5ubuntu4) wily; urgency=medium
 
  -- Marc Deslauriers <marc.deslauriers@ubuntu.com>  Tue, 25 Aug 2015 09:38:43 -0400
 
-qemu (1:2.3+dfsg-5ubuntu3~precise0+exo1) precise; urgency=medium
-
-  * Backport to Precise.
-     - No changes. See 1:2.3+dfsg-5ubuntu2~precise0+exo1.
-
- -- Vincent Bernat <bernat@debian.org>  Wed, 29 Jul 2015 09:46:38 +0200
-
 qemu (1:2.3+dfsg-5ubuntu3) wily; urgency=medium
 
   * SECURITY UPDATE: out-of-bounds memory access in pit_ioport_read()
@@ -214,20 +185,6 @@ qemu (1:2.3+dfsg-5ubuntu3) wily; urgency=medium
     - CVE-2015-5158
 
  -- Marc Deslauriers <marc.deslauriers@ubuntu.com>  Mon, 27 Jul 2015 10:07:05 -0400
-
-qemu (1:2.3+dfsg-5ubuntu2~precise0+exo1) precise; urgency=medium
-
-  * Backport to Precise.
-     - Remove acpica-tools build-dependency.
-     - Remove libseccomp-dev build-dependency.
-     - Remove libusbredirparser-dev build-dependency.
-     - Remove spice build-dependency.
-     - Remove libusb build-dependency.
-     - Keep dependency on seabios. See #757958.
-     - Fix dependency on libtool.
-     - Don't add built-using fields for qemu-user-static package.
-
- -- Vincent Bernat <bernat@debian.org>  Mon, 29 Jun 2015 14:34:25 +0200
 
 qemu (1:2.3+dfsg-5ubuntu2) wily; urgency=medium
 

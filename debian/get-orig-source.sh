@@ -55,7 +55,6 @@ find scripts -name '*.pyc' -print -delete
 
 }
 
-echo $#$1
 case "$#$1" in
   1clean | 1dfsg)
     if [ -f vl.c -a -f hw/block/block.c -a -d pc-bios ]; then
@@ -66,7 +65,6 @@ case "$#$1" in
     ;;
 
   1[012].*) ;;
-  1[1234]:[012].*) ;;
 
   *)
     echo "unknown arguments.  Should be either 'dfsg' or a version number" >&2
@@ -75,7 +73,6 @@ case "$#$1" in
 esac
 
 deb="${1%-*}" # strip debian revision number
-deb="${deb#?:}"
 upstream="${deb%+dfsg}"
 case "$upstream" in
    *~rc*) upstream=$(echo "$upstream" | sed 's/~rc/-rc/') ;;
