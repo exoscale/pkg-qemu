@@ -1,3 +1,9 @@
+qemu (1:2.3+dfsg-5ubuntu9.4~precise0+exo2) precise; urgency=medium
+
+  * Rebuild to get -dbgsym packages.
+
+ -- Vincent Bernat <bernat@debian.org>  Fri, 10 Jun 2016 16:06:05 +0200
+
 qemu (1:2.3+dfsg-5ubuntu9.4~precise0+exo1) precise; urgency=medium
 
   * Backport to Precise.
