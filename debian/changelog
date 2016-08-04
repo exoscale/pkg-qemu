@@ -1,3 +1,10 @@
+qemu (1:2.3+dfsg-5ubuntu9.4~precise0+exo3) precise; urgency=medium
+
+  * Add 0001-virtio-error-out-if-guest-exceeds-virtqueue-size.patch for
+    CVE-2016-5403.
+
+ -- Vincent Bernat <bernat@debian.org>  Thu, 04 Aug 2016 21:14:47 +0200
+
 qemu (1:2.3+dfsg-5ubuntu9.4~precise0+exo2) precise; urgency=medium
 
   * Rebuild to get -dbgsym packages.
