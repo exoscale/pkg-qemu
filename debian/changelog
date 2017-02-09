@@ -1,3 +1,9 @@
+qemu (1:2.5+dfsg-5ubuntu10.8~precise0+exo2) precise; urgency=medium
+
+  * Drop any dependency on qemu-user-* packages.
+
+ -- Vincent Bernat <bernat@debian.org>  Thu, 09 Feb 2017 11:02:59 +0100
+
 qemu (1:2.5+dfsg-5ubuntu10.8~precise0+exo1) precise; urgency=medium
 
   * Backport to Precise.
