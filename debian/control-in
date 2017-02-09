@@ -12,8 +12,6 @@ Build-Depends: debhelper (>= 9),
 # In comments below we also specify (system-specific) arguments
 # to qemu's configure script, -- optional features which depend
 # on build-dependencies.
-# pc-bios/*.dts => *.dtb (PPC firmware)
- device-tree-compiler,
  texinfo,
  python:any,
 # --enable-linux-aio	linux-*
@@ -35,10 +33,9 @@ Build-Depends: debhelper (>= 9),
  libcap-ng-dev [linux-any],
 # --enable-curl
  libcurl4-gnutls-dev,
-# --enable-fdt
- libfdt-dev,
 # --enable-gnutls
  gnutls-dev,
+# --disable-fdt
 # gtk ui is almost the same as sdl but adds bloat
 # --disable-gtk
 ## --with-gtkabi=2.0

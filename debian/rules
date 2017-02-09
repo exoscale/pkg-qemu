@@ -122,9 +122,6 @@ build-stamp: configure-stamp
 
 	# system and utils build
 	$(MAKE) -C qemu-build V=${V}
-ifeq (${enable_system},enable)
-	dtc -o qemu-build/pc-bios/bamboo.dtb pc-bios/bamboo.dts
-endif
 
 ifeq ($(enable_linux_user),enable)
 	# user-static build

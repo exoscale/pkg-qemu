@@ -6,6 +6,7 @@ qemu (1:2.5+dfsg-5ubuntu10.8~precise0+exo1) precise; urgency=medium
      - 0001-virtio-error-out-if-guest-exceeds-virtqueue-size.patch
   * Remove iSCSI support (libiscsi-dev too old).
   * Remove SmartCard support (no libcacard-dev).
+  * Remove FDT support (not needed for amd64).
 
  -- Vincent Bernat <bernat@debian.org>  Thu, 09 Feb 2017 09:42:54 +0100
 
