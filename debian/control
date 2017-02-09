@@ -44,8 +44,6 @@ Build-Depends: debhelper (>= 9),
 # libgtk2.0-dev, libvte-dev (>> 0.18.0~),
 # vte is used together with gtk
 # --disable-vte
-# --enable-libiscsi
- libiscsi-dev (>> 1.9.0~),
 # --enable-curses
  libncurses5-dev,
 # --enable-numa i386|amd64|ia64|mips|mipsel|powerpc|powerpcspe|x32|ppc64|ppc64el|arm64|sparc|hppa
