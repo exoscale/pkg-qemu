@@ -7,6 +7,8 @@ qemu (1:2.5+dfsg-5ubuntu10.8~precise0+exo1) precise; urgency=medium
   * Remove iSCSI support (libiscsi-dev too old).
   * Remove SmartCard support (no libcacard-dev).
   * Remove FDT support (not needed for amd64).
+  * Remove qemu-user-* packages.
+  * Remove qemu-system-* packages, except qemu-system-x86.
 
  -- Vincent Bernat <bernat@debian.org>  Thu, 09 Feb 2017 09:42:54 +0100
 
