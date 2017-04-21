@@ -1,3 +1,9 @@
+qemu (1:2.5+dfsg-5ubuntu10.11~precise0+exo1) precise; urgency=medium
+
+  * Backport to Precise.
+
+ -- Vincent Bernat <bernat@debian.org>  Fri, 21 Apr 2017 10:19:10 +0200
+
 qemu (1:2.5+dfsg-5ubuntu10.11) xenial-security; urgency=medium
 
   * SECURITY UPDATE: DoS in virtio GPU device
