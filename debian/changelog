@@ -6,6 +6,7 @@ qemu (1:2.10+dfsg-0ubuntu6~xenial0+exo1) xenial; urgency=medium
        qemu-system-arm, qemu-system-mips, qemu-system-ppc,
        qemu-system-sparc, qemu-system-misc, qemu-user*).
      - Add patch to compile with libfdt 1.4.0.
+     - Add dependency on dh-systemd.
 
  -- Vincent Bernat <bernat@debian.org>  Fri, 15 Dec 2017 13:01:09 +0100
 
