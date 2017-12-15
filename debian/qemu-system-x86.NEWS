@@ -1,8 +1,8 @@
-qemu (1:2.5+dfsg-5ubuntu10.9) xenial; urgency=low
+qemu (1:2.8+dfsg-2ubuntu1) zesty; urgency=low
 
-  The ubuntu specific machine types for Trusty, Utopic had a bug in
-  former versions. Those bugs made them non-unique by effectively picking up
-  the current qemu versions machine type instead to stay at their defined one.
+  The ubuntu specific machine types for Trusty, Utopic and Vivid had a bug in
+  former versions. Those bugs made them non-unique by effectivly picking up
+  the current qemu versions compat level instead to stay at their defined one.
 
   Machine Type:  Broken in:
   Trusty         Xenial, Yakkety, Cloud-Archive Mitaka
@@ -11,7 +11,7 @@ qemu (1:2.5+dfsg-5ubuntu10.9) xenial; urgency=low
   Despite multiple releases being affected by the bad type definition, most
   common migration paths today like LTS->LTS from Trusty to Xenial are working
   fine for now. But a latter Migration to a newer System would fail as then
-  source and target would disagree on what the guest type exactly is.
+  source and traget would disagree on what the guest type exactly is.
 
   The only known real case of a related issue so far is a Utopic machine type on
   Trusty plus Ubuntu Cloud Archive Liberty migrating to Xenial.
