@@ -2,6 +2,9 @@ qemu (1:2.10+dfsg-0ubuntu6~xenial0+exo1) xenial; urgency=medium
 
   * Backport to Xenial.
      - Relax dependency on libseccomp-dev (only needed for ppc64el).
+     - Do not build various qemu packages (qemu-system-s390x,
+       qemu-system-arm, qemu-system-mips, qemu-system-ppc,
+       qemu-system-sparc, qemu-system-misc, qemu-user*).
 
  -- Vincent Bernat <bernat@debian.org>  Fri, 15 Dec 2017 13:01:09 +0100
 
