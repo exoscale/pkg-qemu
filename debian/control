@@ -152,8 +152,7 @@ Package: qemu-block-extra
 Architecture: amd64 arm arm64 armel armhf hppa i386 ia64 kfreebsd-amd64 kfreebsd-i386 mips mipsel powerpc powerpcspe ppc64 ppc64el s390x sparc sparc64 x32
 Multi-Arch: same
 Depends: ${misc:Depends}, ${shlibs:Depends},
-Enhances: qemu-utils
- qemu-system-arm, qemu-system-mips, qemu-system-sparc, qemu-system-x86
+Enhances: qemu-utils, qemu-system-x86
 Description: extra block backend modules for qemu-system and qemu-utils
  QEMU is a fast processor emulator: currently the package supports
  ARM, CRIS, i386, M68k (ColdFire), MicroBlaze, MIPS, PowerPC, SH4,
