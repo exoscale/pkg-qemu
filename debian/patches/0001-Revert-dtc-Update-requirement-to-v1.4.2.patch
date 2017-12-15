@@ -1,0 +1,82 @@
+From db32ec0814d472eb62815af8ac828744a1a4b698 Mon Sep 17 00:00:00 2001
+From: Vincent Bernat <vincent@bernat.im>
+Date: Fri, 15 Dec 2017 15:55:33 +0100
+Subject: [PATCH] Revert "dtc: Update requirement to v1.4.2"
+
+This reverts commit 6e85fce0225f235b11618fe50eaec64c1de2cf3e. And
+embed appropriate function. This would fail if we were compiled with
+1.4.2.
+---
+ configure            |  6 +++---
+ hw/core/loader-fit.c | 28 ++++++++++++++++++++++++++++
+ 2 files changed, 31 insertions(+), 3 deletions(-)
+
+diff --git a/configure b/configure
+index dd73cce62f9d..90a909956af9 100755
+--- a/configure
++++ b/configure
+@@ -3583,11 +3583,11 @@ fi
+ if test "$fdt" != "no" ; then
+   fdt_libs="-lfdt"
+   # explicitly check for libfdt_env.h as it is missing in some stable installs
+-  # and test for required functions to make sure we are on a version >= 1.4.2
++  # and test for required functions to make sure we are on a version >= 1.4.0
+   cat > $TMPC << EOF
+ #include <libfdt.h>
+ #include <libfdt_env.h>
+-int main(void) { fdt_first_subnode(0, 0); return 0; }
++int main(void) { fdt_get_property_by_offset(0, 0, 0); return 0; }
+ EOF
+   if compile_prog "" "$fdt_libs" ; then
+     # system DTC is good - use it
+@@ -3605,7 +3605,7 @@ EOF
+     fdt_libs="-L\$(BUILD_DIR)/dtc/libfdt $fdt_libs"
+   elif test "$fdt" = "yes" ; then
+     # have neither and want - prompt for system/submodule install
+-    error_exit "DTC (libfdt) version >= 1.4.2 not present. Your options:" \
++    error_exit "DTC (libfdt) version >= 1.4.0 not present. Your options:" \
+         "  (1) Preferred: Install the DTC (libfdt) devel package" \
+         "  (2) Fetch the DTC submodule, using:" \
+         "      git submodule update --init dtc"
+diff --git a/hw/core/loader-fit.c b/hw/core/loader-fit.c
+index 0c4a7207f4d6..e289ddef8fa3 100644
+--- a/hw/core/loader-fit.c
++++ b/hw/core/loader-fit.c
+@@ -250,6 +250,34 @@ out:
+     return ret;
+ }
+ 
++int fdt_first_subnode(const void *fdt, int offset)
++{
++	int depth = 0;
++
++	offset = fdt_next_node(fdt, offset, &depth);
++	if (offset < 0 || depth != 1)
++		return -FDT_ERR_NOTFOUND;
++
++	return offset;
++}
++
++int fdt_next_subnode(const void *fdt, int offset)
++{
++	int depth = 1;
++
++	/*
++	 * With respect to the parent, the depth of the next subnode will be
++	 * the same as the last.
++	 */
++	do {
++		offset = fdt_next_node(fdt, offset, &depth);
++		if (offset < 0 || depth < 1)
++			return -FDT_ERR_NOTFOUND;
++	} while (depth > 1);
++
++	return offset;
++}
++
+ int load_fit(const struct fit_loader *ldr, const char *filename, void *opaque)
+ {
+     const struct fit_loader_match *match;
+-- 
+2.15.1
+
