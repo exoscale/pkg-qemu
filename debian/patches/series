@@ -2,7 +2,9 @@
 use-fixed-data-path.patch
 use-data-path.patch
 
+# exoscale patches
 0001-Revert-dtc-Update-requirement-to-v1.4.2.patch
+kvm-blockdev-ignore-cache-options-for-empty-CDROM-drives.patch
 
 # ubuntu patches
 ubuntu/expose-vmx_qemu64cpu.patch
