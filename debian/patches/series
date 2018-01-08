@@ -5,6 +5,7 @@ use-data-path.patch
 # exoscale patches
 0001-Revert-dtc-Update-requirement-to-v1.4.2.patch
 kvm-blockdev-ignore-cache-options-for-empty-CDROM-drives.patch
+0065-i386-kvm-MSR_IA32_SPEC_CTRL-and-MSR.patch
 
 # ubuntu patches
 ubuntu/expose-vmx_qemu64cpu.patch
