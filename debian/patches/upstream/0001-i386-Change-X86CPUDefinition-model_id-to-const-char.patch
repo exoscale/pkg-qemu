@@ -1,7 +1,7 @@
-From 16b8bd82b070615ee1cd5d21a56e7d564c7488aa Mon Sep 17 00:00:00 2001
+From 923a800c7c8513c37f713eaaaf20e904cedcb3f9 Mon Sep 17 00:00:00 2001
 From: Eduardo Habkost <ehabkost@redhat.com>
 Date: Tue, 9 Jan 2018 13:45:13 -0200
-Subject: [PATCH 1/7] i386: Change X86CPUDefinition::model_id to const char*
+Subject: [PATCH 1/6] i386: Change X86CPUDefinition::model_id to const char*
 
 It is valid to have a 48-character model ID on CPUID, however the
 definition of X86CPUDefinition::model_id is char[48], which can
@@ -26,10 +26,10 @@ Signed-off-by: Eduardo Habkost <ehabkost@redhat.com>
  1 file changed, 8 insertions(+), 1 deletion(-)
 
 diff --git a/target/i386/cpu.c b/target/i386/cpu.c
-index 3818d7283158..c893be5fd237 100644
+index ddc45abd70a3..b238aaa95a46 100644
 --- a/target/i386/cpu.c
 +++ b/target/i386/cpu.c
-@@ -754,7 +754,7 @@ struct X86CPUDefinition {
+@@ -749,7 +749,7 @@ struct X86CPUDefinition {
      int model;
      int stepping;
      FeatureWordArray features;
@@ -38,7 +38,7 @@ index 3818d7283158..c893be5fd237 100644
  };
  
  static X86CPUDefinition builtin_x86_defs[] = {
-@@ -923,6 +923,7 @@ static X86CPUDefinition builtin_x86_defs[] = {
+@@ -918,6 +918,7 @@ static X86CPUDefinition builtin_x86_defs[] = {
          .features[FEAT_1_EDX] =
              I486_FEATURES,
          .xlevel = 0,
@@ -46,7 +46,7 @@ index 3818d7283158..c893be5fd237 100644
      },
      {
          .name = "pentium",
-@@ -934,6 +935,7 @@ static X86CPUDefinition builtin_x86_defs[] = {
+@@ -929,6 +930,7 @@ static X86CPUDefinition builtin_x86_defs[] = {
          .features[FEAT_1_EDX] =
              PENTIUM_FEATURES,
          .xlevel = 0,
@@ -54,7 +54,7 @@ index 3818d7283158..c893be5fd237 100644
      },
      {
          .name = "pentium2",
-@@ -945,6 +947,7 @@ static X86CPUDefinition builtin_x86_defs[] = {
+@@ -940,6 +942,7 @@ static X86CPUDefinition builtin_x86_defs[] = {
          .features[FEAT_1_EDX] =
              PENTIUM2_FEATURES,
          .xlevel = 0,
@@ -62,7 +62,7 @@ index 3818d7283158..c893be5fd237 100644
      },
      {
          .name = "pentium3",
-@@ -956,6 +959,7 @@ static X86CPUDefinition builtin_x86_defs[] = {
+@@ -951,6 +954,7 @@ static X86CPUDefinition builtin_x86_defs[] = {
          .features[FEAT_1_EDX] =
              PENTIUM3_FEATURES,
          .xlevel = 0,
@@ -70,7 +70,7 @@ index 3818d7283158..c893be5fd237 100644
      },
      {
          .name = "athlon",
-@@ -2736,6 +2740,9 @@ static void x86_register_cpudef_type(X86CPUDefinition *def)
+@@ -2670,6 +2674,9 @@ static void x86_register_cpudef_type(X86CPUDefinition *def)
       * they shouldn't be set on the CPU model table.
       */
      assert(!(def->features[FEAT_8000_0001_EDX] & CPUID_EXT2_AMD_ALIASES));

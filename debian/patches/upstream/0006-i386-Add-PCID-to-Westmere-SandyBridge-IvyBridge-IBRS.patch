@@ -1,7 +1,7 @@
-From 12fd097960a9657166d1405a64ebf47a84a7eebc Mon Sep 17 00:00:00 2001
+From 2e79235cab7950bec63fc71ea60428d1d105b658 Mon Sep 17 00:00:00 2001
 From: Eduardo Habkost <ehabkost@redhat.com>
 Date: Tue, 9 Jan 2018 13:45:19 -0200
-Subject: [PATCH 7/7] i386: Add PCID to {Westmere, SandyBridge, IvyBridge}-IBRS
+Subject: [PATCH 6/6] i386: Add PCID to {Westmere, SandyBridge, IvyBridge}-IBRS
 
 RFC NOTE: we need to confirm if all
 Westmere/SandyBridge/IvyBridge CPUs out there support PCID,
@@ -35,10 +35,10 @@ Signed-off-by: Eduardo Habkost <ehabkost@redhat.com>
  1 file changed, 6 insertions(+), 3 deletions(-)
 
 diff --git a/target/i386/cpu.c b/target/i386/cpu.c
-index c80c097e3b15..170c0ecd4355 100644
+index 2d27e3dcfba7..02ea306860ed 100644
 --- a/target/i386/cpu.c
 +++ b/target/i386/cpu.c
-@@ -1123,6 +1123,7 @@ static X86CPUDefinition builtin_x86_defs[] = {
+@@ -1118,6 +1118,7 @@ static X86CPUDefinition builtin_x86_defs[] = {
              CPUID_PGE | CPUID_MTRR | CPUID_SEP | CPUID_APIC | CPUID_CX8 |
              CPUID_MCE | CPUID_PAE | CPUID_MSR | CPUID_TSC | CPUID_PSE |
              CPUID_DE | CPUID_FP87,
@@ -46,7 +46,7 @@ index c80c097e3b15..170c0ecd4355 100644
          .features[FEAT_1_ECX] =
              CPUID_EXT_AES | CPUID_EXT_POPCNT | CPUID_EXT_SSE42 |
              CPUID_EXT_SSE41 | CPUID_EXT_CX16 | CPUID_EXT_SSSE3 |
-@@ -1152,7 +1153,7 @@ static X86CPUDefinition builtin_x86_defs[] = {
+@@ -1147,7 +1148,7 @@ static X86CPUDefinition builtin_x86_defs[] = {
          .features[FEAT_1_ECX] =
              CPUID_EXT_AES | CPUID_EXT_POPCNT | CPUID_EXT_SSE42 |
              CPUID_EXT_SSE41 | CPUID_EXT_CX16 | CPUID_EXT_SSSE3 |
@@ -55,7 +55,7 @@ index c80c097e3b15..170c0ecd4355 100644
          .features[FEAT_8000_0001_EDX] =
              CPUID_EXT2_LM | CPUID_EXT2_SYSCALL | CPUID_EXT2_NX,
          .features[FEAT_8000_0001_ECX] =
-@@ -1177,6 +1178,7 @@ static X86CPUDefinition builtin_x86_defs[] = {
+@@ -1172,6 +1173,7 @@ static X86CPUDefinition builtin_x86_defs[] = {
              CPUID_PGE | CPUID_MTRR | CPUID_SEP | CPUID_APIC | CPUID_CX8 |
              CPUID_MCE | CPUID_PAE | CPUID_MSR | CPUID_TSC | CPUID_PSE |
              CPUID_DE | CPUID_FP87,
@@ -63,7 +63,7 @@ index c80c097e3b15..170c0ecd4355 100644
          .features[FEAT_1_ECX] =
              CPUID_EXT_AVX | CPUID_EXT_XSAVE | CPUID_EXT_AES |
              CPUID_EXT_TSC_DEADLINE_TIMER | CPUID_EXT_POPCNT |
-@@ -1213,7 +1215,7 @@ static X86CPUDefinition builtin_x86_defs[] = {
+@@ -1208,7 +1210,7 @@ static X86CPUDefinition builtin_x86_defs[] = {
              CPUID_EXT_TSC_DEADLINE_TIMER | CPUID_EXT_POPCNT |
              CPUID_EXT_X2APIC | CPUID_EXT_SSE42 | CPUID_EXT_SSE41 |
              CPUID_EXT_CX16 | CPUID_EXT_SSSE3 | CPUID_EXT_PCLMULQDQ |
@@ -72,7 +72,7 @@ index c80c097e3b15..170c0ecd4355 100644
          .features[FEAT_8000_0001_EDX] =
              CPUID_EXT2_LM | CPUID_EXT2_RDTSCP | CPUID_EXT2_NX |
              CPUID_EXT2_SYSCALL,
-@@ -1241,6 +1243,7 @@ static X86CPUDefinition builtin_x86_defs[] = {
+@@ -1236,6 +1238,7 @@ static X86CPUDefinition builtin_x86_defs[] = {
              CPUID_PGE | CPUID_MTRR | CPUID_SEP | CPUID_APIC | CPUID_CX8 |
              CPUID_MCE | CPUID_PAE | CPUID_MSR | CPUID_TSC | CPUID_PSE |
              CPUID_DE | CPUID_FP87,
@@ -80,7 +80,7 @@ index c80c097e3b15..170c0ecd4355 100644
          .features[FEAT_1_ECX] =
              CPUID_EXT_AVX | CPUID_EXT_XSAVE | CPUID_EXT_AES |
              CPUID_EXT_TSC_DEADLINE_TIMER | CPUID_EXT_POPCNT |
-@@ -1280,7 +1283,7 @@ static X86CPUDefinition builtin_x86_defs[] = {
+@@ -1275,7 +1278,7 @@ static X86CPUDefinition builtin_x86_defs[] = {
              CPUID_EXT_TSC_DEADLINE_TIMER | CPUID_EXT_POPCNT |
              CPUID_EXT_X2APIC | CPUID_EXT_SSE42 | CPUID_EXT_SSE41 |
              CPUID_EXT_CX16 | CPUID_EXT_SSSE3 | CPUID_EXT_PCLMULQDQ |

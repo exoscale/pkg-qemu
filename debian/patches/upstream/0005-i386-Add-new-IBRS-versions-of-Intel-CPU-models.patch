@@ -1,7 +1,7 @@
-From bfe30dfbdc68255fa4d69b6ef6756f63e0a98e59 Mon Sep 17 00:00:00 2001
+From 775bf0dbee634f56fc06bf35c983694b0d1ec5cb Mon Sep 17 00:00:00 2001
 From: Eduardo Habkost <ehabkost@redhat.com>
 Date: Tue, 9 Jan 2018 13:45:17 -0200
-Subject: [PATCH 5/7] i386: Add new -IBRS versions of Intel CPU models
+Subject: [PATCH 5/6] i386: Add new -IBRS versions of Intel CPU models
 
 The new MSR IA32_SPEC_CTRL MSR was introduced by a recent Intel
 microcode updated and can be used by OSes to mitigate
@@ -20,10 +20,10 @@ Signed-off-by: Eduardo Habkost <ehabkost@redhat.com>
  1 file changed, 378 insertions(+), 1 deletion(-)
 
 diff --git a/target/i386/cpu.c b/target/i386/cpu.c
-index 17eb0de98732..ff8d43d897a0 100644
+index cdec90e27458..2d27e3dcfba7 100644
 --- a/target/i386/cpu.c
 +++ b/target/i386/cpu.c
-@@ -1085,6 +1085,31 @@ static X86CPUDefinition builtin_x86_defs[] = {
+@@ -1080,6 +1080,31 @@ static X86CPUDefinition builtin_x86_defs[] = {
          .xlevel = 0x80000008,
          .model_id = "Intel Core i7 9xx (Nehalem Class Core i7)",
      },
@@ -55,7 +55,7 @@ index 17eb0de98732..ff8d43d897a0 100644
      {
          .name = "Westmere",
          .level = 11,
-@@ -1111,6 +1136,34 @@ static X86CPUDefinition builtin_x86_defs[] = {
+@@ -1106,6 +1131,34 @@ static X86CPUDefinition builtin_x86_defs[] = {
          .xlevel = 0x80000008,
          .model_id = "Westmere E56xx/L56xx/X56xx (Nehalem-C)",
      },
@@ -90,7 +90,7 @@ index 17eb0de98732..ff8d43d897a0 100644
      {
          .name = "SandyBridge",
          .level = 0xd,
-@@ -1142,6 +1195,39 @@ static X86CPUDefinition builtin_x86_defs[] = {
+@@ -1137,6 +1190,39 @@ static X86CPUDefinition builtin_x86_defs[] = {
          .xlevel = 0x80000008,
          .model_id = "Intel Xeon E312xx (Sandy Bridge)",
      },
@@ -130,7 +130,7 @@ index 17eb0de98732..ff8d43d897a0 100644
      {
          .name = "IvyBridge",
          .level = 0xd,
-@@ -1176,6 +1262,42 @@ static X86CPUDefinition builtin_x86_defs[] = {
+@@ -1171,6 +1257,42 @@ static X86CPUDefinition builtin_x86_defs[] = {
          .xlevel = 0x80000008,
          .model_id = "Intel Xeon E3-12xx v2 (Ivy Bridge)",
      },
@@ -173,7 +173,7 @@ index 17eb0de98732..ff8d43d897a0 100644
      {
          .name = "Haswell-noTSX",
          .level = 0xd,
-@@ -1211,7 +1333,46 @@ static X86CPUDefinition builtin_x86_defs[] = {
+@@ -1206,7 +1328,46 @@ static X86CPUDefinition builtin_x86_defs[] = {
              CPUID_6_EAX_ARAT,
          .xlevel = 0x80000008,
          .model_id = "Intel Core Processor (Haswell, no TSX)",
@@ -221,7 +221,7 @@ index 17eb0de98732..ff8d43d897a0 100644
          .name = "Haswell",
          .level = 0xd,
          .vendor = CPUID_VENDOR_INTEL,
-@@ -1248,6 +1409,45 @@ static X86CPUDefinition builtin_x86_defs[] = {
+@@ -1243,6 +1404,45 @@ static X86CPUDefinition builtin_x86_defs[] = {
          .xlevel = 0x80000008,
          .model_id = "Intel Core Processor (Haswell)",
      },
@@ -267,7 +267,7 @@ index 17eb0de98732..ff8d43d897a0 100644
      {
          .name = "Broadwell-noTSX",
          .level = 0xd,
-@@ -1286,6 +1486,46 @@ static X86CPUDefinition builtin_x86_defs[] = {
+@@ -1281,6 +1481,46 @@ static X86CPUDefinition builtin_x86_defs[] = {
          .xlevel = 0x80000008,
          .model_id = "Intel Core Processor (Broadwell, no TSX)",
      },
@@ -314,7 +314,7 @@ index 17eb0de98732..ff8d43d897a0 100644
      {
          .name = "Broadwell",
          .level = 0xd,
-@@ -1324,6 +1564,46 @@ static X86CPUDefinition builtin_x86_defs[] = {
+@@ -1319,6 +1559,46 @@ static X86CPUDefinition builtin_x86_defs[] = {
          .xlevel = 0x80000008,
          .model_id = "Intel Core Processor (Broadwell)",
      },
@@ -361,7 +361,7 @@ index 17eb0de98732..ff8d43d897a0 100644
      {
          .name = "Skylake-Client",
          .level = 0xd,
-@@ -1369,6 +1649,53 @@ static X86CPUDefinition builtin_x86_defs[] = {
+@@ -1364,6 +1644,53 @@ static X86CPUDefinition builtin_x86_defs[] = {
          .xlevel = 0x80000008,
          .model_id = "Intel Core Processor (Skylake)",
      },
@@ -415,7 +415,7 @@ index 17eb0de98732..ff8d43d897a0 100644
      {
          .name = "Skylake-Server",
          .level = 0xd,
-@@ -1417,6 +1744,56 @@ static X86CPUDefinition builtin_x86_defs[] = {
+@@ -1412,6 +1739,56 @@ static X86CPUDefinition builtin_x86_defs[] = {
          .xlevel = 0x80000008,
          .model_id = "Intel Xeon Processor (Skylake)",
      },

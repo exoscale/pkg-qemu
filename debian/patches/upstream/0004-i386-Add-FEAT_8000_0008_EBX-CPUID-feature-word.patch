@@ -1,7 +1,7 @@
-From d31bbd32ff56b0c55f198bd3b82886a0ef58430b Mon Sep 17 00:00:00 2001
+From a896cca562989b17a20b45a62dd7935988a4322c Mon Sep 17 00:00:00 2001
 From: Eduardo Habkost <ehabkost@redhat.com>
 Date: Tue, 9 Jan 2018 13:45:16 -0200
-Subject: [PATCH 4/7] i386: Add FEAT_8000_0008_EBX CPUID feature word
+Subject: [PATCH 4/6] i386: Add FEAT_8000_0008_EBX CPUID feature word
 
 Add the new feature word and the "ibpb" feature flag.
 
@@ -14,10 +14,10 @@ Signed-off-by: Eduardo Habkost <ehabkost@redhat.com>
  2 files changed, 21 insertions(+), 1 deletion(-)
 
 diff --git a/target/i386/cpu.c b/target/i386/cpu.c
-index 67c3b61b2d5b..17eb0de98732 100644
+index 8bbf138eba47..cdec90e27458 100644
 --- a/target/i386/cpu.c
 +++ b/target/i386/cpu.c
-@@ -483,6 +483,22 @@ static FeatureWordInfo feature_word_info[FEATURE_WORDS] = {
+@@ -480,6 +480,22 @@ static FeatureWordInfo feature_word_info[FEATURE_WORDS] = {
          .tcg_features = TCG_APM_FEATURES,
          .unmigratable_flags = CPUID_APM_INVTSC,
      },
@@ -40,7 +40,7 @@ index 67c3b61b2d5b..17eb0de98732 100644
      [FEAT_XSAVE] = {
          .feat_names = {
              "xsaveopt", "xsavec", "xgetbv1", "xsaves",
-@@ -3130,7 +3146,7 @@ void cpu_x86_cpuid(CPUX86State *env, uint32_t index, uint32_t count,
+@@ -3059,7 +3075,7 @@ void cpu_x86_cpuid(CPUX86State *env, uint32_t index, uint32_t count,
          } else {
              *eax = cpu->phys_bits;
          }
@@ -49,7 +49,7 @@ index 67c3b61b2d5b..17eb0de98732 100644
          *ecx = 0;
          *edx = 0;
          if (cs->nr_cores * cs->nr_threads > 1) {
-@@ -3593,6 +3609,7 @@ static void x86_cpu_expand_features(X86CPU *cpu, Error **errp)
+@@ -3515,6 +3531,7 @@ static void x86_cpu_expand_features(X86CPU *cpu, Error **errp)
          x86_cpu_adjust_feat_level(cpu, FEAT_8000_0001_EDX);
          x86_cpu_adjust_feat_level(cpu, FEAT_8000_0001_ECX);
          x86_cpu_adjust_feat_level(cpu, FEAT_8000_0007_EDX);
@@ -58,10 +58,10 @@ index 67c3b61b2d5b..17eb0de98732 100644
          x86_cpu_adjust_feat_level(cpu, FEAT_SVM);
          x86_cpu_adjust_feat_level(cpu, FEAT_XSAVE);
 diff --git a/target/i386/cpu.h b/target/i386/cpu.h
-index de387c131108..f7df5b4f9c63 100644
+index 84698f5b62a4..47082fc79893 100644
 --- a/target/i386/cpu.h
 +++ b/target/i386/cpu.h
-@@ -472,6 +472,7 @@ typedef enum FeatureWord {
+@@ -454,6 +454,7 @@ typedef enum FeatureWord {
      FEAT_8000_0001_EDX, /* CPUID[8000_0001].EDX */
      FEAT_8000_0001_ECX, /* CPUID[8000_0001].ECX */
      FEAT_8000_0007_EDX, /* CPUID[8000_0007].EDX */
@@ -69,7 +69,7 @@ index de387c131108..f7df5b4f9c63 100644
      FEAT_C000_0001_EDX, /* CPUID[C000_0001].EDX */
      FEAT_KVM,           /* CPUID[4000_0001].EAX (KVM_CPUID_FEATURES) */
      FEAT_HYPERV_EAX,    /* CPUID[4000_0003].EAX */
-@@ -669,6 +670,8 @@ typedef uint32_t FeatureWordArray[FEATURE_WORDS];
+@@ -644,6 +645,8 @@ typedef uint32_t FeatureWordArray[FEATURE_WORDS];
  #define CPUID_7_0_EDX_AVX512_4FMAPS (1U << 3) /* AVX512 Multiply Accumulation Single Precision */
  #define CPUID_7_0_EDX_SPEC_CTRL     (1U << 26) /* Speculation Control */
  
