@@ -1,0 +1,94 @@
+From 12fd097960a9657166d1405a64ebf47a84a7eebc Mon Sep 17 00:00:00 2001
+From: Eduardo Habkost <ehabkost@redhat.com>
+Date: Tue, 9 Jan 2018 13:45:19 -0200
+Subject: [PATCH 7/7] i386: Add PCID to {Westmere, SandyBridge, IvyBridge}-IBRS
+
+RFC NOTE: we need to confirm if all
+Westmere/SandyBridge/IvyBridge CPUs out there support PCID,
+before applying this patch.
+
+RFC NOTE 2: in parallel, we are evaluating the possibility of
+enabling PCID on the existing Westmere/SandyBridge/IvyBridge CPU
+models, see
+https://patchew.org/QEMU/20180108205052.24385-1-vincent@bernat.im/
+and
+https://patchew.org/QEMU/20180109070112.30806-1-vincent@bernat.im/
+
+PCID was already available on Westmere, SandyBridge and
+IvyBridge, but we can't easily add it to the existing CPU models
+without breaking libvirt expectations about CPU model runnability
+(a runnable CPU model shouldn't become runnable just because of a
+machine-type or QEMU upgrade).
+
+However, Westmere-IBRS, SandyBridge-IBRS and IvyBridge-IBRS are
+new CPU models, so we can safely add PCID to them.
+
+Note that PCID is not necessary to mitigate Meltdown and/or
+Spectre, but it is really helpful to make performance not suffer
+when enabling KPTI on guest kernels.
+
+Cc: Jiri Denemark <jdenemar@redhat.com>
+Suggested-by: Vincent Bernat <vincent@bernat.im>
+Signed-off-by: Eduardo Habkost <ehabkost@redhat.com>
+---
+ target/i386/cpu.c | 9 ++++++---
+ 1 file changed, 6 insertions(+), 3 deletions(-)
+
+diff --git a/target/i386/cpu.c b/target/i386/cpu.c
+index c80c097e3b15..170c0ecd4355 100644
+--- a/target/i386/cpu.c
++++ b/target/i386/cpu.c
+@@ -1123,6 +1123,7 @@ static X86CPUDefinition builtin_x86_defs[] = {
+             CPUID_PGE | CPUID_MTRR | CPUID_SEP | CPUID_APIC | CPUID_CX8 |
+             CPUID_MCE | CPUID_PAE | CPUID_MSR | CPUID_TSC | CPUID_PSE |
+             CPUID_DE | CPUID_FP87,
++        /* Missing: CPUID_EXT_PCID */
+         .features[FEAT_1_ECX] =
+             CPUID_EXT_AES | CPUID_EXT_POPCNT | CPUID_EXT_SSE42 |
+             CPUID_EXT_SSE41 | CPUID_EXT_CX16 | CPUID_EXT_SSSE3 |
+@@ -1152,7 +1153,7 @@ static X86CPUDefinition builtin_x86_defs[] = {
+         .features[FEAT_1_ECX] =
+             CPUID_EXT_AES | CPUID_EXT_POPCNT | CPUID_EXT_SSE42 |
+             CPUID_EXT_SSE41 | CPUID_EXT_CX16 | CPUID_EXT_SSSE3 |
+-            CPUID_EXT_PCLMULQDQ | CPUID_EXT_SSE3,
++            CPUID_EXT_PCLMULQDQ | CPUID_EXT_SSE3 | CPUID_EXT_PCID,
+         .features[FEAT_8000_0001_EDX] =
+             CPUID_EXT2_LM | CPUID_EXT2_SYSCALL | CPUID_EXT2_NX,
+         .features[FEAT_8000_0001_ECX] =
+@@ -1177,6 +1178,7 @@ static X86CPUDefinition builtin_x86_defs[] = {
+             CPUID_PGE | CPUID_MTRR | CPUID_SEP | CPUID_APIC | CPUID_CX8 |
+             CPUID_MCE | CPUID_PAE | CPUID_MSR | CPUID_TSC | CPUID_PSE |
+             CPUID_DE | CPUID_FP87,
++        /* Missing: CPUID_EXT_PCID */
+         .features[FEAT_1_ECX] =
+             CPUID_EXT_AVX | CPUID_EXT_XSAVE | CPUID_EXT_AES |
+             CPUID_EXT_TSC_DEADLINE_TIMER | CPUID_EXT_POPCNT |
+@@ -1213,7 +1215,7 @@ static X86CPUDefinition builtin_x86_defs[] = {
+             CPUID_EXT_TSC_DEADLINE_TIMER | CPUID_EXT_POPCNT |
+             CPUID_EXT_X2APIC | CPUID_EXT_SSE42 | CPUID_EXT_SSE41 |
+             CPUID_EXT_CX16 | CPUID_EXT_SSSE3 | CPUID_EXT_PCLMULQDQ |
+-            CPUID_EXT_SSE3,
++            CPUID_EXT_SSE3 | CPUID_EXT_PCID,
+         .features[FEAT_8000_0001_EDX] =
+             CPUID_EXT2_LM | CPUID_EXT2_RDTSCP | CPUID_EXT2_NX |
+             CPUID_EXT2_SYSCALL,
+@@ -1241,6 +1243,7 @@ static X86CPUDefinition builtin_x86_defs[] = {
+             CPUID_PGE | CPUID_MTRR | CPUID_SEP | CPUID_APIC | CPUID_CX8 |
+             CPUID_MCE | CPUID_PAE | CPUID_MSR | CPUID_TSC | CPUID_PSE |
+             CPUID_DE | CPUID_FP87,
++        /* Missing: CPUID_EXT_PCID */
+         .features[FEAT_1_ECX] =
+             CPUID_EXT_AVX | CPUID_EXT_XSAVE | CPUID_EXT_AES |
+             CPUID_EXT_TSC_DEADLINE_TIMER | CPUID_EXT_POPCNT |
+@@ -1280,7 +1283,7 @@ static X86CPUDefinition builtin_x86_defs[] = {
+             CPUID_EXT_TSC_DEADLINE_TIMER | CPUID_EXT_POPCNT |
+             CPUID_EXT_X2APIC | CPUID_EXT_SSE42 | CPUID_EXT_SSE41 |
+             CPUID_EXT_CX16 | CPUID_EXT_SSSE3 | CPUID_EXT_PCLMULQDQ |
+-            CPUID_EXT_SSE3 | CPUID_EXT_F16C | CPUID_EXT_RDRAND,
++            CPUID_EXT_SSE3 | CPUID_EXT_F16C | CPUID_EXT_RDRAND | CPUID_EXT_PCID,
+         .features[FEAT_7_0_EBX] =
+             CPUID_7_0_EBX_FSGSBASE | CPUID_7_0_EBX_SMEP |
+             CPUID_7_0_EBX_ERMS,
+-- 
+2.15.1
+
