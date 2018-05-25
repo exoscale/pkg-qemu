@@ -55,9 +55,7 @@ ifeq (${enable_system},enable)
 
 # list of system (softmmu) targets, from ./configure
 system_targets = \
- i386 x86_64 alpha aarch64 arm cris lm32 m68k microblaze microblazeel \
- mips mipsel mips64 mips64el moxie nios2 or1k ppc ppcemb ppc64 sh4 sh4eb \
- sparc sparc64 s390x tricore xtensa xtensaeb unicore32
+ i386 x86_64
 
 # qemu-system subpackages, from d/control
 sys_systems = arm mips ppc sparc x86 s390x
