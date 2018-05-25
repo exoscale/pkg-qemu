@@ -1,3 +1,16 @@
+qemu (1:2.11+dfsg-1ubuntu7.2~xenial0+exo1) xenial; urgency=medium
+
+  * Backport to Xenial.
+     - Relax dependency on libseccomp-dev (only needed for ppc64el).
+     - Do not build various qemu packages (qemu-system-s390x,
+       qemu-system-arm, qemu-system-mips, qemu-system-ppc,
+       qemu-system-sparc, qemu-system-misc, qemu-user*).
+     - Add patch to compile with libfdt 1.4.0.
+     - Add patch to ignore cache on empty CDROM.
+     - Add dependency on dh-systemd.
+
+ -- Vincent Bernat <bernat@debian.org>  Fri, 25 May 2018 17:01:54 +0200
+
 qemu (1:2.11+dfsg-1ubuntu7.2) bionic-security; urgency=medium
 
   * SECURITY UPDATE: Speculative Store Bypass
