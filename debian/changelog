@@ -3,6 +3,7 @@ qemu (1:2.11+dfsg-1ubuntu7.2+bionic0+exo1) bionic; urgency=medium
   * Do not build various qemu packages (qemu-system-s390x,
     qemu-system-arm, qemu-system-mips, qemu-system-ppc, qemu-system-sparc,
     qemu-system-misc, qemu-user*).
+  * Add patch to ignore cache on empty CDROM.
 
  -- Vincent Bernat <bernat@debian.org>  Fri, 25 May 2018 17:46:35 +0200
 
