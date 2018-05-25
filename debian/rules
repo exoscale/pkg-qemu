@@ -43,7 +43,6 @@ common_configure_opts = \
 	--localstatedir=/var \
 	--disable-blobs \
 	--disable-strip \
-	--with-system-pixman \
 	--interp-prefix=/etc/qemu-binfmt/%M \
 	--localstatedir=/var \
 
@@ -57,7 +56,7 @@ ifeq (${enable_system},enable)
 # list of system (softmmu) targets, from ./configure
 system_targets = \
  i386 x86_64 alpha aarch64 arm cris lm32 m68k microblaze microblazeel \
- mips mipsel mips64 mips64el moxie or1k ppc ppcemb ppc64 sh4 sh4eb \
+ mips mipsel mips64 mips64el moxie nios2 or1k ppc ppcemb ppc64 sh4 sh4eb \
  sparc sparc64 s390x tricore xtensa xtensaeb unicore32
 
 # qemu-system subpackages, from d/control
@@ -81,8 +80,8 @@ ifeq (${enable_linux_user},enable)
 
 # list of linux-user targets, from ./configure
 user_targets = \
- i386 x86_64 alpha aarch64 arm armeb cris m68k microblaze microblazeel \
- mips mipsel mips64 mips64el mipsn32 mipsn32el or1k \
+ i386 x86_64 alpha aarch64 arm armeb cris hppa m68k microblaze microblazeel \
+ mips mipsel mips64 mips64el mipsn32 mipsn32el nios2 or1k \
  ppc ppc64 ppc64abi32 ppc64le sh4 sh4eb sparc sparc64 sparc32plus \
  s390x tilegx
 
@@ -232,6 +231,7 @@ ifneq ($(filter $(DEB_HOST_ARCH),s390 s390x),)
 endif
 ifneq ($(filter $(DEB_HOST_ARCH),s390 s390x),)
 	install -D -m755 qemu-build/pc-bios/s390-ccw/s390-ccw.img debian/qemu-system-s390x/usr/share/qemu/s390-ccw.img
+	install -D -m755 qemu-build/pc-bios/s390-ccw/s390-netboot.img debian/qemu-system-s390x/usr/share/qemu/s390-netboot.img
 endif
 
 ifeq ($(VENDOR),UBUNTU)
@@ -306,7 +306,6 @@ endif
 	dh_strip ${ai}
 	dh_compress ${ai}
 	dh_fixperms ${ai}
-	dh_makeshlibs ${ai}
 	dh_shlibdeps ${ai}
 	dh_installdeb ${ai}
 ifeq ($(enable_linux_user),enable)
