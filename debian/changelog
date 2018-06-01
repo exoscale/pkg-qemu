@@ -1,3 +1,9 @@
+qemu (1:2.11+dfsg-1ubuntu7.2~xenial0+exo3) xenial; urgency=medium
+
+  * d/patches: add patch to fix snapshot locking problem.
+
+ -- Vincent Bernat <bernat@debian.org>  Fri, 01 Jun 2018 09:41:38 +0200
+
 qemu (1:2.11+dfsg-1ubuntu7.2~xenial0+exo2) xenial; urgency=medium
 
   * d/control: don't depends on ipxe-efi ROM package.

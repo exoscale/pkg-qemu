@@ -39,3 +39,8 @@ ubuntu/CVE-2017-16845.patch
 ubuntu/CVE-2018-7550.patch
 ubuntu/CVE-2018-7858.patch
 ubuntu/CVE-2018-3639.patch
+
+# upstream patches
+0001-iotests-Test-creating-overlay-when-guest-running.patch
+0001-block-Fix-flags-in-reopen-queue.patch
+0002-iotests-Add-regression-test-for-commit-base-locking.patch
