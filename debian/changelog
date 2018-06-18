@@ -1,3 +1,10 @@
+qemu (1:2.11+dfsg-1ubuntu7.3~xenial0+exo2) xenial; urgency=medium
+
+  * d/control: depends on ipxe-efi ROM package (needed when using
+    virtio-net).
+
+ -- Vincent Bernat <bernat@debian.org>  Mon, 18 Jun 2018 16:21:41 +0200
+
 qemu (1:2.11+dfsg-1ubuntu7.3~xenial0+exo1) xenial; urgency=medium
 
   * Backport to Xenial.
@@ -22,6 +29,12 @@ qemu (1:2.11+dfsg-1ubuntu7.2~xenial0+exo3) xenial; urgency=medium
   * d/patches: add patch to fix snapshot locking problem.
 
  -- Vincent Bernat <bernat@debian.org>  Fri, 01 Jun 2018 09:41:38 +0200
+
+qemu (1:2.11+dfsg-1ubuntu7.2~xenial0+exo2) xenial; urgency=medium
+
+  * d/control: don't depends on ipxe-efi ROM package.
+
+ -- Vincent Bernat <bernat@debian.org>  Mon, 28 May 2018 16:55:50 +0200
 
 qemu (1:2.11+dfsg-1ubuntu7.2~xenial0+exo1) xenial; urgency=medium
 
