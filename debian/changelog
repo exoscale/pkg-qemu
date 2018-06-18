@@ -1,3 +1,10 @@
+qemu (1:2.11+dfsg-1ubuntu7.3~xenial0+exo1) xenial; urgency=medium
+
+  * Backport to Xenial.
+     - No changes.
+
+ -- Vincent Bernat <bernat@debian.org>  Mon, 18 Jun 2018 13:19:22 +0200
+
 qemu (1:2.11+dfsg-1ubuntu7.3) bionic-security; urgency=medium
 
   * SECURITY UPDATE: Speculative Store Bypass
