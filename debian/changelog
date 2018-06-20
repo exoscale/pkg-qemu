@@ -1,3 +1,9 @@
+qemu (1:2.11+dfsg-1ubuntu7.3~xenial0+exo3) xenial; urgency=medium
+
+  * d/control: depends on more recent ipxe-qemu package.
+
+ -- Vincent Bernat <bernat@debian.org>  Wed, 20 Jun 2018 09:33:25 +0200
+
 qemu (1:2.11+dfsg-1ubuntu7.3~xenial0+exo2) xenial; urgency=medium
 
   * d/control: depends on ipxe-efi ROM package (needed when using
