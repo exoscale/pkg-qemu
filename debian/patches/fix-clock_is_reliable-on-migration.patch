@@ -1,0 +1,50 @@
+From: Michael Chapman <address@hidden>
+
+When migrating from a pre-2.9 QEMU, no clock_is_reliable flag is
+transferred. We should assume that the source host has an unreliable
+KVM_GET_CLOCK, rather than using whatever was determined locally, to
+ensure that any drift from the TSC-based value calculated by the guest
+is corrected.
+
+Signed-off-by: Michael Chapman <address@hidden>
+Message-Id: <address@hidden>
+Signed-off-by: Paolo Bonzini <address@hidden>
+---
+ hw/i386/kvm/clock.c | 14 ++++++++++++++
+ 1 file changed, 14 insertions(+)
+
+diff --git a/hw/i386/kvm/clock.c b/hw/i386/kvm/clock.c
+index 1707434..7dac319 100644
+--- a/hw/i386/kvm/clock.c
++++ b/hw/i386/kvm/clock.c
+@@ -242,6 +242,19 @@ static const VMStateDescription 
+kvmclock_reliable_get_clock = {
+ };
+ 
+ /*
++ * When migrating, assume the source has an unreliable
++ * KVM_GET_CLOCK unless told otherwise.
++ */
++static int kvmclock_pre_load(void *opaque)
++{
++    KVMClockState *s = opaque;
++
++    s->clock_is_reliable = false;
++
++    return 0;
++}
++
++/*
+  * When migrating, read the clock just before migration,
+  * so that the guest clock counts during the events
+  * between:
+@@ -268,6 +281,7 @@ static const VMStateDescription kvmclock_vmsd = {
+     .name = "kvmclock",
+     .version_id = 1,
+     .minimum_version_id = 1,
++    .pre_load = kvmclock_pre_load,
+     .pre_save = kvmclock_pre_save,
+     .fields = (VMStateField[]) {
+         VMSTATE_UINT64(clock, KVMClockState),
+-- 
+1.8.3.1
