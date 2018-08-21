@@ -46,3 +46,5 @@ kvmclock_reliable_get_clock = {
      .pre_save = kvmclock_pre_save,
      .fields = (VMStateField[]) {
          VMSTATE_UINT64(clock, KVMClockState),
+-- 
+1.8.3.1
