@@ -1,4 +1,4 @@
-qemu (1:2.11+dfsg-1ubuntu7.3+xenial0+exo2) xenial; urgency=medium
+qemu (1:2.11+dfsg-1ubuntu7.3+xenial0+exo4) xenial; urgency=medium
 
   * d/patches: add patch to fix migration from QEMU < 2.9
     - https://bugs.launchpad.net/qemu/+bug/1775555
