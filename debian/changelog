@@ -1,3 +1,98 @@
+qemu (1:2.11+dfsg-1ubuntu7.8) bionic-security; urgency=medium
+
+  * SECURITY UPDATE: integer overflow in NE2000 NIC emulation
+    - debian/patches/CVE-2018-10839.patch: use proper type in
+      hw/net/ne2000.c.
+    - CVE-2018-10839
+  * SECURITY UPDATE: buffer overflow via incoming fragmented datagrams
+    - debian/patches/CVE-2018-11806.patch: correct size computation in
+      slirp/mbuf.c, slirp/mbuf.h.
+    - CVE-2018-11806
+  * SECURITY UPDATE: integer overflow via crafted QMP command
+    - debian/patches/CVE-2018-12617.patch: check bytes count read by
+      guest-file-read in qga/commands-posix.c.
+    - CVE-2018-12617
+  * SECURITY UPDATE: OOB heap buffer r/w access in NVM Express Controller
+    - debian/patches/CVE-2018-16847.patch: check size in hw/block/nvme.c.
+    - CVE-2018-16847
+  * SECURITY UPDATE: buffer overflow in rtl8139
+    - debian/patches/CVE-2018-17958.patch: use proper type in
+      hw/net/rtl8139.c.
+    - CVE-2018-17958
+  * SECURITY UPDATE: buffer overflow in pcnet
+    - debian/patches/CVE-2018-17962.patch: use proper type in
+      hw/net/pcnet.c.
+    - CVE-2018-17962
+  * SECURITY UPDATE: DoS via large packet sizes
+    - debian/patches/CVE-2018-17963.patch: check size in net/net.c.
+    - CVE-2018-17963
+  * SECURITY UPDATE: DoS in lsi53c895a
+    - debian/patches/CVE-2018-18849.patch: check message length value is
+      valid in hw/scsi/lsi53c895a.c.
+    - CVE-2018-18849
+  * SECURITY UPDATE: Out-of-bounds r/w stack access in ppc64
+    - debian/patches/CVE-2018-18954.patch: check size before data buffer
+      access in hw/ppc/pnv_lpc.c.
+    - CVE-2018-18954
+  * SECURITY UPDATE: race condition in 9p
+    - debian/patches/CVE-2018-19364-1.patch: use write lock in
+      hw/9pfs/cofile.c.
+    - debian/patches/CVE-2018-19364-2.patch: use write lock in
+      hw/9pfs/9p.c.
+    - CVE-2018-19364
+
+ -- Marc Deslauriers <marc.deslauriers@ubuntu.com>  Wed, 21 Nov 2018 14:17:51 -0500
+
+qemu (1:2.11+dfsg-1ubuntu7.7) bionic; urgency=medium
+
+  * Update pxe netboot images for KVM s390x to qemu 3.0 level (LP: #1790901)
+    The SLOF source pieces in src:qemu are only used for s390x netboot,
+    which are independent ROMs (no linking). All other binaries out of this
+    are part of src:slof and independent.
+    - d/p/ubuntu/lp-1790901-partial-SLOF-for-s390x-netboot-2.11-to-3.0.patch
+    - d/p/ubuntu/lp-1790901-0*: backport s390x pxelinux netboot capabilities
+      and related fixes
+
+ -- Christian Ehrhardt <christian.ehrhardt@canonical.com>  Tue, 25 Sep 2018 13:31:15 +0200
+
+qemu (1:2.11+dfsg-1ubuntu7.6) bionic; urgency=medium
+
+  [ Christian Ehrhardt ]
+  * Add cpu model for z14 ZR1 (LP: #1780773)
+  * d/p/ubuntu/lp-1789551-seccomp-set-the-seccomp-filter-to-all-threads.patch:
+    ensure that the seccomp blacklist is applied to all threads (LP: #1789551)
+    - CVE-2018-15746
+  * improve s390x spectre mitigation with etoken facility (LP: #1790457)
+    - debian/patches/ubuntu/lp-1790457-s390x-kvm-add-etoken-facility.patch
+    - debian/patches/ubuntu/lp-1790457-partial-s390x-linux-headers-update.patch
+
+  [ Phillip Susi ]
+  * d/p/ubuntu/lp-1787267-fix-en_us-vnc-pipe.patch: Fix pipe, greater than and
+    less than keys over vnc when using en_us kemaps (LP: #1787267).
+
+ -- Christian Ehrhardt <christian.ehrhardt@canonical.com>  Wed, 29 Aug 2018 11:46:37 +0200
+
+qemu (1:2.11+dfsg-1ubuntu7.5) bionic; urgency=medium
+
+  [Christian Ehrhardt]
+  * d/p/lp-1755912-qxl-fix-local-renderer-crash.patch: Fix an issue triggered
+    by migrations with UI frontends or frequent guest resolution changes
+    (LP: #1755912)
+
+  [ Murilo Opsfelder Araujo ]
+  * d/p/ubuntu/target-ppc-extend-eieio-for-POWER9.patch: Backport to
+    extend eieio for POWER9 emulation (LP: #1787408).
+
+ -- Christian Ehrhardt <christian.ehrhardt@canonical.com>  Tue, 21 Aug 2018 11:25:45 +0200
+
+qemu (1:2.11+dfsg-1ubuntu7.4) bionic; urgency=medium
+
+  * d/p/ubuntu/machine-type-hpb.patch: add -hpb machine type
+    for host-phys-bits=true (LP: #1776189)
+    - add an info about this change in debian/qemu-system-x86.NEWS
+
+ -- Christian Ehrhardt <christian.ehrhardt@canonical.com>  Wed, 13 Jun 2018 10:41:34 +0200
+
 qemu (1:2.11+dfsg-1ubuntu7.3) bionic-security; urgency=medium
 
   * SECURITY UPDATE: Speculative Store Bypass
