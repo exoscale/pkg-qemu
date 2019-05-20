@@ -1,6 +1,9 @@
 use-fixed-data-path.patch
 use-data-path.patch
 
+# exoscale patches
+kvm-blockdev-ignore-cache-options-for-empty-CDROM-drives.patch
+
 # ubuntu patches
 ubuntu/qemu-stable-2.11.1.patch
 ubuntu/expose-vmx_qemu64cpu.patch
