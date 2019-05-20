@@ -1,4 +1,4 @@
-qemu (1:2.11+dfsg-1ubuntu7.13) bionic-security; urgency=medium
+qemu (1:2.11+dfsg-1ubuntu7.13+exo1) bionic-security; urgency=medium
 
   * SECURITY UPDATE: Add support for exposing md-clear functionality
     to guests
