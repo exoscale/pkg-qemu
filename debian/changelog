@@ -1,5 +1,69 @@
-qemu (1:2.11+dfsg-1ubuntu7.8+bionic0+exo1) bionic-security; urgency=medium
+qemu (1:2.11+dfsg-1ubuntu7.13) bionic-security; urgency=medium
 
+  * SECURITY UPDATE: Add support for exposing md-clear functionality
+    to guests
+    - d/p/ubuntu/enable-md-clear.patch
+    - CVE-2018-12126, CVE-2018-12127, CVE-2018-12130, CVE-2019-11091
+  * SECURITY UPDATE: heap overflow when loading device tree blob
+    - d/p/ubuntu/CVE-2018-20815.patch: specify how large the buffer to
+      copy the device tree blob into is.
+    - CVE-2018-20815
+  * SECURITY UPDATE: information leak in SLiRP
+    - d/p/ubuntu/CVE-2019-9824.patch: check sscanf result when
+      emulating ident.
+    - CVE-2019-9824
+
+ -- Steve Beattie <sbeattie@ubuntu.com>  Wed, 08 May 2019 23:24:12 -0700
+
+qemu (1:2.11+dfsg-1ubuntu7.12) bionic-security; urgency=medium
+
+  [ Marc Deslauriers ]
+  * SECURITY UPDATE: TOCTTOU in MTP
+    - debian/patches/CVE-2018-16872.patch: use O_NOFOLLOW and O_CLOEXEC in
+      hw/usb/dev-mtp.c.
+    - CVE-2018-16872
+  * SECURITY UPDATE: race during file renaming in v9fs_wstat
+    - debian/patches/CVE-2018-19489.patch: add locks to hw/9pfs/9p.c.
+    - CVE-2018-19489
+  * SECURITY UPDATE: out-of-bounds read via i2 commands
+    - debian/patches/CVE-2019-3812.patch: add bounds check to
+      hw/i2c/i2c-ddc.c.
+    - CVE-2019-3812
+  * SECURITY UPDATE: heap based buffer overflow in slirp
+    - debian/patches/CVE-2019-6778.patch: check data length while emulating
+      ident function in slirp/tcp_subr.c.
+    - CVE-2019-6778
+
+  [ Christian Ehrhardt ]
+  * fix crash when performing block pull on partial cluster (LP: #1818264)
+    - d/p/ubuntu/lp-1818264-block-Fix-copy-on-read-crash-with-partial.patch
+  * qemu-guest-agent: fix path of fsfreeze-hook (LP: #1820291)
+    - d/qemu-guest-agent.install: use correct path for fsfreeze-hook
+    - d/qemu-guest-agent.pre{rm|inst}/.postrm: special handling for
+      mv_conffile since the new path is a directory in the old package
+      version which can not be handled by mv_conffile
+
+ -- Marc Deslauriers <marc.deslauriers@ubuntu.com>  Mon, 25 Mar 2019 08:32:58 -0400
+
+qemu (1:2.11+dfsg-1ubuntu7.10) bionic; urgency=medium
+
+  * d/p/ubuntu/lp-1806104-spapr_pci-Remove-unhelpful-pagesize-warning.patch:
+    remove misleading page size warning on qemu-system-ppc64 (LP: #1806104)
+  * d/p/ubuntu/lp-1812384-s390x-Return-specification-exception.patch: ensure
+    a proper exception on unknown diag 308 subcodes
+    (LP: #1812384)
+  * d/p/ubuntu/lp-1809083-*: fix backward migration on ppc64el (LP: #1809083)
+
+ -- Christian Ehrhardt <christian.ehrhardt@canonical.com>  Thu, 31 Jan 2019 14:07:51 +0100
+
+qemu (1:2.11+dfsg-1ubuntu7.9) bionic; urgency=medium
+
+  * debian/patches/ubuntu/lp1787405-*: Support guest dedicated Crypto
+    Adapters on s390x (LP: #1787405)
+
+ -- Christian Ehrhardt <christian.ehrhardt@canonical.com>  Thu, 15 Nov 2018 12:29:56 +0100
+
+qemu (1:2.11+dfsg-1ubuntu7.8) bionic-security; urgency=medium
 
   * SECURITY UPDATE: integer overflow in NE2000 NIC emulation
     - debian/patches/CVE-2018-10839.patch: use proper type in
@@ -44,19 +108,55 @@ qemu (1:2.11+dfsg-1ubuntu7.8+bionic0+exo1) bionic-security; urgency=medium
 
  -- Marc Deslauriers <marc.deslauriers@ubuntu.com>  Wed, 21 Nov 2018 14:17:51 -0500
 
-qemu (1:2.11+dfsg-1ubuntu7.3+bionic0+exo2) bionic; urgency=medium
+qemu (1:2.11+dfsg-1ubuntu7.7) bionic; urgency=medium
 
-  * d/patches: add patch to fix migration from QEMU < 2.9
-    - https://bugs.launchpad.net/qemu/+bug/1775555
+  * Update pxe netboot images for KVM s390x to qemu 3.0 level (LP: #1790901)
+    The SLOF source pieces in src:qemu are only used for s390x netboot,
+    which are independent ROMs (no linking). All other binaries out of this
+    are part of src:slof and independent.
+    - d/p/ubuntu/lp-1790901-partial-SLOF-for-s390x-netboot-2.11-to-3.0.patch
+    - d/p/ubuntu/lp-1790901-0*: backport s390x pxelinux netboot capabilities
+      and related fixes
 
- -- Jean-Philippe Menil <jpmenil@exoscale.ch>  Tue, 21 Aug 2018 10:00:00 +0200
+ -- Christian Ehrhardt <christian.ehrhardt@canonical.com>  Tue, 25 Sep 2018 13:31:15 +0200
 
-qemu (1:2.11+dfsg-1ubuntu7.3+bionic0+exo1) bionic; urgency=medium
+qemu (1:2.11+dfsg-1ubuntu7.6) bionic; urgency=medium
 
-  * Update for bionic.
-     - No changes.
+  [ Christian Ehrhardt ]
+  * Add cpu model for z14 ZR1 (LP: #1780773)
+  * d/p/ubuntu/lp-1789551-seccomp-set-the-seccomp-filter-to-all-threads.patch:
+    ensure that the seccomp blacklist is applied to all threads (LP: #1789551)
+    - CVE-2018-15746
+  * improve s390x spectre mitigation with etoken facility (LP: #1790457)
+    - debian/patches/ubuntu/lp-1790457-s390x-kvm-add-etoken-facility.patch
+    - debian/patches/ubuntu/lp-1790457-partial-s390x-linux-headers-update.patch
 
- -- Vincent Bernat <bernat@debian.org>  Mon, 18 Jun 2018 13:20:40 +0200
+  [ Phillip Susi ]
+  * d/p/ubuntu/lp-1787267-fix-en_us-vnc-pipe.patch: Fix pipe, greater than and
+    less than keys over vnc when using en_us kemaps (LP: #1787267).
+
+ -- Christian Ehrhardt <christian.ehrhardt@canonical.com>  Wed, 29 Aug 2018 11:46:37 +0200
+
+qemu (1:2.11+dfsg-1ubuntu7.5) bionic; urgency=medium
+
+  [Christian Ehrhardt]
+  * d/p/lp-1755912-qxl-fix-local-renderer-crash.patch: Fix an issue triggered
+    by migrations with UI frontends or frequent guest resolution changes
+    (LP: #1755912)
+
+  [ Murilo Opsfelder Araujo ]
+  * d/p/ubuntu/target-ppc-extend-eieio-for-POWER9.patch: Backport to
+    extend eieio for POWER9 emulation (LP: #1787408).
+
+ -- Christian Ehrhardt <christian.ehrhardt@canonical.com>  Tue, 21 Aug 2018 11:25:45 +0200
+
+qemu (1:2.11+dfsg-1ubuntu7.4) bionic; urgency=medium
+
+  * d/p/ubuntu/machine-type-hpb.patch: add -hpb machine type
+    for host-phys-bits=true (LP: #1776189)
+    - add an info about this change in debian/qemu-system-x86.NEWS
+
+ -- Christian Ehrhardt <christian.ehrhardt@canonical.com>  Wed, 13 Jun 2018 10:41:34 +0200
 
 qemu (1:2.11+dfsg-1ubuntu7.3) bionic-security; urgency=medium
 
@@ -69,19 +169,6 @@ qemu (1:2.11+dfsg-1ubuntu7.3) bionic-security; urgency=medium
     - CVE-2018-3639
 
  -- Marc Deslauriers <marc.deslauriers@ubuntu.com>  Wed, 23 May 2018 07:57:07 -0400
-
-qemu (1:2.11+dfsg-1ubuntu7.2+bionic0+exo2) bionic; urgency=medium
-
-  * d/patches: add patch to fix snapshot locking problem.
-
- -- Vincent Bernat <bernat@debian.org>  Fri, 01 Jun 2018 09:41:38 +0200
-
-qemu (1:2.11+dfsg-1ubuntu7.2+bionic0+exo1) bionic; urgency=medium
-
-  * Make qemu-system only depends on qemu-system-x86.
-  * Add patch to ignore cache on empty CDROM.
-
- -- Vincent Bernat <bernat@debian.org>  Fri, 25 May 2018 17:46:35 +0200
 
 qemu (1:2.11+dfsg-1ubuntu7.2) bionic-security; urgency=medium
 
