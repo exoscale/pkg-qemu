@@ -2,7 +2,7 @@ qemu (1:2.11+dfsg-1ubuntu7.13+exo3) bionic-security; urgency=medium
 
   * Add fix-clock_is_reliable-on-migration.patch [launchpad #1775555]
 
- -- Jean-Philippe Menil <jpmenil@exoscale.ch> Tue, 03 June 2019 17:55:00 +0200
+ -- Jean-Philippe Menil <jpmenil@exoscale.ch> Tue, 03 Jun 2019 17:55:00 +0200
 
 qemu (1:2.11+dfsg-1ubuntu7.13+exo2) bionic-security; urgency=medium
 
