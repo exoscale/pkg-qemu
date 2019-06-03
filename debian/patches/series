@@ -4,6 +4,7 @@ use-data-path.patch
 # exoscale patches
 kvm-blockdev-ignore-cache-options-for-empty-CDROM-drives.patch
 kvm-block-Fix-flags-in-reopen-queue.patch
+fix-clock_is_reliable-on-migration.patch
 
 # ubuntu patches
 ubuntu/qemu-stable-2.11.1.patch
