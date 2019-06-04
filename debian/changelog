@@ -1,3 +1,11 @@
+qemu (1:2.11+dfsg-1ubuntu7.14+exo1) bionic-security; urgency=medium
+
+  * Add qemu-guest-agent Breaks: for unattended-upgrades versions not being
+    able to install it to avoid qemu-guest-agent blocking other security
+    updates. (LP: #1823872)
+
+ -- Balint Reczey <rbalint@ubuntu.com>  Thu, 23 May 2019 15:09:48 +0200
+
 qemu (1:2.11+dfsg-1ubuntu7.13+exo3) bionic-security; urgency=medium
 
   * Add fix-clock_is_reliable-on-migration.patch [launchpad #1775555]
