@@ -1,0 +1,54 @@
+From 9e2a2a3e083fec1e8059b331e3998c0849d779c1 Mon Sep 17 00:00:00 2001
+From: Jay Zhou <jianjay.zhou@huawei.com>
+Date: Tue, 27 Feb 2018 15:10:04 +0800
+Subject: [PATCH] vhost: fix memslot limit check
+Bug-Ubuntu: https://bugs.launchpad.net/ubuntu/+source/qemu/+bug/1887525
+Origin: upstream, https://git.qemu.org/?p=qemu.git;a=commit;h=9e2a2a3e083fec1e8059b331e3998c0849d779c1
+
+Since used_memslots will be updated to the actual value after
+registering memory listener for the first time, move the
+memslots limit checking to the right place.
+
+Reviewed-by: Igor Mammedov <imammedo@redhat.com>
+Signed-off-by: Jay Zhou <jianjay.zhou@huawei.com>
+Reviewed-by: Michael S. Tsirkin <mst@redhat.com>
+Signed-off-by: Michael S. Tsirkin <mst@redhat.com>
+---
+ hw/virtio/vhost.c | 19 ++++++++++++-------
+ 1 file changed, 12 insertions(+), 7 deletions(-)
+
+--- a/hw/virtio/vhost.c
++++ b/hw/virtio/vhost.c
+@@ -1251,13 +1251,6 @@ int vhost_dev_init(struct vhost_dev *hde
+         goto fail;
+     }
+ 
+-    if (used_memslots > hdev->vhost_ops->vhost_backend_memslots_limit(hdev)) {
+-        error_report("vhost backend memory slots limit is less"
+-                " than current number of present memory slots");
+-        r = -1;
+-        goto fail;
+-    }
+-
+     r = hdev->vhost_ops->vhost_set_owner(hdev);
+     if (r < 0) {
+         VHOST_OPS_DEBUG("vhost_set_owner failed");
+@@ -1339,6 +1332,18 @@ int vhost_dev_init(struct vhost_dev *hde
+     hdev->memory_changed = false;
+     memory_listener_register(&hdev->memory_listener, &address_space_memory);
+     QLIST_INSERT_HEAD(&vhost_devices, hdev, entry);
++
++    if (used_memslots > hdev->vhost_ops->vhost_backend_memslots_limit(hdev)) {
++        error_report("vhost backend memory slots limit is less"
++                " than current number of present memory slots");
++        r = -1;
++        if (busyloop_timeout) {
++            goto fail_busyloop;
++        } else {
++            goto fail;
++        }
++    }
++
+     return 0;
+ 
+ fail_busyloop:

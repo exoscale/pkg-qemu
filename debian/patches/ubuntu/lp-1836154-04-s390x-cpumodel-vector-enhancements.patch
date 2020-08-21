@@ -1,0 +1,51 @@
+From c83bd115bc91acde9931fc91b46df474d96ebb76 Mon Sep 17 00:00:00 2001
+From: Christian Borntraeger <borntraeger@de.ibm.com>
+Date: Mon, 29 Apr 2019 05:02:46 -0400
+Subject: [PATCH 4/9] s390x/cpumodel: vector enhancements
+
+Add vector enhancements to the cpu model.
+
+Signed-off-by: Christian Borntraeger <borntraeger@de.ibm.com>
+Reviewed-by: David Hildenbrand <david@redhat.com>
+Message-Id: <20190429090250.7648-6-borntraeger@de.ibm.com>
+Signed-off-by: Cornelia Huck <cohuck@redhat.com>
+(cherry picked from commit 54d65de0b525272edfa66eb75c3f67b183f8aff4)
+
+Author: Christian Borntraeger <borntraeger@de.ibm.com>
+Origin: backport, https://git.qemu.org/?p=qemu.git;a=commit;h=54d65de0b525272edfa66eb75c3f67b183f8aff4
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/1836154
+Last-Update: 2019-08-07
+---
+ target/s390x/cpu_features.c     | 2 ++
+ target/s390x/cpu_features_def.h | 2 ++
+ 2 files changed, 4 insertions(+)
+
+diff --git a/target/s390x/cpu_features.c b/target/s390x/cpu_features.c
+index 78e26044ad17..7073dcb5d8ea 100644
+--- a/target/s390x/cpu_features.c
++++ b/target/s390x/cpu_features.c
+@@ -105,6 +105,8 @@ static const S390FeatDef s390_features[] = {
+     FEAT_INIT("irbm", S390_FEAT_TYPE_STFL, 145, "Insert-reference-bits-multiple facility"),
+     FEAT_INIT("msa8-base", S390_FEAT_TYPE_STFL, 146, "Message-security-assist-extension-8 facility (excluding subfunctions)"),
+     FEAT_INIT("cmmnt", S390_FEAT_TYPE_STFL, 147, "CMM: ESSA-enhancement (no translate) facility"),
++    FEAT_INIT("vxeh2", S390_FEAT_TYPE_STFL, 148, "Vector Enhancements facility 2"),
++    FEAT_INIT("vxbeh", S390_FEAT_TYPE_STFL, 152, "Vector BCD enhancements facility 1"),
+     FEAT_INIT("msa9-base", S390_FEAT_TYPE_STFL, 155, "Message-security-assist-extension-9 facility (excluding subfunctions)"),
+     FEAT_INIT("etoken", S390_FEAT_TYPE_STFL, 156, "Etoken facility"),
+ 
+diff --git a/target/s390x/cpu_features_def.h b/target/s390x/cpu_features_def.h
+index 6ac8e6ded6f7..209303ea0d53 100644
+--- a/target/s390x/cpu_features_def.h
++++ b/target/s390x/cpu_features_def.h
+@@ -96,6 +96,8 @@ typedef enum {
+     S390_FEAT_INSERT_REFERENCE_BITS_MULT,
+     S390_FEAT_MSA_EXT_8,
+     S390_FEAT_CMM_NT,
++    S390_FEAT_VECTOR_ENH2,
++    S390_FEAT_VECTOR_BCD_ENH,
+     S390_FEAT_MSA_EXT_9,
+     S390_FEAT_ETOKEN,
+ 
+-- 
+2.12.3
+

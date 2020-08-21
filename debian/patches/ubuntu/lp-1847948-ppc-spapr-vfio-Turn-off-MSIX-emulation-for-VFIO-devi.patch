@@ -1,0 +1,82 @@
+From fcad0d2121976df4b422b4007a5eb7fcaac01134 Mon Sep 17 00:00:00 2001
+From: Alexey Kardashevskiy <aik@ozlabs.ru>
+Date: Tue, 13 Mar 2018 11:17:31 -0600
+Subject: [PATCH] ppc/spapr, vfio: Turn off MSIX emulation for VFIO devices
+
+This adds a possibility for the platform to tell VFIO not to emulate MSIX
+so MMIO memory regions do not get split into chunks in flatview and
+the entire page can be registered as a KVM memory slot and make direct
+MMIO access possible for the guest.
+
+This enables the entire MSIX BAR mapping to the guest for the pseries
+platform in order to achieve the maximum MMIO preformance for certain
+devices.
+
+Tested on:
+LSI Logic / Symbios Logic SAS3008 PCI-Express Fusion-MPT SAS-3 (rev 02)
+
+Signed-off-by: Alexey Kardashevskiy <aik@ozlabs.ru>
+Reviewed-by: David Gibson <david@gibson.dropbear.id.au>
+Signed-off-by: Alex Williamson <alex.williamson@redhat.com>
+
+Origin: upstream, https://git.qemu.org/?p=qemu.git;a=commit;h=fcad0d2121976df4b422b4007a5e
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/1847948
+Last-Update: 2019-10-15
+
+---
+ hw/ppc/spapr.c |  7 +++++++
+ hw/vfio/pci.c  | 13 +++++++++++++
+ 2 files changed, 20 insertions(+)
+
+diff --git a/hw/ppc/spapr.c b/hw/ppc/spapr.c
+index 7e1c858566..032d03423f 100644
+--- a/hw/ppc/spapr.c
++++ b/hw/ppc/spapr.c
+@@ -2855,6 +2855,11 @@ static void spapr_set_modern_hotplug_events(Object *obj, bool value,
+     spapr->use_hotplug_event_source = value;
+ }
+ 
++static bool spapr_get_msix_emulation(Object *obj, Error **errp)
++{
++    return true;
++}
++
+ static char *spapr_get_resize_hpt(Object *obj, Error **errp)
+ {
+     sPAPRMachineState *spapr = SPAPR_MACHINE(obj);
+@@ -2936,6 +2941,8 @@ static void spapr_instance_init(Object *obj)
+     object_property_set_description(obj, "vsmt",
+                                     "Virtual SMT: KVM behaves as if this were"
+                                     " the host's SMT mode", &error_abort);
++    object_property_add_bool(obj, "vfio-no-msix-emulation",
++                             spapr_get_msix_emulation, NULL, NULL);
+ }
+ 
+ static void spapr_machine_finalizefn(Object *obj)
+diff --git a/hw/vfio/pci.c b/hw/vfio/pci.c
+index 02974f4eb9..b9bc6cd310 100644
+--- a/hw/vfio/pci.c
++++ b/hw/vfio/pci.c
+@@ -1581,6 +1581,19 @@ static int vfio_msix_setup(VFIOPCIDevice *vdev, int pos, Error **errp)
+      */
+     memory_region_set_enabled(&vdev->pdev.msix_pba_mmio, false);
+ 
++    /*
++     * The emulated machine may provide a paravirt interface for MSIX setup
++     * so it is not strictly necessary to emulate MSIX here. This becomes
++     * helpful when frequently accessed MMIO registers are located in
++     * subpages adjacent to the MSIX table but the MSIX data containing page
++     * cannot be mapped because of a host page size bigger than the MSIX table
++     * alignment.
++     */
++    if (object_property_get_bool(OBJECT(qdev_get_machine()),
++                                 "vfio-no-msix-emulation", NULL)) {
++        memory_region_set_enabled(&vdev->pdev.msix_table_mmio, false);
++    }
++
+     return 0;
+ }
+ 
+-- 
+2.23.0
+

@@ -1,0 +1,149 @@
+kvm: Add support to KVM_GET_MSR_FEATURE_INDEX_LIST and KVM_GET_MSRS system ioctl
+
+Add kvm_get_supported_feature_msrs() to get supported MSR feature index list.
+Add kvm_arch_get_supported_msr_feature() to get each MSR features value.
+
+Signed-off-by: Robert Hoo <robert.hu@linux.intel.com>
+Message-Id: <1539578845-37944-2-git-send-email-robert.hu@linux.intel.com>
+Reviewed-by: Eduardo Habkost <ehabkost@redhat.com>
+Signed-off-by: Eduardo Habkost <ehabkost@redhat.com>
+-
+Author: Robert Hoo <robert.hu@linux.intel.com>
+Origin: upstream, https://github.com/qemu/qemu/commit/f57bceb6ab51
+Applied-Upstream: v3.0.0-1659-gf57bceb6ab
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/1828495
+Reviewed-by: Rafael David Tinoco <rafaeldtinoco@ubuntu.com>
+Last-Update: 2019-06-16
+---
+ include/sysemu/kvm.h |  2 ++
+ target/i386/kvm.c    | 80 ++++++++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 82 insertions(+)
+
+diff --git a/include/sysemu/kvm.h b/include/sysemu/kvm.h
+index bbf12a172..d2140d9da 100644
+--- a/include/sysemu/kvm.h
++++ b/include/sysemu/kvm.h
+@@ -447,6 +447,8 @@ int kvm_vm_check_extension(KVMState *s, unsigned int extension);
+ 
+ uint32_t kvm_arch_get_supported_cpuid(KVMState *env, uint32_t function,
+                                       uint32_t index, int reg);
++uint32_t kvm_arch_get_supported_msr_feature(KVMState *s, uint32_t index);
++
+ 
+ void kvm_set_sigmask_len(KVMState *s, unsigned int sigmask_len);
+ 
+diff --git a/target/i386/kvm.c b/target/i386/kvm.c
+index 15001beed..0dd5611d2 100644
+--- a/target/i386/kvm.c
++++ b/target/i386/kvm.c
+@@ -104,6 +104,7 @@ static int has_pit_state2;
+ static bool has_msr_mcg_ext_ctl;
+ 
+ static struct kvm_cpuid2 *cpuid_cache;
++static struct kvm_msr_list *kvm_feature_msrs;
+ 
+ int kvm_has_pit_state2(void)
+ {
+@@ -393,6 +394,42 @@ uint32_t kvm_arch_get_supported_cpuid(KVMState *s, uint32_t function,
+     return ret;
+ }
+ 
++uint32_t kvm_arch_get_supported_msr_feature(KVMState *s, uint32_t index)
++{
++    struct {
++        struct kvm_msrs info;
++        struct kvm_msr_entry entries[1];
++    } msr_data;
++    uint32_t ret;
++
++    if (kvm_feature_msrs == NULL) { /* Host doesn't support feature MSRs */
++        return 0;
++    }
++
++    /* Check if requested MSR is supported feature MSR */
++    int i;
++    for (i = 0; i < kvm_feature_msrs->nmsrs; i++)
++        if (kvm_feature_msrs->indices[i] == index) {
++            break;
++        }
++    if (i == kvm_feature_msrs->nmsrs) {
++        return 0; /* if the feature MSR is not supported, simply return 0 */
++    }
++
++    msr_data.info.nmsrs = 1;
++    msr_data.entries[0].index = index;
++
++    ret = kvm_ioctl(s, KVM_GET_MSRS, &msr_data);
++    if (ret != 1) {
++        error_report("KVM get MSR (index=0x%x) feature failed, %s",
++            index, strerror(-ret));
++        exit(1);
++    }
++
++    return msr_data.entries[0].data;
++}
++
++
+ typedef struct HWPoisonPage {
+     ram_addr_t ram_addr;
+     QLIST_ENTRY(HWPoisonPage) list;
+@@ -1067,6 +1104,47 @@ void kvm_arch_do_init_vcpu(X86CPU *cpu)
+     }
+ }
+ 
++static int kvm_get_supported_feature_msrs(KVMState *s)
++{
++    int ret = 0;
++
++    if (kvm_feature_msrs != NULL) {
++        return 0;
++    }
++
++    if (!kvm_check_extension(s, KVM_CAP_GET_MSR_FEATURES)) {
++        return 0;
++    }
++
++    struct kvm_msr_list msr_list;
++
++    msr_list.nmsrs = 0;
++    ret = kvm_ioctl(s, KVM_GET_MSR_FEATURE_INDEX_LIST, &msr_list);
++    if (ret < 0 && ret != -E2BIG) {
++        error_report("Fetch KVM feature MSR list failed: %s",
++            strerror(-ret));
++        return ret;
++    }
++
++    assert(msr_list.nmsrs > 0);
++    kvm_feature_msrs = (struct kvm_msr_list *) \
++        g_malloc0(sizeof(msr_list) +
++                 msr_list.nmsrs * sizeof(msr_list.indices[0]));
++
++    kvm_feature_msrs->nmsrs = msr_list.nmsrs;
++    ret = kvm_ioctl(s, KVM_GET_MSR_FEATURE_INDEX_LIST, kvm_feature_msrs);
++
++    if (ret < 0) {
++        error_report("Fetch KVM feature MSR list failed: %s",
++            strerror(-ret));
++        g_free(kvm_feature_msrs);
++        kvm_feature_msrs = NULL;
++        return ret;
++    }
++
++    return 0;
++}
++
+ static int kvm_get_supported_msrs(KVMState *s)
+ {
+     static int kvm_supported_msrs;
+@@ -1220,6 +1298,8 @@ int kvm_arch_init(MachineState *ms, KVMState *s)
+         return ret;
+     }
+ 
++    kvm_get_supported_feature_msrs(s);
++
+     uname(&utsname);
+     lm_capable_kernel = strcmp(utsname.machine, "x86_64") == 0;
+ 
+-- 
+2.17.1
+

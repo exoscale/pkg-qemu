@@ -1,0 +1,133 @@
+From ab7e28b0905b1e2daeb5d582cf0f0ce33ea47317 Mon Sep 17 00:00:00 2001
+From: Christian Ehrhardt <christian.ehrhardt@canonical.com>
+Date: Mon, 2 Mar 2020 15:12:53 +0100
+Subject: [PATCH] modules: load modules from versioned /var/run dir
+
+On upgrades the old .so files usually are replaced. But on the other
+hand since a qemu process represents a guest instance it is usually kept
+around.
+
+That makes late addition of dynamic features e.g. 'hot-attach of a ceph
+disk' fail by trying to load a new version of e.f. block-rbd.so into an
+old still running qemu binary.
+
+This adds a fallback to also load modules from a versioned directory in the
+temporary /var/run path. That way qemu is providing a way for packaging
+to store modules of an upgraded qemu package as needed until the next reboot.
+
+Fixes: https://bugs.launchpad.net/ubuntu/+source/qemu/+bug/1847361
+Signed-off-by: Christian Ehrhardt <christian.ehrhardt@canonical.com>
+
+Backport-Note: the context is a bit different and the assert a ==.
+Therefore adapt to the changed var name as well as adapting array size
+based on the config option.
+
+Origin, backport, https://git.qemu.org/?p=qemu.git;a=commit;h=267514b33ffa3f315adc26fc14d89f92e90840f5
+Origin, backport, https://git.qemu.org/?p=qemu.git;a=commit;h=bd83c861c0
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/1847361
+Last-Update: 2020-03-02
+
+---
+ configure     | 15 +++++++++++++++
+ util/module.c | 14 ++++++++++++++
+ 2 files changed, 29 insertions(+)
+
+--- a/configure
++++ b/configure
+@@ -340,6 +340,7 @@ EXESUF=""
+ DSOSUF=".so"
+ LDFLAGS_SHARED="-shared"
+ modules="no"
++module_upgrades="no"
+ prefix="/usr/local"
+ mandir="\${prefix}/share/man"
+ datadir="\${prefix}/share"
+@@ -888,6 +889,10 @@ for opt do
+   --disable-modules)
+       modules="no"
+   ;;
++  --disable-module-upgrades) module_upgrades="no"
++  ;;
++  --enable-module-upgrades) module_upgrades="yes"
++  ;;
+   --cpu=*)
+   ;;
+   --target-list=*) target_list="$optarg"
+@@ -1495,6 +1500,7 @@ disabled with --disable-FEATURE, default
+   guest-agent-msi build guest agent Windows MSI installation package
+   pie             Position Independent Executables
+   modules         modules support
++  module-upgrades try to load modules from alternate paths for upgrades
+   debug-tcg       TCG debugging (default is disabled)
+   debug-info      debugging information
+   sparse          sparse checker
+@@ -1707,6 +1713,11 @@ if compile_prog "-Werror -fno-gcse" "" ;
+   TRANSLATE_OPT_CFLAGS=-fno-gcse
+ fi
+ 
++# module_upgrades is only reasonable if modules are enabled
++if test "$modules" = "no" && test "$module_upgrades" = "yes" ; then
++  error_exit "Can't enable module-upgrades as Modules are not enabled"
++fi
++
+ if test "$static" = "yes" ; then
+   if test "$modules" = "yes" ; then
+     error_exit "static and modules are mutually incompatible"
+@@ -5440,6 +5451,7 @@ if test "$slirp" = "yes" ; then
+     echo "smbd              $smbd"
+ fi
+ echo "module support    $modules"
++echo "alt path mod load $module_upgrades"
+ echo "host CPU          $cpu"
+ echo "host big endian   $bigendian"
+ echo "target list       $target_list"
+@@ -5753,6 +5765,9 @@ if test "$modules" = "yes"; then
+   echo "CONFIG_STAMP=_$( (echo $qemu_version; echo $pkgversion; cat $0) | $shacmd - | cut -f1 -d\ )" >> $config_host_mak
+   echo "CONFIG_MODULES=y" >> $config_host_mak
+ fi
++if test "$module_upgrades" = "yes"; then
++  echo "CONFIG_MODULE_UPGRADES=y" >> $config_host_mak
++fi
+ if test "$sdl" = "yes" ; then
+   echo "CONFIG_SDL=y" >> $config_host_mak
+   echo "CONFIG_SDLABI=$sdlabi" >> $config_host_mak
+--- a/util/module.c
++++ b/util/module.c
+@@ -20,6 +20,9 @@
+ #endif
+ #include "qemu/queue.h"
+ #include "qemu/module.h"
++#ifdef CONFIG_MODULE_UPGRADES
++#include "qemu-version.h"
++#endif
+ 
+ typedef struct ModuleEntry
+ {
+@@ -162,7 +165,12 @@ void module_load_one(const char *prefix,
+ #ifdef CONFIG_MODULES
+     char *fname = NULL;
+     char *exec_dir;
++#ifdef CONFIG_MODULE_UPGRADES
++    char *version_dir;
++    char *dirs[4];
++#else
+     char *dirs[3];
++#endif
+     char *module_name;
+     int i = 0;
+     int ret;
+@@ -189,6 +197,14 @@ void module_load_one(const char *prefix,
+     dirs[i++] = g_strdup_printf("%s", CONFIG_QEMU_MODDIR);
+     dirs[i++] = g_strdup_printf("%s/..", exec_dir ? : "");
+     dirs[i++] = g_strdup_printf("%s", exec_dir ? : "");
++
++#ifdef CONFIG_MODULE_UPGRADES
++    version_dir = g_strcanon(g_strdup(QEMU_PKGVERSION),
++                             G_CSET_A_2_Z G_CSET_a_2_z G_CSET_DIGITS "+-.~",
++                             '_');
++    dirs[i++] = g_strdup_printf("/var/run/qemu/%s", version_dir);
++#endif
++
+     assert(i == ARRAY_SIZE(dirs));
+     g_free(exec_dir);
+     exec_dir = NULL;

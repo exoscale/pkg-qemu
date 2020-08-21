@@ -1,0 +1,41 @@
+From 0d4cb295db7503fbac2f5bb3e878a56630231fed Mon Sep 17 00:00:00 2001
+From: Christian Borntraeger <borntraeger@de.ibm.com>
+Date: Mon, 15 Jul 2019 16:23:03 +0200
+Subject: [PATCH] s390x/cpumodel: also change name of vxbeh
+
+David suggested to keep everything in sync as 4.1 is not yet released.
+This patch fixes the name "vxbeh" into "vxpdeh".
+
+To simplify the backports this patch will not change VECTOR_BCD_ENH as
+this is just an internal name. That will be done by an extra patch that
+does not need to be backported.
+
+Suggested-by: David Hildenbrand <david@redhat.com>
+Fixes: d05be57ddc2e ("s390: cpumodel: fix description for the new vector facility")
+Fixes: 54d65de0b525 ("s390x/cpumodel: vector enhancements")
+Signed-off-by: Christian Borntraeger <borntraeger@de.ibm.com>
+Message-Id: <20190715142304.215018-3-borntraeger@de.ibm.com>
+[CH: vxp->vxpdeh, as discussed]
+Reviewed-by: David Hildenbrand <david@redhat.com>
+Reviewed-by: Thomas Huth <thuth@redhat.com>
+Signed-off-by: Cornelia Huck <cohuck@redhat.com>
+
+Origin: backport, https://git.qemu.org/?p=qemu.git;a=commit;h=0d4cb295db75
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/1836154
+Last-Update: 2019-07-17
+
+---
+ target/s390x/cpu_features_def.inc.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+--- a/target/s390x/cpu_features.c
++++ b/target/s390x/cpu_features.c
+@@ -108,7 +108,7 @@ static const S390FeatDef s390_features[]
+     FEAT_INIT("vxeh2", S390_FEAT_TYPE_STFL, 148, "Vector Enhancements facility 2"),
+     FEAT_INIT("esort-base", S390_FEAT_TYPE_STFL, 150, "Enhanced-sort facility (excluding subfunctions)"),
+     FEAT_INIT("deflate-base", S390_FEAT_TYPE_STFL, 151, "Deflate-conversion facility (excluding subfunctions)"),
+-    FEAT_INIT("vxbeh", S390_FEAT_TYPE_STFL, 152, "Vector-Packed-Decimal-Enhancement Facility"),
++    FEAT_INIT("vxpdeh", S390_FEAT_TYPE_STFL, 152, "Vector-Packed-Decimal-Enhancement Facility"),
+     FEAT_INIT("msa9-base", S390_FEAT_TYPE_STFL, 155, "Message-security-assist-extension-9 facility (excluding subfunctions)"),
+     FEAT_INIT("etoken", S390_FEAT_TYPE_STFL, 156, "Etoken facility"),
+ 

@@ -1,0 +1,56 @@
+i386: remove the 'INTEL_PT' CPUID bit from named CPU models
+
+Processor tracing is not yet implemented for KVM and it will be an
+opt in feature requiring a special module parameter.
+Disable it, because it is wrong to enable it by default and
+it is impossible that no one has ever used it.
+
+Cc: qemu-stable@nongnu.org
+Signed-off-by: Paolo Bonzini <pbonzini@redhat.com>
+-
+Author: Paolo Bonzini <pbonzini@redhat.com>
+Origin: upstream, https://github.com/qemu/qemu/commit/4c257911dcc7
+Applied-Upstream: v3.1.0-1496-g4c257911dc
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/1828495
+Reviewed-by: Rafael David Tinoco <rafaeldtinoco@ubuntu.com>
+Last-Update: 2019-06-19
+---
+ target/i386/cpu.c | 8 +++-----
+ 1 file changed, 3 insertions(+), 5 deletions(-)
+
+diff --git a/target/i386/cpu.c b/target/i386/cpu.c
+index dd0abb530..7271f7830 100644
+--- a/target/i386/cpu.c
++++ b/target/i386/cpu.c
+@@ -2063,7 +2063,7 @@ static X86CPUDefinition builtin_x86_defs[] = {
+             CPUID_7_0_EBX_HLE | CPUID_7_0_EBX_AVX2 | CPUID_7_0_EBX_SMEP |
+             CPUID_7_0_EBX_BMI2 | CPUID_7_0_EBX_ERMS | CPUID_7_0_EBX_INVPCID |
+             CPUID_7_0_EBX_RTM | CPUID_7_0_EBX_RDSEED | CPUID_7_0_EBX_ADX |
+-            CPUID_7_0_EBX_SMAP | CPUID_7_0_EBX_MPX | CPUID_7_0_EBX_INTEL_PT,
++            CPUID_7_0_EBX_SMAP | CPUID_7_0_EBX_MPX,
+         .features[FEAT_7_0_ECX] =
+             CPUID_7_0_ECX_VBMI | CPUID_7_0_ECX_UMIP | CPUID_7_0_ECX_PKU |
+             CPUID_7_0_ECX_OSPKE | CPUID_7_0_ECX_VBMI2 | CPUID_7_0_ECX_GFNI |
+@@ -2121,8 +2121,7 @@ static X86CPUDefinition builtin_x86_defs[] = {
+             CPUID_7_0_EBX_SMAP | CPUID_7_0_EBX_MPX | CPUID_7_0_EBX_CLWB |
+             CPUID_7_0_EBX_AVX512F | CPUID_7_0_EBX_AVX512DQ |
+             CPUID_7_0_EBX_AVX512BW | CPUID_7_0_EBX_AVX512CD |
+-            CPUID_7_0_EBX_AVX512VL | CPUID_7_0_EBX_CLFLUSHOPT |
+-            CPUID_7_0_EBX_INTEL_PT,
++            CPUID_7_0_EBX_AVX512VL | CPUID_7_0_EBX_CLFLUSHOPT,
+         .features[FEAT_7_0_ECX] =
+             CPUID_7_0_ECX_VBMI | CPUID_7_0_ECX_UMIP | CPUID_7_0_ECX_PKU |
+             CPUID_7_0_ECX_OSPKE | CPUID_7_0_ECX_VBMI2 | CPUID_7_0_ECX_GFNI |
+@@ -2178,8 +2177,7 @@ static X86CPUDefinition builtin_x86_defs[] = {
+             CPUID_7_0_EBX_SMAP | CPUID_7_0_EBX_MPX | CPUID_7_0_EBX_CLWB |
+             CPUID_7_0_EBX_AVX512F | CPUID_7_0_EBX_AVX512DQ |
+             CPUID_7_0_EBX_AVX512BW | CPUID_7_0_EBX_AVX512CD |
+-            CPUID_7_0_EBX_AVX512VL | CPUID_7_0_EBX_CLFLUSHOPT |
+-            CPUID_7_0_EBX_INTEL_PT,
++            CPUID_7_0_EBX_AVX512VL | CPUID_7_0_EBX_CLFLUSHOPT,
+         .features[FEAT_7_0_ECX] =
+             CPUID_7_0_ECX_PKU | CPUID_7_0_ECX_OSPKE |
+             CPUID_7_0_ECX_AVX512VNNI,
+-- 
+2.17.1
+

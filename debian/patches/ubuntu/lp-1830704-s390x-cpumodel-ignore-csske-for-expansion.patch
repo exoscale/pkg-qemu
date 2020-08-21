@@ -1,0 +1,38 @@
+From eaf6f642abf1d4d24791b70728d4068428fc4658 Mon Sep 17 00:00:00 2001
+From: Christian Borntraeger <borntraeger@de.ibm.com>
+Date: Mon, 29 Apr 2019 05:02:43 -0400
+Subject: [PATCH] s390x/cpumodel: ignore csske for expansion
+
+csske will be removed in a future machine. Ignore it for expanding the
+cpu model. Otherwise qemu falls back to z9.
+
+Signed-off-by: Christian Borntraeger <borntraeger@de.ibm.com>
+Cc: qemu-stable@nongnu.org
+Reviewed-by: David Hildenbrand <david@redhat.com>
+Message-Id: <20190429090250.7648-3-borntraeger@de.ibm.com>
+Signed-off-by: Cornelia Huck <cohuck@redhat.com>
+
+Origin: upstream, https://git.qemu.org/?p=qemu.git;a=commit;h=eaf6f642abf1d4d24791b70728d4068428fc4658
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/1830704
+Last-Update: 2019-05-28
+
+---
+ target/s390x/cpu_models.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/target/s390x/cpu_models.c b/target/s390x/cpu_models.c
+index e5afa15512..b4bb5de635 100644
+--- a/target/s390x/cpu_models.c
++++ b/target/s390x/cpu_models.c
+@@ -1322,6 +1322,8 @@ static void init_ignored_base_feat(void)
+          S390_FEAT_KM_TDEA_192,
+          S390_FEAT_KIMD_SHA_1,
+          S390_FEAT_KLMD_SHA_1,
++         /* CSSKE is deprecated on newer generations */
++         S390_FEAT_CONDITIONAL_SSKE,
+     };
+     int i;
+ 
+-- 
+2.21.0
+

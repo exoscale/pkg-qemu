@@ -1,0 +1,40 @@
+From 9b54810232977c2eb2b32b28c3dde39a1fa82e87 Mon Sep 17 00:00:00 2001
+From: Christian Borntraeger <borntraeger@de.ibm.com>
+Date: Mon, 8 Jul 2019 17:09:31 +0200
+Subject: [PATCH 9/9] s390: cpumodel: fix description for the new vector
+ facility
+
+The new facility is called "Vector-Packed-Decimal-Enhancement Facility"
+and not "Vector BCD enhancements facility 1". As the shortname might
+have already found its way into some backports, let's keep vxbeh.
+
+Fixes: 54d65de0b525 ("s390x/cpumodel: vector enhancements")
+Signed-off-by: Christian Borntraeger <borntraeger@de.ibm.com>
+Message-Id: <20190708150931.93448-1-borntraeger@de.ibm.com>
+Signed-off-by: Cornelia Huck <cohuck@redhat.com>
+(cherry picked from commit d05be57ddc2e1722f527aa4c20d84dfd15c840ec)
+
+Author: Christian Borntraeger <borntraeger@de.ibm.com>
+Origin: backport, https://git.qemu.org/?p=qemu.git;a=commit;h=d05be57ddc2e1722f527aa4c20d84dfd15c840ec
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/1836154
+Last-Update: 2019-08-07
+---
+ target/s390x/cpu_features.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/target/s390x/cpu_features.c b/target/s390x/cpu_features.c
+index 98fa3a66dc81..24538fc6091e 100644
+--- a/target/s390x/cpu_features.c
++++ b/target/s390x/cpu_features.c
+@@ -108,7 +108,7 @@ static const S390FeatDef s390_features[] = {
+     FEAT_INIT("vxeh2", S390_FEAT_TYPE_STFL, 148, "Vector Enhancements facility 2"),
+     FEAT_INIT("esort-base", S390_FEAT_TYPE_STFL, 150, "Enhanced-sort facility (excluding subfunctions)"),
+     FEAT_INIT("deflate-base", S390_FEAT_TYPE_STFL, 151, "Deflate-conversion facility (excluding subfunctions)"),
+-    FEAT_INIT("vxbeh", S390_FEAT_TYPE_STFL, 152, "Vector BCD enhancements facility 1"),
++    FEAT_INIT("vxbeh", S390_FEAT_TYPE_STFL, 152, "Vector-Packed-Decimal-Enhancement Facility"),
+     FEAT_INIT("msa9-base", S390_FEAT_TYPE_STFL, 155, "Message-security-assist-extension-9 facility (excluding subfunctions)"),
+     FEAT_INIT("etoken", S390_FEAT_TYPE_STFL, 156, "Etoken facility"),
+ 
+-- 
+2.12.3
+

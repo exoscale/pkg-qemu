@@ -1,0 +1,25 @@
+From 12c9dbb8042d3c9e1aa98c2daa27dab5b0b4eb5b Mon Sep 17 00:00:00 2001
+From: Alessandro Ratti <alessandro@exoscale.com>
+Date: Fri, 21 Aug 2020 14:23:31 +0000
+Subject: [PATCH] Bump up the l2_cache_size
+
+---
+ block/qcow2.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/block/qcow2.h b/block/qcow2.h
+index 6f0ff15dd..3b20e4557 100644
+--- a/block/qcow2.h
++++ b/block/qcow2.h
+@@ -75,7 +75,7 @@
+ 
+ /* Whichever is more */
+ #define DEFAULT_L2_CACHE_CLUSTERS 8 /* clusters */
+-#define DEFAULT_L2_CACHE_BYTE_SIZE 1048576 /* bytes */
++#define DEFAULT_L2_CACHE_BYTE_SIZE 1610612736 /* bytes */
+ 
+ /* The refblock cache needs only a fourth of the L2 cache size to cover as many
+  * clusters */
+-- 
+2.25.1
+

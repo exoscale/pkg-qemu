@@ -1,0 +1,39 @@
+From 254790a909a2f153d689bfa7d8e8f0386cda870d Mon Sep 17 00:00:00 2001
+From: Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>
+Date: Fri, 1 Jun 2018 11:38:09 -0400
+Subject: [PATCH] i386: Define AMD's no SSB mitigation needed.
+
+AMD future CPUs expose a mechanism to tell the guest that the
+Speculative Store Bypass Disable is not needed and that the
+CPU is all good.
+
+This is exposed via the CPUID 8000_0008.EBX[26] bit.
+
+See 124441_AMD64_SpeculativeStoreBypassDisable_Whitepaper_final.pdf
+
+A copy of this document is available at
+        https://bugzilla.kernel.org/show_bug.cgi?id=199889
+
+Signed-off-by: Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>
+Message-Id: <20180601153809.15259-3-konrad.wilk@oracle.com>
+Signed-off-by: Eduardo Habkost <ehabkost@redhat.com>
+
+Origin: backport, https://git.qemu.org/?p=qemu.git;a=commit;h=254790a9
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/1840745
+Last-Update: 2019-08-21
+
+---
+ target/i386/cpu.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+--- a/target/i386/cpu.c
++++ b/target/i386/cpu.c
+@@ -529,7 +529,7 @@ static FeatureWordInfo feature_word_info
+             "ibpb", NULL, NULL, NULL,
+             NULL, NULL, NULL, NULL,
+             NULL, NULL, NULL, NULL,
+-            "amd-ssbd", "virt-ssbd", NULL, NULL,
++            "amd-ssbd", "virt-ssbd", "amd-no-ssb", NULL,
+             NULL, NULL, NULL, NULL,
+         },
+         .cpuid = { .eax = 0x80000008, .reg = R_EBX, },

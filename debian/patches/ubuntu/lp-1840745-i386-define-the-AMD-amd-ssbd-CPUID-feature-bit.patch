@@ -1,0 +1,42 @@
+From a764f3f7197f4d7ad8fe8424269933de912224cb Mon Sep 17 00:00:00 2001
+From: Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>
+Date: Fri, 1 Jun 2018 11:38:08 -0400
+Subject: [PATCH] i386: define the AMD 'amd-ssbd' CPUID feature bit
+
+AMD future CPUs expose _two_ ways to utilize the Intel equivalant
+of the Speculative Store Bypass Disable. The first is via
+the virtualized VIRT_SPEC CTRL MSR (0xC001_011f) and the second
+is via the SPEC_CTRL MSR (0x48). The document titled:
+124441_AMD64_SpeculativeStoreBypassDisable_Whitepaper_final.pdf
+
+gives priority of SPEC CTRL MSR over the VIRT SPEC CTRL MSR.
+
+A copy of this document is available at
+      https://bugzilla.kernel.org/show_bug.cgi?id=199889
+
+Anyhow, this means that on future AMD CPUs there will be  _two_ ways to
+deal with SSBD.
+
+Signed-off-by: Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>
+Message-Id: <20180601153809.15259-2-konrad.wilk@oracle.com>
+Signed-off-by: Eduardo Habkost <ehabkost@redhat.com>
+
+Origin: backport, https://git.qemu.org/?p=qemu.git;a=commit;h=a764f3f7
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/1840745
+Last-Update: 2019-08-21
+
+---
+ target/i386/cpu.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+--- a/target/i386/cpu.c
++++ b/target/i386/cpu.c
+@@ -529,7 +529,7 @@ static FeatureWordInfo feature_word_info
+             "ibpb", NULL, NULL, NULL,
+             NULL, NULL, NULL, NULL,
+             NULL, NULL, NULL, NULL,
+-            NULL, "virt-ssbd", NULL, NULL,
++            "amd-ssbd", "virt-ssbd", NULL, NULL,
+             NULL, NULL, NULL, NULL,
+         },
+         .cpuid = { .eax = 0x80000008, .reg = R_EBX, },

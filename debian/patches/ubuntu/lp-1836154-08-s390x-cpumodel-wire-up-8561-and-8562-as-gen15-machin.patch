@@ -1,0 +1,53 @@
+From 7ad963d1a299970a49da9372527cd3cc3990a39f Mon Sep 17 00:00:00 2001
+From: Christian Borntraeger <borntraeger@de.ibm.com>
+Date: Mon, 29 Apr 2019 05:02:50 -0400
+Subject: [PATCH 8/9] s390x/cpumodel: wire up 8561 and 8562 as gen15 machines
+
+8561 and 8562 will be gen15 machines. There is no name yet, let us use
+gen15a and gen15b as base name. Later on we can provide aliases with
+the proper name.
+
+Signed-off-by: Christian Borntraeger <borntraeger@de.ibm.com>
+Message-Id: <20190429090250.7648-10-borntraeger@de.ibm.com>
+Reviewed-by: David Hildenbrand <david@redhat.com>
+Signed-off-by: Cornelia Huck <cohuck@redhat.com>
+(cherry picked from commit c657e84faee48d6ab36665da5a008b8f0649593d)
+
+Author: Christian Borntraeger <borntraeger@de.ibm.com>
+Origin: backport, https://git.qemu.org/?p=qemu.git;a=commit;h=c657e84faee48d6ab36665da5a008b8f0649593d
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/1836154
+Last-Update: 2019-08-07
+---
+ target/s390x/cpu_models.c | 9 +++++----
+ 1 file changed, 5 insertions(+), 4 deletions(-)
+
+diff --git a/target/s390x/cpu_models.c b/target/s390x/cpu_models.c
+index 1e8714afe3a8..6052983051d0 100644
+--- a/target/s390x/cpu_models.c
++++ b/target/s390x/cpu_models.c
+@@ -41,10 +41,9 @@
+     }
+ 
+ /*
+- * CPU definiton list in order of release. For now, base features of a
+- * following release are always a subset of base features of the previous
+- * release. Same is correct for the other feature sets.
+- * A BC release always follows the corresponding EC release.
++ * CPU definition list in order of release. Up to generation 14 base features
++ * of a following release have been a superset of the previous release. With
++ * generation 15 one base feature and one optional feature have been deprecated.
+  */
+ static S390CPUDef s390_cpu_defs[] = {
+     CPUDEF_INIT(0x2064, 7, 1, 38, 0x00000000U, "z900", "IBM zSeries 900 GA1"),
+@@ -80,6 +79,8 @@ static S390CPUDef s390_cpu_defs[] = {
+     CPUDEF_INIT(0x2965, 13, 2, 47, 0x08000000U, "z13s", "IBM z13s GA1"),
+     CPUDEF_INIT(0x3906, 14, 1, 47, 0x08000000U, "z14", "IBM z14 GA1"),
+     CPUDEF_INIT(0x3907, 14, 1, 47, 0x08000000U, "z14ZR1", "IBM z14 Model ZR1 GA1"),
++    CPUDEF_INIT(0x8561, 15, 1, 47, 0x08000000U, "gen15a", "IBM 8561 GA1"),
++    CPUDEF_INIT(0x8562, 15, 1, 47, 0x08000000U, "gen15b", "IBM 8562 GA1"),
+ };
+ 
+ /* features part of a base model but not relevant for finding a base model */
+-- 
+2.12.3
+

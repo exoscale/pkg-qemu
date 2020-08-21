@@ -1,0 +1,49 @@
+i386: Add CPUID bit for WBNOINVD
+
+WBNOINVD: Write back and do not invalidate cache, enumerated by
+CPUID.(EAX=80000008H, ECX=0):EBX[bit 9].
+
+Signed-off-by: Robert Hoo <robert.hu@linux.intel.com>
+Message-Id: <1530781798-183214-5-git-send-email-robert.hu@linux.intel.com>
+Signed-off-by: Eduardo Habkost <ehabkost@redhat.com>
+-
+Author: Robert Hoo <robert.hu@linux.intel.com>
+Origin: upstream, https://github.com/qemu/qemu/commit/59a80a19ca31
+Applied-Upstream: v3.0.0-155-g59a80a19ca
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/1828495
+Reviewed-by: Rafael David Tinoco <rafaeldtinoco@ubuntu.com>
+Last-Update: 2019-06-16
+---
+ target/i386/cpu.c | 2 +-
+ target/i386/cpu.h | 2 ++
+ 2 files changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/target/i386/cpu.c b/target/i386/cpu.c
+index 3f90633c0..46e14df96 100644
+--- a/target/i386/cpu.c
++++ b/target/i386/cpu.c
+@@ -487,7 +487,7 @@ static FeatureWordInfo feature_word_info[FEATURE_WORDS] = {
+         .feat_names = {
+             NULL, NULL, NULL, NULL,
+             NULL, NULL, NULL, NULL,
+-            NULL, NULL, NULL, NULL,
++            NULL, "wbnoinvd", NULL, NULL,
+             "ibpb", NULL, NULL, NULL,
+             NULL, NULL, NULL, NULL,
+             NULL, NULL, NULL, NULL,
+diff --git a/target/i386/cpu.h b/target/i386/cpu.h
+index e40dafce0..9405c0189 100644
+--- a/target/i386/cpu.h
++++ b/target/i386/cpu.h
+@@ -657,6 +657,8 @@ typedef uint32_t FeatureWordArray[FEATURE_WORDS];
+ #define CPUID_7_0_EDX_ARCH_CAPABILITIES (1U << 29)  /*Arch Capabilities*/
+ #define CPUID_7_0_EDX_SPEC_CTRL_SSBD  (1U << 31) /* Speculative Store Bypass Disable */
+ 
++#define CPUID_8000_0008_EBX_WBNOINVD  (1U << 9)  /* Write back and
++                                                                             do not invalidate cache */
+ #define CPUID_8000_0008_EBX_IBPB    (1U << 12) /* Indirect Branch Prediction Barrier */
+ 
+ #define CPUID_XSAVE_XSAVEOPT   (1U << 0)
+-- 
+2.17.1
+

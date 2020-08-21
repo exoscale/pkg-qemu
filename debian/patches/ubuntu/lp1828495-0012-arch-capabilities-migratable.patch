@@ -1,0 +1,35 @@
+i386: Make arch_capabilities migratable
+
+Now that kvm_arch_get_supported_cpuid() will only return
+arch_capabilities if QEMU is able to initialize the MSR properly,
+we know that the feature is safely migratable.
+
+Signed-off-by: Eduardo Habkost <ehabkost@redhat.com>
+Message-Id: <20190125220606.4864-3-ehabkost@redhat.com>
+Signed-off-by: Eduardo Habkost <ehabkost@redhat.com>
+-
+Author: Eduardo Habkost <ehabkost@redhat.com>
+Origin: upstream, https://github.com/qemu/qemu/commit/014018e19b3c
+Applied-Upstream: v4.0.0-rc0-2-g014018e19b
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/1828495
+Reviewed-by: Rafael David Tinoco <rafaeldtinoco@ubuntu.com>
+Last-Update: 2019-06-16
+---
+ target/i386/cpu.c | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/target/i386/cpu.c b/target/i386/cpu.c
+index 61de39bc8..3b7adf458 100644
+--- a/target/i386/cpu.c
++++ b/target/i386/cpu.c
+@@ -503,7 +503,6 @@ static FeatureWordInfo feature_word_info[FEATURE_WORDS] = {
+             .reg = R_EDX,
+         },
+         .tcg_features = TCG_7_0_EDX_FEATURES,
+-        .unmigratable_flags = CPUID_7_0_EDX_ARCH_CAPABILITIES,
+     },
+     [FEAT_8000_0007_EDX] = {
+         .type = CPUID_FEATURE_WORD,
+-- 
+2.17.1
+

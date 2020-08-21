@@ -1,0 +1,95 @@
+From ae0215b2bb56a9d5321a185dde133bfdd306a4c0 Mon Sep 17 00:00:00 2001
+From: Alexey Kardashevskiy <aik@ozlabs.ru>
+Date: Tue, 13 Mar 2018 11:17:31 -0600
+Subject: [PATCH] vfio-pci: Allow mmap of MSIX BAR
+
+At the moment we unconditionally avoid mapping MSIX data of a BAR and
+emulate MSIX table in QEMU. However it is 1) not always necessary as
+a platform may provide a paravirt interface for MSIX configuration;
+2) can affect the speed of MMIO access by emulating them in QEMU when
+frequently accessed registers share same system page with MSIX data,
+this is particularly a problem for systems with the page size bigger
+than 4KB.
+
+A new capability - VFIO_REGION_INFO_CAP_MSIX_MAPPABLE - has been added
+to the kernel [1] which tells the userspace that mapping of the MSIX data
+is possible now. This makes use of it so from now on QEMU tries mapping
+the entire BAR as a whole and emulate MSIX on top of that.
+
+[1] https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=a32295c612c57990d17fb0f41e7134394b2f35f6
+
+Signed-off-by: Alexey Kardashevskiy <aik@ozlabs.ru>
+Reviewed-by: David Gibson <david@gibson.dropbear.id.au>
+Signed-off-by: Alex Williamson <alex.williamson@redhat.com>
+
+Origin: upstream, https://git.qemu.org/?p=qemu.git;a=commit;h=ae0215b2bb56a9d5321a185dde13
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/1847948
+Last-Update: 2019-10-15
+
+---
+ hw/vfio/common.c              | 15 +++++++++++++++
+ hw/vfio/pci.c                 |  9 +++++++++
+ include/hw/vfio/vfio-common.h |  1 +
+ 3 files changed, 25 insertions(+)
+
+diff --git a/hw/vfio/common.c b/hw/vfio/common.c
+index 07c03d78b6..5e84716218 100644
+--- a/hw/vfio/common.c
++++ b/hw/vfio/common.c
+@@ -1471,6 +1471,21 @@ int vfio_get_dev_region_info(VFIODevice *vbasedev, uint32_t type,
+     return -ENODEV;
+ }
+ 
++bool vfio_has_region_cap(VFIODevice *vbasedev, int region, uint16_t cap_type)
++{
++    struct vfio_region_info *info = NULL;
++    bool ret = false;
++
++    if (!vfio_get_region_info(vbasedev, region, &info)) {
++        if (vfio_get_region_info_cap(info, cap_type)) {
++            ret = true;
++        }
++        g_free(info);
++    }
++
++    return ret;
++}
++
+ /*
+  * Interfaces for IBM EEH (Enhanced Error Handling)
+  */
+diff --git a/hw/vfio/pci.c b/hw/vfio/pci.c
+index b9d2c12b82..02974f4eb9 100644
+--- a/hw/vfio/pci.c
++++ b/hw/vfio/pci.c
+@@ -1294,6 +1294,15 @@ static void vfio_pci_fixup_msix_region(VFIOPCIDevice *vdev)
+     off_t start, end;
+     VFIORegion *region = &vdev->bars[vdev->msix->table_bar].region;
+ 
++    /*
++     * If the host driver allows mapping of a MSIX data, we are going to
++     * do map the entire BAR and emulate MSIX table on top of that.
++     */
++    if (vfio_has_region_cap(&vdev->vbasedev, region->nr,
++                            VFIO_REGION_INFO_CAP_MSIX_MAPPABLE)) {
++        return;
++    }
++
+     /*
+      * We expect to find a single mmap covering the whole BAR, anything else
+      * means it's either unsupported or already setup.
+diff --git a/include/hw/vfio/vfio-common.h b/include/hw/vfio/vfio-common.h
+index c5efa32750..d9360148e6 100644
+--- a/include/hw/vfio/vfio-common.h
++++ b/include/hw/vfio/vfio-common.h
+@@ -193,6 +193,7 @@ int vfio_get_region_info(VFIODevice *vbasedev, int index,
+                          struct vfio_region_info **info);
+ int vfio_get_dev_region_info(VFIODevice *vbasedev, uint32_t type,
+                              uint32_t subtype, struct vfio_region_info **info);
++bool vfio_has_region_cap(VFIODevice *vbasedev, int region, uint16_t cap_type);
+ #endif
+ extern const MemoryListener vfio_prereg_listener;
+ 
+-- 
+2.23.0
+

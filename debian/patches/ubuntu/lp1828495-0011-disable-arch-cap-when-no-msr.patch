@@ -1,0 +1,61 @@
+i386: kvm: Disable arch_capabilities if MSR can't be set
+
+KVM has two bugs in the handling of MSR_IA32_ARCH_CAPABILITIES:
+
+1) Linux commit commit 1eaafe91a0df ("kvm: x86: IA32_ARCH_CAPABILITIES
+   is always supported") makes GET_SUPPORTED_CPUID return
+   arch_capabilities even if running on SVM.  This makes "-cpu
+   host,migratable=off" incorrectly expose arch_capabilities on CPUID on
+   AMD hosts (where the MSR is not emulated by KVM).
+
+2) KVM_GET_MSR_INDEX_LIST does not return MSR_IA32_ARCH_CAPABILITIES if
+   the MSR is not supported by the host CPU.  This makes QEMU not
+   initialize the MSR properly at kvm_put_msrs() on those hosts.
+
+Work around both bugs on the QEMU side, by checking if the MSR
+was returned by KVM_GET_MSR_INDEX_LIST before returning the
+feature flag on kvm_arch_get_supported_cpuid().
+
+This has the unfortunate side effect of making arch_capabilities
+unavailable on hosts without hardware support for the MSR until bug #2
+is fixed on KVM, but I can't see another way to work around bug #1
+without that side effect.
+
+Signed-off-by: Eduardo Habkost <ehabkost@redhat.com>
+Message-Id: <20190125220606.4864-2-ehabkost@redhat.com>
+Signed-off-by: Eduardo Habkost <ehabkost@redhat.com>
+Signed-off-by: Rafael David Tinoco <rafaeldtinoco@ubuntu.com>
+-
+Author: Eduardo Habkost <ehabkost@redhat.com>
+Origin: upstream, https://github.com/qemu/qemu/commit/485b1d256bcb
+Applied-Upstream: v4.0.0-rc0-1-g485b1d256b
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/1828495
+Reviewed-by: Rafael David Tinoco <rafaeldtinoco@ubuntu.com>
+Last-Update: 2019-06-16
+---
+ target/i386/kvm.c | 9 +++++++++
+ 1 file changed, 9 insertions(+)
+
+diff --git a/target/i386/kvm.c b/target/i386/kvm.c
+index e790c2ddf..bda8ba32e 100644
+--- a/target/i386/kvm.c
++++ b/target/i386/kvm.c
+@@ -372,6 +372,15 @@ uint32_t kvm_arch_get_supported_cpuid(KVMState *s, uint32_t function,
+         if (host_tsx_blacklisted()) {
+             ret &= ~(CPUID_7_0_EBX_RTM | CPUID_7_0_EBX_HLE);
+         }
++    } else if (function == 7 && index == 0 && reg == R_EDX) {
++        /*
++         * Linux v4.17-v4.20 incorrectly return ARCH_CAPABILITIES on SVM hosts.
++         * We can detect the bug by checking if MSR_IA32_ARCH_CAPABILITIES is
++         * returned by KVM_GET_MSR_INDEX_LIST.
++         */
++        if (!has_msr_arch_capabs) {
++            ret &= ~CPUID_7_0_EDX_ARCH_CAPABILITIES;
++        }
+     } else if (function == 0x80000001 && reg == R_EDX) {
+         /* On Intel, kvm returns cpuid according to the Intel spec,
+          * so add missing bits according to the AMD spec:
+-- 
+2.17.1
+

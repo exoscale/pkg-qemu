@@ -1,0 +1,93 @@
+i386: Disable OSPKE on CPU model definitions
+
+Currently, the Cascadelake-Server, Icelake-Client, and
+Icelake-Server are always generating the following warning:
+
+  qemu-system-x86_64: warning: \
+    host doesn't support requested feature: CPUID.07H:ECX [bit 4]
+
+This happens because OSPKE was never returned by
+GET_SUPPORTED_CPUID or x86_cpu_get_supported_feature_word().
+OSPKE is a runtime flag automatically set by the KVM module or by
+TCG code, was always cleared by x86_cpu_filter_features(), and
+was not supposed to appear on the CPU model table.
+
+Remove the OSPKE flag from the CPU model table entries, to avoid
+the bogus warning and avoid returning invalid feature data on
+query-cpu-* QMP commands.  As OSPKE was always cleared by
+x86_cpu_filter_features(), this won't have any guest-visible
+impact.
+
+Include a test case that should detect the problem if we introduce
+a similar bug again.
+
+    [backport notes]
+
+    * This upstream commit had a regression test called:
+        - tests/acceptance/cpu_queries.py
+      that was not backported together.
+
+    * Related bugs (about removing CPU feature flags) on QEMU > 3.1:
+
+      (LP: 1825195) qemu dropped osxsave/ospke feature triggering
+      upgrade issues
+
+        - http://bit.ly/2KhpRmF (i386: Remove osxsave CPUID flag name)
+        - http://bit.ly/2KjPlQi (i386: Remove ospke CPUID flag name)
+
+Fixes: c7a88b52f62b ("i386: Add new model of Cascadelake-Server")
+Fixes: 8a11c62da914 ("i386: Add new CPU model Icelake-{Server,Client}")
+Cc: Tao Xu <tao3.xu@intel.com>
+Cc: Robert Hoo <robert.hu@linux.intel.com>
+Signed-off-by: Eduardo Habkost <ehabkost@redhat.com>
+Message-Id: <20190319200515.14999-1-ehabkost@redhat.com>
+Signed-off-by: Eduardo Habkost <ehabkost@redhat.com>
+(backported from upstream commit: bb4928c7cafe50ab2137a0034e350ef1bfa044d9)
+Signed-off-by: Rafael David Tinoco <rafaeldtinoco@ubuntu.com>
+-
+Author: Rafael David Tinoco <rafaeldtinoco@ubuntu.com>
+Original-Author: Eduardo Habkost <ehabkost@redhat.com>
+Origin: backport, https://github.com/qemu/qemu/commit/bb4928c7cafe
+Applied-Upstream: v4.0.0-rc0-3-gbb4928c7ca
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/1828495
+Reviewed-by: Rafael David Tinoco <rafaeldtinoco@ubuntu.com>
+Last-Update: 2019-06-19
+---
+ target/i386/cpu.c | 7 +++----
+ 1 file changed, 3 insertions(+), 4 deletions(-)
+
+diff --git a/target/i386/cpu.c b/target/i386/cpu.c
+index b0b4b2f5d..9827fd2dd 100644
+--- a/target/i386/cpu.c
++++ b/target/i386/cpu.c
+@@ -2066,7 +2066,7 @@ static X86CPUDefinition builtin_x86_defs[] = {
+             CPUID_7_0_EBX_SMAP | CPUID_7_0_EBX_MPX,
+         .features[FEAT_7_0_ECX] =
+             CPUID_7_0_ECX_VBMI | CPUID_7_0_ECX_UMIP | CPUID_7_0_ECX_PKU |
+-            CPUID_7_0_ECX_OSPKE | CPUID_7_0_ECX_VBMI2 | CPUID_7_0_ECX_GFNI |
++            CPUID_7_0_ECX_VBMI2 | CPUID_7_0_ECX_GFNI |
+             CPUID_7_0_ECX_VAES | CPUID_7_0_ECX_VPCLMULQDQ |
+             CPUID_7_0_ECX_AVX512VNNI | CPUID_7_0_ECX_AVX512BITALG |
+             CPUID_7_0_ECX_AVX512_VPOPCNTDQ,
+@@ -2124,7 +2124,7 @@ static X86CPUDefinition builtin_x86_defs[] = {
+             CPUID_7_0_EBX_AVX512VL | CPUID_7_0_EBX_CLFLUSHOPT,
+         .features[FEAT_7_0_ECX] =
+             CPUID_7_0_ECX_VBMI | CPUID_7_0_ECX_UMIP | CPUID_7_0_ECX_PKU |
+-            CPUID_7_0_ECX_OSPKE | CPUID_7_0_ECX_VBMI2 | CPUID_7_0_ECX_GFNI |
++            CPUID_7_0_ECX_VBMI2 | CPUID_7_0_ECX_GFNI |
+             CPUID_7_0_ECX_VAES | CPUID_7_0_ECX_VPCLMULQDQ |
+             CPUID_7_0_ECX_AVX512VNNI | CPUID_7_0_ECX_AVX512BITALG |
+             CPUID_7_0_ECX_AVX512_VPOPCNTDQ | CPUID_7_0_ECX_LA57,
+@@ -2179,8 +2179,7 @@ static X86CPUDefinition builtin_x86_defs[] = {
+             CPUID_7_0_EBX_AVX512BW | CPUID_7_0_EBX_AVX512CD |
+             CPUID_7_0_EBX_AVX512VL | CPUID_7_0_EBX_CLFLUSHOPT,
+         .features[FEAT_7_0_ECX] =
+-            CPUID_7_0_ECX_PKU | CPUID_7_0_ECX_OSPKE |
+-            CPUID_7_0_ECX_AVX512VNNI,
++            CPUID_7_0_ECX_PKU | CPUID_7_0_ECX_AVX512VNNI,
+         .features[FEAT_7_0_EDX] =
+             CPUID_7_0_EDX_SPEC_CTRL | CPUID_7_0_EDX_SPEC_CTRL_SSBD,
+         /* Missing: XSAVES (not supported by some Linux versions,
+-- 
+2.17.1
+

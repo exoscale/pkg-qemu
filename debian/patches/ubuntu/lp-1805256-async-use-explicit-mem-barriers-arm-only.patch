@@ -1,0 +1,181 @@
+Description: async: use explicit memory barriers
+
+When using C11 atomics, non-seqcst reads and writes do not participate
+in the total order of seqcst operations.  In util/async.c and util/aio-posix.c,
+in particular, the pattern that we use
+
+          write ctx->notify_me                 write bh->scheduled
+          read bh->scheduled                   read ctx->notify_me
+          if !bh->scheduled, sleep             if ctx->notify_me, notify
+
+needs to use seqcst operations for both the write and the read.  In
+general this is something that we do not want, because there can be
+many sources that are polled in addition to bottom halves.  The
+alternative is to place a seqcst memory barrier between the write
+and the read.  This also comes with a disadvantage, in that the
+memory barrier is implicit on strongly-ordered architectures and
+it wastes a few dozen clock cycles.
+
+Fortunately, ctx->notify_me is never written concurrently by two
+threads, so we can assert that and relax the writes to ctx->notify_me.
+The resulting solution works and performs well on both aarch64 and x86.
+
+Note that the atomic_set/atomic_read combination is not an atomic
+read-modify-write, and therefore it is even weaker than C11 ATOMIC_RELAXED;
+on x86, ATOMIC_RELAXED compiles to a locked operation.
+
+    [Backport Note]
+
+    Backported ONLY atomics and barriers from upstream commit.
+
+    Note: AIO is a sensitive part of QEMU and we decided not to apply
+    this SRU to all architectures, reducing chances of regressions to
+    anything other than Aarch64 architecture, affected by the original
+    issue.
+
+Analyzed-by: Ying Fang <fangying1@huawei.com>
+Signed-off-by: Paolo Bonzini <pbonzini@redhat.com>
+Tested-by: Ying Fang <fangying1@huawei.com>
+Message-Id: <20200407140746.8041-6-pbonzini@redhat.com>
+Signed-off-by: Stefan Hajnoczi <stefanha@redhat.com>
+[backported from upstream 5710a3e09f9b85801e5ce70797a4a511e5fc9e2c]
+Signed-off-by: Rafael David Tinoco <rafaeldtinoco@ubuntu.com>
+---
+ util/aio-posix.c | 17 +++++++++++++++++
+ util/aio-win32.c | 17 +++++++++++++++++
+ util/async.c     | 28 ++++++++++++++++++++++++++++
+ 3 files changed, 62 insertions(+)
+
+diff --git a/util/aio-posix.c b/util/aio-posix.c
+index 1427f49b4..721d69c8f 100644
+--- a/util/aio-posix.c
++++ b/util/aio-posix.c
+@@ -590,7 +590,18 @@ bool aio_poll(AioContext *ctx, bool blocking)
+      * so disable the optimization now.
+      */
+     if (blocking) {
++#if !defined(__aarch64__)
+         atomic_add(&ctx->notify_me, 2);
++#else
++        /* LP: #1805256 - ARM Bionic SRU */
++        atomic_set(&ctx->notify_me, atomic_read(&ctx->notify_me) + 2);
++        /*
++         * Write ctx->notify_me before computing the timeout
++         * (reading bottom half flags, etc.).  Pairs with
++         * smp_mb in aio_notify().
++         */
++        smp_mb();
++#endif
+     }
+ 
+     qemu_lockcnt_inc(&ctx->list_lock);
+@@ -631,7 +642,13 @@ bool aio_poll(AioContext *ctx, bool blocking)
+     }
+ 
+     if (blocking) {
++#if !defined(__aarch64__)
+         atomic_sub(&ctx->notify_me, 2);
++#else
++        /* LP: #1805256 - ARM Bionic SRU */
++        /* Finish the poll before clearing the flag.  */
++        atomic_store_release(&ctx->notify_me, atomic_read(&ctx->notify_me) - 2);
++#endif
+     }
+ 
+     /* Adjust polling time */
+diff --git a/util/aio-win32.c b/util/aio-win32.c
+index d6d5e02f0..49ba72918 100644
+--- a/util/aio-win32.c
++++ b/util/aio-win32.c
+@@ -340,7 +340,18 @@ bool aio_poll(AioContext *ctx, bool blocking)
+      * so disable the optimization now.
+      */
+     if (blocking) {
++#if !defined(__aarch64__)
+         atomic_add(&ctx->notify_me, 2);
++#else
++        /* LP: #1805256 - ARM Bionic SRU */
++        atomic_set(&ctx->notify_me, atomic_read(&ctx->notify_me) + 2);
++        /*
++         * Write ctx->notify_me before computing the timeout
++         * (reading bottom half flags, etc.).  Pairs with
++         * smp_mb in aio_notify().
++         */
++        smp_mb();
++#endif
+     }
+ 
+     qemu_lockcnt_inc(&ctx->list_lock);
+@@ -373,7 +384,13 @@ bool aio_poll(AioContext *ctx, bool blocking)
+         ret = WaitForMultipleObjects(count, events, FALSE, timeout);
+         if (blocking) {
+             assert(first);
++#if !defined(__aarch64__)
+             atomic_sub(&ctx->notify_me, 2);
++#else
++            /* LP: #1805256 - ARM Bionic SRU */
++            atomic_store_release(&ctx->notify_me,
++                    atomic_read(&ctx->notify_me) - 2);
++#endif
+         }
+ 
+         if (first) {
+diff --git a/util/async.c b/util/async.c
+index 4dd9d95a9..20f234e2b 100644
+--- a/util/async.c
++++ b/util/async.c
+@@ -221,7 +221,19 @@ aio_ctx_prepare(GSource *source, gint    *timeout)
+ {
+     AioContext *ctx = (AioContext *) source;
+ 
++#if !defined(__aarch64__)
+     atomic_or(&ctx->notify_me, 1);
++#else
++    /* LP: #1805256 - ARM Bionic SRU */
++    atomic_set(&ctx->notify_me, atomic_read(&ctx->notify_me) | 1);
++
++    /*
++     * Write ctx->notify_me before computing the timeout
++     * (reading bottom half flags, etc.).  Pairs with
++     * smp_mb in aio_notify().
++     */
++    smp_mb();
++#endif
+ 
+     /* We assume there is no timeout already supplied */
+     *timeout = qemu_timeout_ns_to_ms(aio_compute_timeout(ctx));
+@@ -239,7 +251,13 @@ aio_ctx_check(GSource *source)
+     AioContext *ctx = (AioContext *) source;
+     QEMUBH *bh;
+ 
++#if !defined(__aarch64__)
+     atomic_and(&ctx->notify_me, ~1);
++#else
++    /* LP: #1805256 - ARM Bionic SRU */
++    /* Finish computing the timeout before clearing the flag.  */
++    atomic_store_release(&ctx->notify_me, atomic_read(&ctx->notify_me) & ~1);
++#endif
+     aio_notify_accept(ctx);
+ 
+     for (bh = ctx->first_bh; bh; bh = bh->next) {
+@@ -338,7 +356,17 @@ void aio_notify(AioContext *ctx)
+      * with atomic_or in aio_ctx_prepare or atomic_add in aio_poll.
+      */
+     smp_mb();
++
++#if !defined(__aarch64__)
+     if (ctx->notify_me) {
++#else
++    /* LP: #1805256 - ARM Bionic SRU
++     *
++     * Write e.g. bh->scheduled before reading ctx->notify_me.  Pairs
++     * with smp_mb in aio_ctx_prepare or aio_poll.
++     */
++    if (atomic_read(&ctx->notify_me)) {
++#endif
+         event_notifier_set(&ctx->notifier);
+         atomic_mb_set(&ctx->notified, true);
+     }
+-- 
+2.17.1
+

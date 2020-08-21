@@ -1,0 +1,92 @@
+From 2497b4a3c08426122d1a89b808c669a734469e5a Mon Sep 17 00:00:00 2001
+From: "Jason J. Herne" <jjherne@linux.ibm.com>
+Date: Mon, 29 Apr 2019 09:09:41 -0400
+Subject: [PATCH] s390-bios: Skip bootmap signature entries
+
+Newer versions of zipl have the ability to write signature entries to the boot
+script for secure boot. We don't yet support secure boot, but we need to skip
+over signature entries while reading the boot script in order to maintain our
+ability to boot guest operating systems that have a secure bootloader.
+
+Signed-off-by: Jason J. Herne <jjherne@linux.ibm.com>
+Reviewed-by: Farhan Ali <alifm@linux.ibm.com>
+Message-Id: <1556543381-12671-1-git-send-email-jjherne@linux.ibm.com>
+Signed-off-by: Thomas Huth <thuth@redhat.com>
+
+Origin: backport, https://git.qemu.org/?p=qemu.git;a=commit;h=2497b4a3
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/1830243
+Last-Update: 2019-07-04
+
+---
+ pc-bios/s390-ccw/bootmap.c | 19 +++++++++++++++++--
+ pc-bios/s390-ccw/bootmap.h | 10 ++++++----
+ 2 files changed, 23 insertions(+), 6 deletions(-)
+
+diff --git a/pc-bios/s390-ccw/bootmap.c b/pc-bios/s390-ccw/bootmap.c
+index 7aef65ab67..d13b7cbd15 100644
+--- a/pc-bios/s390-ccw/bootmap.c
++++ b/pc-bios/s390-ccw/bootmap.c
+@@ -254,7 +254,14 @@ static void run_eckd_boot_script(block_number_t bmt_block_nr,
+     memset(sec, FREE_SPACE_FILLER, sizeof(sec));
+     read_block(block_nr, sec, "Cannot read Boot Map Script");
+ 
+-    for (i = 0; bms->entry[i].type == BOOT_SCRIPT_LOAD; i++) {
++    for (i = 0; bms->entry[i].type == BOOT_SCRIPT_LOAD ||
++                bms->entry[i].type == BOOT_SCRIPT_SIGNATURE; i++) {
++
++        /* We don't support secure boot yet, so we skip signature entries */
++        if (bms->entry[i].type == BOOT_SCRIPT_SIGNATURE) {
++            continue;
++        }
++
+         address = bms->entry[i].address.load_address;
+         block_nr = eckd_block_num(&(bms->entry[i].blkptr));
+ 
+@@ -489,7 +496,15 @@ static void zipl_run(ScsiBlockPtr *pte)
+ 
+     /* Load image(s) into RAM */
+     entry = (ComponentEntry *)(&header[1]);
+-    while (entry->component_type == ZIPL_COMP_ENTRY_LOAD) {
++    while (entry->component_type == ZIPL_COMP_ENTRY_LOAD ||
++           entry->component_type == ZIPL_COMP_ENTRY_SIGNATURE) {
++
++        /* We don't support secure boot yet, so we skip signature entries */
++        if (entry->component_type == ZIPL_COMP_ENTRY_SIGNATURE) {
++            entry++;
++            continue;
++        }
++
+         zipl_load_segment(entry);
+ 
+         entry++;
+diff --git a/pc-bios/s390-ccw/bootmap.h b/pc-bios/s390-ccw/bootmap.h
+index a085212077..94f53a5f1e 100644
+--- a/pc-bios/s390-ccw/bootmap.h
++++ b/pc-bios/s390-ccw/bootmap.h
+@@ -98,8 +98,9 @@ typedef struct ScsiMbr {
+ #define ZIPL_COMP_HEADER_IPL    0x00
+ #define ZIPL_COMP_HEADER_DUMP   0x01
+ 
+-#define ZIPL_COMP_ENTRY_LOAD    0x02
+-#define ZIPL_COMP_ENTRY_EXEC    0x01
++#define ZIPL_COMP_ENTRY_EXEC      0x01
++#define ZIPL_COMP_ENTRY_LOAD      0x02
++#define ZIPL_COMP_ENTRY_SIGNATURE 0x03
+ 
+ typedef struct XEckdMbr {
+     uint8_t magic[4];   /* == "xIPL"        */
+@@ -117,8 +118,9 @@ typedef struct BootMapScriptEntry {
+     BootMapPointer blkptr;
+     uint8_t pad[7];
+     uint8_t type;   /* == BOOT_SCRIPT_* */
+-#define BOOT_SCRIPT_EXEC 0x01
+-#define BOOT_SCRIPT_LOAD 0x02
++#define BOOT_SCRIPT_EXEC      0x01
++#define BOOT_SCRIPT_LOAD      0x02
++#define BOOT_SCRIPT_SIGNATURE 0x03
+     union {
+         uint64_t load_address;
+         uint64_t load_psw;
+-- 
+2.22.0
+

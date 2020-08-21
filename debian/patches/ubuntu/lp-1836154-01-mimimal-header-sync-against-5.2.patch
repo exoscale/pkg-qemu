@@ -1,0 +1,36 @@
+From bc3442e7becc9c67f29000c1e7b2193004ad1e8c Mon Sep 17 00:00:00 2001
+From: Christian Borntraeger <borntraeger@de.ibm.com>
+Date: Fri, 12 Jul 2019 10:14:09 +0200
+Subject: [PATCH 1/9] mimimal header sync against 5.2
+
+only kvm/s390 parts.
+
+Signed-off-by: Christian Borntraeger <borntraeger@de.ibm.com>
+
+Author: Christian Borntraeger <borntraeger@de.ibm.com>
+Origin: backport, https://git.qemu.org/?p=qemu.git;a=commit;h=d9cb4336159a00bd0d9c81b93f02874ef3626057
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/1836154
+Last-Update: 2019-08-07
+---
+ linux-headers/asm-s390/kvm.h | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/linux-headers/asm-s390/kvm.h b/linux-headers/asm-s390/kvm.h
+index 0265482f8fdf..03ab5968c75d 100644
+--- a/linux-headers/asm-s390/kvm.h
++++ b/linux-headers/asm-s390/kvm.h
+@@ -152,7 +152,10 @@ struct kvm_s390_vm_cpu_subfunc {
+ 	__u8 pcc[16];		/* with MSA4 */
+ 	__u8 ppno[16];		/* with MSA5 */
+ 	__u8 kma[16];		/* with MSA8 */
+-	__u8 reserved[1808];
++	__u8 kdsa[16];		/* with MSA9 */
++	__u8 sortl[32];		/* with STFLE.150 */
++	__u8 dfltcc[32];	/* with STFLE.151 */
++	__u8 reserved[1728];
+ };
+ 
+ /* kvm attributes for crypto */
+-- 
+2.12.3
+

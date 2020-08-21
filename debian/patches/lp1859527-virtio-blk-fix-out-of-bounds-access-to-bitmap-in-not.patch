@@ -1,0 +1,35 @@
+From 725fe5d10dbd4259b1853b7d253cef83a3c0d22a Mon Sep 17 00:00:00 2001
+From: Li Hangjing <lihangjing@baidu.com>
+Date: Mon, 16 Dec 2019 10:30:50 +0800
+Subject: [PATCH] virtio-blk: fix out-of-bounds access to bitmap in
+ notify_guest_bh
+Bug-Ubuntu: https://bugs.launchpad.net/ubuntu/+source/qemu/+bug/1859527
+Origin: upstream, https://git.qemu.org/?p=qemu.git;a=commit;h=725fe5d10dbd4259b1853b7d253cef83a3c0d22a
+
+When the number of a virtio-blk device's virtqueues is larger than
+BITS_PER_LONG, the out-of-bounds access to bitmap[ ] will occur.
+
+Fixes: e21737ab15 ("virtio-blk: multiqueue batch notify")
+Cc: qemu-stable@nongnu.org
+Cc: Stefan Hajnoczi <stefanha@redhat.com>
+Signed-off-by: Li Hangjing <lihangjing@baidu.com>
+Reviewed-by: Xie Yongji <xieyongji@baidu.com>
+Reviewed-by: Chai Wen <chaiwen@baidu.com>
+Message-id: 20191216023050.48620-1-lihangjing@baidu.com
+Message-Id: <20191216023050.48620-1-lihangjing@baidu.com>
+Signed-off-by: Stefan Hajnoczi <stefanha@redhat.com>
+---
+ hw/block/dataplane/virtio-blk.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+--- a/hw/block/dataplane/virtio-blk.c
++++ b/hw/block/dataplane/virtio-blk.c
+@@ -62,7 +62,7 @@ static void notify_guest_bh(void *opaque
+     memset(s->batch_notify_vqs, 0, sizeof(bitmap));
+ 
+     for (j = 0; j < nvqs; j += BITS_PER_LONG) {
+-        unsigned long bits = bitmap[j];
++        unsigned long bits = bitmap[j / BITS_PER_LONG];
+ 
+         while (bits != 0) {
+             unsigned i = j + ctzl(bits);

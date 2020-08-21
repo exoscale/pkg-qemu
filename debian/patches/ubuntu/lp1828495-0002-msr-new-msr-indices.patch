@@ -1,0 +1,39 @@
+i386: Add new MSR indices for IA32_PRED_CMD and IA32_ARCH_CAPABILITIES
+
+IA32_PRED_CMD MSR gives software a way to issue commands that affect the state
+of indirect branch predictors. Enumerated by CPUID.(EAX=7H,ECX=0):EDX[26].
+IA32_ARCH_CAPABILITIES MSR enumerates architectural features of RDCL_NO and
+IBRS_ALL. Enumerated by CPUID.(EAX=07H, ECX=0):EDX[29].
+
+https://software.intel.com/sites/default/files/managed/c5/63/336996-Speculative-Execution-Side-Channel-Mitigations.pdf
+
+Signed-off-by: Robert Hoo <robert.hu@linux.intel.com>
+Message-Id: <1530781798-183214-2-git-send-email-robert.hu@linux.intel.com>
+Signed-off-by: Eduardo Habkost <ehabkost@redhat.com>
+-
+Author: Robert Hoo <robert.hu@linux.intel.com>
+Origin: upstream, https://github.com/qemu/qemu/commit/8c80c99fccea
+Applied-Upstream: v3.0.0-152-g8c80c99fcc
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/1828495
+Reviewed-by: Rafael David Tinoco <rafaeldtinoco@ubuntu.com>
+Last-Update: 2019-06-16
+---
+ target/i386/cpu.h | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/target/i386/cpu.h b/target/i386/cpu.h
+index 4b1d6ac8a..3d0675f8d 100644
+--- a/target/i386/cpu.h
++++ b/target/i386/cpu.h
+@@ -337,6 +337,8 @@
+ #define MSR_TSC_ADJUST                  0x0000003b
+ #define MSR_IA32_SPEC_CTRL              0x48
+ #define MSR_VIRT_SSBD                   0xc001011f
++#define MSR_IA32_PRED_CMD               0x49
++#define MSR_IA32_ARCH_CAPABILITIES      0x10a
+ #define MSR_IA32_TSCDEADLINE            0x6e0
+ 
+ #define FEATURE_CONTROL_LOCKED                    (1<<0)
+-- 
+2.17.1
+

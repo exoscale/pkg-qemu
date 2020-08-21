@@ -1,0 +1,51 @@
+From 81a992fdea16e44f4d0eae7dc859a0dc8be2d6f9 Mon Sep 17 00:00:00 2001
+From: Christian Borntraeger <borntraeger@de.ibm.com>
+Date: Mon, 29 Apr 2019 05:02:44 -0400
+Subject: [PATCH 2/9] s390x/cpumodel: Miscellaneous-Instruction-Extensions
+ Facility 3
+
+Provide the "Miscellaneous-Instruction-Extensions Facility 3" via
+stfle.61.
+
+Signed-off-by: Christian Borntraeger <borntraeger@de.ibm.com>
+Reviewed-by: David Hildenbrand <david@redhat.com>
+Message-Id: <20190429090250.7648-4-borntraeger@de.ibm.com>
+Signed-off-by: Cornelia Huck <cohuck@redhat.com>
+(cherry picked from commit 2ec038836fa03103596023e4a1ad7e6eb50ee7c7)
+
+Author: Christian Borntraeger <borntraeger@de.ibm.com>
+Origin: backport, https://git.qemu.org/?p=qemu.git;a=commit;h=2ec038836fa03103596023e4a1ad7e6eb50ee7c7
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/1836154
+Last-Update: 2019-08-07
+---
+ target/s390x/cpu_features.c     | 1 +
+ target/s390x/cpu_features_def.h | 1 +
+ 2 files changed, 2 insertions(+)
+
+diff --git a/target/s390x/cpu_features.c b/target/s390x/cpu_features.c
+index 15738afee154..f03c3c1b9263 100644
+--- a/target/s390x/cpu_features.c
++++ b/target/s390x/cpu_features.c
+@@ -80,6 +80,7 @@ static const S390FeatDef s390_features[] = {
+     FEAT_INIT("minste2", S390_FEAT_TYPE_STFL, 58, "Miscellaneous-instruction-extensions facility 2"),
+     FEAT_INIT("sema", S390_FEAT_TYPE_STFL, 59, "Semaphore-assist facility"),
+     FEAT_INIT("tsi", S390_FEAT_TYPE_STFL, 60, "Time-slice Instrumentation facility"),
++    FEAT_INIT("minste3", S390_FEAT_TYPE_STFL, 61, "Miscellaneous-Instruction-Extensions Facility 3"),
+     FEAT_INIT("ri", S390_FEAT_TYPE_STFL, 64, "CPU runtime-instrumentation facility"),
+     FEAT_INIT("zpci", S390_FEAT_TYPE_STFL, 69, "z/PCI facility"),
+     FEAT_INIT("aen", S390_FEAT_TYPE_STFL, 71, "General-purpose-adapter-event-notification facility"),
+diff --git a/target/s390x/cpu_features_def.h b/target/s390x/cpu_features_def.h
+index 965bde306acd..b233b7137860 100644
+--- a/target/s390x/cpu_features_def.h
++++ b/target/s390x/cpu_features_def.h
+@@ -71,6 +71,7 @@ typedef enum {
+     S390_FEAT_MISC_INSTRUCTION_EXT,
+     S390_FEAT_SEMAPHORE_ASSIST,
+     S390_FEAT_TIME_SLICE_INSTRUMENTATION,
++    S390_FEAT_MISC_INSTRUCTION_EXT3,
+     S390_FEAT_RUNTIME_INSTRUMENTATION,
+     S390_FEAT_ZPCI,
+     S390_FEAT_ADAPTER_EVENT_NOTIFICATION,
+-- 
+2.12.3
+

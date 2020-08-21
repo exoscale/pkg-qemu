@@ -1,0 +1,182 @@
+From ee6b6209e534d15aa458cf0e20161c08da4fe31d Mon Sep 17 00:00:00 2001
+From: Christian Borntraeger <borntraeger@de.ibm.com>
+Date: Mon, 29 Apr 2019 05:02:48 -0400
+Subject: [PATCH 6/9] s390x/cpumodel: add Deflate-conversion facility
+
+add the deflate conversion facility.
+
+Signed-off-by: Christian Borntraeger <borntraeger@de.ibm.com>
+Message-Id: <20190429090250.7648-8-borntraeger@de.ibm.com>
+Reviewed-by: David Hildenbrand <david@redhat.com>
+Signed-off-by: Cornelia Huck <cohuck@redhat.com>
+(cherry picked from commit afc7b8666b62fe72fdbad7ab0c3f206d4c57c1d1)
+
+Author: Christian Borntraeger <borntraeger@de.ibm.com>
+Origin: backport, https://git.qemu.org/?p=qemu.git;a=commit;h=afc7b8666b62fe72fdbad7ab0c3f206d4c57c1d1
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/1836154
+Last-Update: 2019-08-07
+---
+ target/s390x/cpu_features.c     |  9 +++++++++
+ target/s390x/cpu_features.h     |  2 ++
+ target/s390x/cpu_features_def.h |  7 +++++++
+ target/s390x/gen-features.c     | 12 ++++++++++++
+ target/s390x/kvm.c              |  6 ++++++
+ 5 files changed, 36 insertions(+)
+
+diff --git a/target/s390x/cpu_features.c b/target/s390x/cpu_features.c
+index f1d784beeb52..98fa3a66dc81 100644
+--- a/target/s390x/cpu_features.c
++++ b/target/s390x/cpu_features.c
+@@ -107,6 +107,7 @@ static const S390FeatDef s390_features[] = {
+     FEAT_INIT("cmmnt", S390_FEAT_TYPE_STFL, 147, "CMM: ESSA-enhancement (no translate) facility"),
+     FEAT_INIT("vxeh2", S390_FEAT_TYPE_STFL, 148, "Vector Enhancements facility 2"),
+     FEAT_INIT("esort-base", S390_FEAT_TYPE_STFL, 150, "Enhanced-sort facility (excluding subfunctions)"),
++    FEAT_INIT("deflate-base", S390_FEAT_TYPE_STFL, 151, "Deflate-conversion facility (excluding subfunctions)"),
+     FEAT_INIT("vxbeh", S390_FEAT_TYPE_STFL, 152, "Vector BCD enhancements facility 1"),
+     FEAT_INIT("msa9-base", S390_FEAT_TYPE_STFL, 155, "Message-security-assist-extension-9 facility (excluding subfunctions)"),
+     FEAT_INIT("etoken", S390_FEAT_TYPE_STFL, 156, "Etoken facility"),
+@@ -340,6 +341,11 @@ static const S390FeatDef s390_features[] = {
+     FEAT_INIT("sortl-32", S390_FEAT_TYPE_SORTL, 130, "SORTL 32 input lists"),
+     FEAT_INIT("sortl-128", S390_FEAT_TYPE_SORTL, 132, "SORTL 128 input lists"),
+     FEAT_INIT("sortl-f0", S390_FEAT_TYPE_SORTL, 192, "SORTL format 0 parameter-block"),
++
++    FEAT_INIT("dfltcc-gdht", S390_FEAT_TYPE_DFLTCC, 1, "DFLTCC GDHT"),
++    FEAT_INIT("dfltcc-cmpr", S390_FEAT_TYPE_DFLTCC, 2, "DFLTCC CMPR"),
++    FEAT_INIT("dfltcc-xpnd", S390_FEAT_TYPE_DFLTCC, 4, "DFLTCC XPND"),
++    FEAT_INIT("dfltcc-f0", S390_FEAT_TYPE_DFLTCC, 192, "DFLTCC format 0 parameter-block"),
+ };
+ 
+ const S390FeatDef *s390_feat_def(S390Feat feat)
+@@ -404,6 +410,7 @@ void s390_fill_feat_block(const S390FeatBitmap features, S390FeatType type,
+     case S390_FEAT_TYPE_KMA:
+     case S390_FEAT_TYPE_KDSA:
+     case S390_FEAT_TYPE_SORTL:
++    case S390_FEAT_TYPE_DFLTCC:
+         set_be_bit(0, data); /* query is always available */
+         break;
+     default:
+@@ -432,6 +439,7 @@ void s390_add_from_feat_block(S390FeatBitmap features, S390FeatType type,
+        break;
+     case S390_FEAT_TYPE_PLO:
+     case S390_FEAT_TYPE_SORTL:
++    case S390_FEAT_TYPE_DFLTCC:
+        nr_bits = 256;
+        break;
+     default:
+@@ -503,6 +511,7 @@ static S390FeatGroupDef s390_feature_groups[] = {
+     FEAT_GROUP_INIT("msa9", MSA_EXT_9, "Message-security-assist-extension 9 facility"),
+     FEAT_GROUP_INIT("msa9_pckmo", MSA_EXT_9_PCKMO, "Message-security-assist-extension 9 PCKMO subfunctions"),
+     FEAT_GROUP_INIT("esort", ENH_SORT, "Enhanced-sort facility"),
++    FEAT_GROUP_INIT("deflate", DEFLATE_CONVERSION, "Deflate-conversion facility"),
+ };
+ 
+ const S390FeatGroupDef *s390_feat_group_def(S390FeatGroup group)
+diff --git a/target/s390x/cpu_features.h b/target/s390x/cpu_features.h
+index c829f367861d..7e161380963b 100644
+--- a/target/s390x/cpu_features.h
++++ b/target/s390x/cpu_features.h
+@@ -40,6 +40,7 @@ typedef enum {
+     S390_FEAT_TYPE_KMA,
+     S390_FEAT_TYPE_KDSA,
+     S390_FEAT_TYPE_SORTL,
++    S390_FEAT_TYPE_DFLTCC,
+ } S390FeatType;
+ 
+ /* Definition of a CPU feature */
+@@ -83,6 +84,7 @@ typedef enum {
+     S390_FEAT_GROUP_MSA_EXT_9,
+     S390_FEAT_GROUP_MSA_EXT_9_PCKMO,
+     S390_FEAT_GROUP_ENH_SORT,
++    S390_FEAT_GROUP_DEFLATE_CONVERSION,
+     S390_FEAT_GROUP_MAX,
+ } S390FeatGroup;
+ 
+diff --git a/target/s390x/cpu_features_def.h b/target/s390x/cpu_features_def.h
+index f13f74a3ade2..973ef0ccf982 100644
+--- a/target/s390x/cpu_features_def.h
++++ b/target/s390x/cpu_features_def.h
+@@ -98,6 +98,7 @@ typedef enum {
+     S390_FEAT_CMM_NT,
+     S390_FEAT_VECTOR_ENH2,
+     S390_FEAT_ESORT_BASE,
++    S390_FEAT_DEFLATE_BASE,
+     S390_FEAT_VECTOR_BCD_ENH,
+     S390_FEAT_MSA_EXT_9,
+     S390_FEAT_ETOKEN,
+@@ -350,6 +351,12 @@ typedef enum {
+     S390_FEAT_SORTL_128,
+     S390_FEAT_SORTL_F0,
+ 
++    /* DEFLATE */
++    S390_FEAT_DEFLATE_GHDT,
++    S390_FEAT_DEFLATE_CMPR,
++    S390_FEAT_DEFLATE_XPND,
++    S390_FEAT_DEFLATE_F0,
++
+     S390_FEAT_MAX,
+ } S390Feat;
+ 
+diff --git a/target/s390x/gen-features.c b/target/s390x/gen-features.c
+index bb457afe8b64..9ebef0506e5f 100644
+--- a/target/s390x/gen-features.c
++++ b/target/s390x/gen-features.c
+@@ -250,6 +250,13 @@
+     S390_FEAT_SORTL_F0
+ 
+ 
++#define S390_FEAT_GROUP_DEFLATE_CONVERSION \
++    S390_FEAT_DEFLATE_BASE, \
++    S390_FEAT_DEFLATE_GHDT, \
++    S390_FEAT_DEFLATE_CMPR, \
++    S390_FEAT_DEFLATE_XPND, \
++    S390_FEAT_DEFLATE_F0
++
+ /* cpu feature groups */
+ static uint16_t group_PLO[] = {
+     S390_FEAT_GROUP_PLO,
+@@ -300,6 +307,10 @@ static uint16_t group_ENH_SORT[] = {
+     S390_FEAT_GROUP_ENH_SORT,
+ };
+ 
++static uint16_t group_DEFLATE_CONVERSION[] = {
++    S390_FEAT_GROUP_DEFLATE_CONVERSION,
++};
++
+ /* Base features (in order of release)
+  * Only non-hypervisor managed features belong here.
+  * Base feature sets are static meaning they do not change in future QEMU
+@@ -687,6 +698,7 @@ static FeatGroupDefSpec FeatGroupDef[] = {
+     FEAT_GROUP_INITIALIZER(MSA_EXT_9),
+     FEAT_GROUP_INITIALIZER(MSA_EXT_9_PCKMO),
+     FEAT_GROUP_INITIALIZER(ENH_SORT),
++    FEAT_GROUP_INITIALIZER(DEFLATE_CONVERSION),
+ };
+ 
+ static void set_bits(uint64_t list[], BitSpec bits)
+diff --git a/target/s390x/kvm.c b/target/s390x/kvm.c
+index 360b04db7698..4e425a9fd3a5 100644
+--- a/target/s390x/kvm.c
++++ b/target/s390x/kvm.c
+@@ -2138,6 +2138,9 @@ static int query_cpu_subfunc(S390FeatBitmap features)
+     if (test_bit(S390_FEAT_ESORT_BASE, features)) {
+         s390_add_from_feat_block(features, S390_FEAT_TYPE_SORTL, prop.sortl);
+     }
++    if (test_bit(S390_FEAT_DEFLATE_BASE, features)) {
++        s390_add_from_feat_block(features, S390_FEAT_TYPE_DFLTCC, prop.dfltcc);
++    }
+     return 0;
+ }
+ 
+@@ -2188,6 +2191,9 @@ static int configure_cpu_subfunc(const S390FeatBitmap features)
+     if (test_bit(S390_FEAT_ESORT_BASE, features)) {
+         s390_fill_feat_block(features, S390_FEAT_TYPE_SORTL, prop.sortl);
+     }
++    if (test_bit(S390_FEAT_DEFLATE_BASE, features)) {
++        s390_fill_feat_block(features, S390_FEAT_TYPE_DFLTCC, prop.dfltcc);
++    }
+     return kvm_vm_ioctl(kvm_state, KVM_SET_DEVICE_ATTR, &attr);
+ }
+ 
+-- 
+2.12.3
+

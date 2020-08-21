@@ -1,0 +1,239 @@
+From 77012c6029ae15328f04ddcb713f459cdacffef9 Mon Sep 17 00:00:00 2001
+From: Suraj Jitindar Singh <sjitindarsingh@gmail.com>
+Date: Fri, 1 Mar 2019 14:19:12 +1100
+Subject: [PATCH] target/ppc/spapr: Add SPAPR_CAP_CCF_ASSIST
+
+Introduce a new spapr_cap SPAPR_CAP_CCF_ASSIST to be used to indicate
+the requirement for a hw-assisted version of the count cache flush
+workaround.
+
+The count cache flush workaround is a software workaround which can be
+used to flush the count cache on context switch. Some revisions of
+hardware may have a hardware accelerated flush, in which case the
+software flush can be shortened. This cap is used to set the
+availability of such hardware acceleration for the count cache flush
+routine.
+
+The availability of such hardware acceleration is indicated by the
+H_CPU_CHAR_BCCTR_FLUSH_ASSIST flag being set in the characteristics
+returned from the KVM_PPC_GET_CPU_CHAR ioctl.
+
+Signed-off-by: Suraj Jitindar Singh <sjitindarsingh@gmail.com>
+Message-Id: <20190301031912.28809-2-sjitindarsingh@gmail.com>
+[dwg: Small style fixes]
+Signed-off-by: David Gibson <david@gibson.dropbear.id.au>
+(cherry picked from commit 8ff43ee404d3e295839d1fd4e9e6571ca7a62a66)
+* remove context dependencies on post-2.11 capabilities and migration
+  state
+* adjust SPAPR_CAP_CCF_ASSIST to be next avail index (SPAPR_CAP_IBS + 1)
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+(cherry picked from commit 2cdaf75db8ac825cb4b8b6a00b7bb114941cc51d)
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+
+Author: Michael Roth <mdroth@linux.vnet.ibm.com>
+Origin: upstream, https://git.qemu.org/?p=qemu.git;a=commit;h=8ff43ee404d3e295839d1fd4e9e6571ca7a62a66
+Origin: backport, https://github.com/mdroth/qemu/commit/77012c6029ae15328f04ddcb713f459cdacffef9
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/1832622
+Last-Update: 2019-06-13
+
+---
+ hw/ppc/spapr.c         |  2 ++
+ hw/ppc/spapr_caps.c    | 25 +++++++++++++++++++++++++
+ hw/ppc/spapr_hcall.c   |  5 +++++
+ include/hw/ppc/spapr.h |  5 ++++-
+ target/ppc/kvm.c       | 16 ++++++++++++++++
+ target/ppc/kvm_ppc.h   |  6 ++++++
+ 6 files changed, 58 insertions(+), 1 deletion(-)
+
+diff --git a/hw/ppc/spapr.c b/hw/ppc/spapr.c
+index 90ea7f367c..3a9ca6342e 100644
+--- a/hw/ppc/spapr.c
++++ b/hw/ppc/spapr.c
+@@ -1754,6 +1754,7 @@ static const VMStateDescription vmstate_spapr = {
+         &vmstate_spapr_cap_cfpc,
+         &vmstate_spapr_cap_sbbc,
+         &vmstate_spapr_cap_ibs,
++        &vmstate_spapr_cap_ccf_assist,
+         NULL
+     }
+ };
+@@ -3733,6 +3734,7 @@ static void spapr_machine_class_init(ObjectClass *oc, void *data)
+     smc->default_caps.caps[SPAPR_CAP_CFPC] = SPAPR_CAP_BROKEN;
+     smc->default_caps.caps[SPAPR_CAP_SBBC] = SPAPR_CAP_BROKEN;
+     smc->default_caps.caps[SPAPR_CAP_IBS] = SPAPR_CAP_BROKEN;
++    smc->default_caps.caps[SPAPR_CAP_CCF_ASSIST] = SPAPR_CAP_OFF;
+     spapr_caps_add_properties(smc, &error_abort);
+ }
+ 
+diff --git a/hw/ppc/spapr_caps.c b/hw/ppc/spapr_caps.c
+index cabbd4a0bc..0041c112ec 100644
+--- a/hw/ppc/spapr_caps.c
++++ b/hw/ppc/spapr_caps.c
+@@ -264,6 +264,21 @@ static void cap_safe_indirect_branch_apply(sPAPRMachineState *spapr,
+ 
+ #define VALUE_DESC_TRISTATE     " (broken, workaround, fixed)"
+ 
++static void cap_ccf_assist_apply(sPAPRMachineState *spapr, uint8_t val,
++                                 Error **errp)
++{
++    uint8_t kvm_val = kvmppc_get_cap_count_cache_flush_assist();
++
++    if (tcg_enabled() && val) {
++        /* TODO - for now only allow broken for TCG */
++        error_setg(errp,
++"Requested count cache flush assist capability level not supported by tcg, try cap-ccf-assist=off");
++    } else if (kvm_enabled() && (val > kvm_val)) {
++        error_setg(errp,
++"Requested count cache flush assist capability level not supported by kvm, try cap-ccf-assist=off");
++    }
++}
++
+ sPAPRCapabilityInfo capability_table[SPAPR_CAP_NUM] = {
+     [SPAPR_CAP_HTM] = {
+         .name = "htm",
+@@ -327,6 +342,15 @@ sPAPRCapabilityInfo capability_table[SPAPR_CAP_NUM] = {
+         .possible = &cap_ibs_possible,
+         .apply = cap_safe_indirect_branch_apply,
+     },
++    [SPAPR_CAP_CCF_ASSIST] = {
++        .name = "ccf-assist",
++        .description = "Count Cache Flush Assist via HW Instruction",
++        .index = SPAPR_CAP_CCF_ASSIST,
++        .get = spapr_cap_get_bool,
++        .set = spapr_cap_set_bool,
++        .type = "bool",
++        .apply = cap_ccf_assist_apply,
++    },
+ };
+ 
+ static sPAPRCapabilities default_caps_with_cpu(sPAPRMachineState *spapr,
+@@ -446,6 +470,7 @@ SPAPR_CAP_MIG_STATE(dfp, SPAPR_CAP_DFP);
+ SPAPR_CAP_MIG_STATE(cfpc, SPAPR_CAP_CFPC);
+ SPAPR_CAP_MIG_STATE(sbbc, SPAPR_CAP_SBBC);
+ SPAPR_CAP_MIG_STATE(ibs, SPAPR_CAP_IBS);
++SPAPR_CAP_MIG_STATE(ccf_assist, SPAPR_CAP_CCF_ASSIST);
+ 
+ void spapr_caps_reset(sPAPRMachineState *spapr)
+ {
+diff --git a/hw/ppc/spapr_hcall.c b/hw/ppc/spapr_hcall.c
+index 779d097bd7..1660ef1d63 100644
+--- a/hw/ppc/spapr_hcall.c
++++ b/hw/ppc/spapr_hcall.c
+@@ -1666,6 +1666,8 @@ static target_ulong h_get_cpu_characteristics(PowerPCCPU *cpu,
+     uint8_t safe_cache = spapr_get_cap(spapr, SPAPR_CAP_CFPC);
+     uint8_t safe_bounds_check = spapr_get_cap(spapr, SPAPR_CAP_SBBC);
+     uint8_t safe_indirect_branch = spapr_get_cap(spapr, SPAPR_CAP_IBS);
++    uint8_t count_cache_flush_assist = spapr_get_cap(spapr,
++                                                     SPAPR_CAP_CCF_ASSIST);
+ 
+     switch (safe_cache) {
+     case SPAPR_CAP_WORKAROUND:
+@@ -1706,6 +1708,9 @@ static target_ulong h_get_cpu_characteristics(PowerPCCPU *cpu,
+         break;
+     case SPAPR_CAP_WORKAROUND:
+         behaviour |= H_CPU_BEHAV_FLUSH_COUNT_CACHE;
++        if (count_cache_flush_assist) {
++            characteristics |= H_CPU_CHAR_BCCTR_FLUSH_ASSIST;
++        }
+         break;
+     default: /* broken */
+         assert(safe_indirect_branch == SPAPR_CAP_BROKEN);
+diff --git a/include/hw/ppc/spapr.h b/include/hw/ppc/spapr.h
+index 15cdcb3ef6..011afb62d7 100644
+--- a/include/hw/ppc/spapr.h
++++ b/include/hw/ppc/spapr.h
+@@ -66,8 +66,10 @@ typedef enum {
+ #define SPAPR_CAP_SBBC                  0x04
+ /* Indirect Branch Serialisation */
+ #define SPAPR_CAP_IBS                   0x05
++/* Count Cache Flush Assist HW Instruction */
++#define SPAPR_CAP_CCF_ASSIST            0x06
+ /* Num Caps */
+-#define SPAPR_CAP_NUM                   (SPAPR_CAP_IBS + 1)
++#define SPAPR_CAP_NUM                   (SPAPR_CAP_CCF_ASSIST + 1)
+ 
+ /*
+  * Capability Values
+@@ -781,6 +783,7 @@ extern const VMStateDescription vmstate_spapr_cap_dfp;
+ extern const VMStateDescription vmstate_spapr_cap_cfpc;
+ extern const VMStateDescription vmstate_spapr_cap_sbbc;
+ extern const VMStateDescription vmstate_spapr_cap_ibs;
++extern const VMStateDescription vmstate_spapr_cap_ccf_assist;
+ 
+ static inline uint8_t spapr_get_cap(sPAPRMachineState *spapr, int cap)
+ {
+diff --git a/target/ppc/kvm.c b/target/ppc/kvm.c
+index 89b52eb1d4..b8bb16bc59 100644
+--- a/target/ppc/kvm.c
++++ b/target/ppc/kvm.c
+@@ -95,6 +95,7 @@ static int cap_ppc_pvr_compat;
+ static int cap_ppc_safe_cache;
+ static int cap_ppc_safe_bounds_check;
+ static int cap_ppc_safe_indirect_branch;
++static int cap_ppc_count_cache_flush_assist;
+ 
+ static uint32_t debug_inst_opcode;
+ 
+@@ -2505,6 +2506,14 @@ static int parse_cap_ppc_safe_indirect_branch(struct kvm_ppc_cpu_char c)
+     return 0;
+ }
+ 
++static int parse_cap_ppc_count_cache_flush_assist(struct kvm_ppc_cpu_char c)
++{
++    if (c.character & c.character_mask & H_CPU_CHAR_BCCTR_FLUSH_ASSIST) {
++        return 1;
++    }
++    return 0;
++}
++
+ static void kvmppc_get_cpu_characteristics(KVMState *s)
+ {
+     struct kvm_ppc_cpu_char c;
+@@ -2527,6 +2536,8 @@ static void kvmppc_get_cpu_characteristics(KVMState *s)
+     cap_ppc_safe_cache = parse_cap_ppc_safe_cache(c);
+     cap_ppc_safe_bounds_check = parse_cap_ppc_safe_bounds_check(c);
+     cap_ppc_safe_indirect_branch = parse_cap_ppc_safe_indirect_branch(c);
++    cap_ppc_count_cache_flush_assist =
++        parse_cap_ppc_count_cache_flush_assist(c);
+ }
+ 
+ int kvmppc_get_cap_safe_cache(void)
+@@ -2544,6 +2555,11 @@ int kvmppc_get_cap_safe_indirect_branch(void)
+     return cap_ppc_safe_indirect_branch;
+ }
+ 
++int kvmppc_get_cap_count_cache_flush_assist(void)
++{
++    return cap_ppc_count_cache_flush_assist;
++}
++
+ PowerPCCPUClass *kvm_ppc_get_host_cpu_class(void)
+ {
+     uint32_t host_pvr = mfpvr();
+diff --git a/target/ppc/kvm_ppc.h b/target/ppc/kvm_ppc.h
+index 39830baa77..d634b7139e 100644
+--- a/target/ppc/kvm_ppc.h
++++ b/target/ppc/kvm_ppc.h
+@@ -62,6 +62,7 @@ bool kvmppc_has_cap_mmu_hash_v3(void);
+ int kvmppc_get_cap_safe_cache(void);
+ int kvmppc_get_cap_safe_bounds_check(void);
+ int kvmppc_get_cap_safe_indirect_branch(void);
++int kvmppc_get_cap_count_cache_flush_assist(void);
+ int kvmppc_enable_hwrng(void);
+ int kvmppc_put_books_sregs(PowerPCCPU *cpu);
+ PowerPCCPUClass *kvm_ppc_get_host_cpu_class(void);
+@@ -308,6 +309,11 @@ static inline int kvmppc_get_cap_safe_indirect_branch(void)
+     return 0;
+ }
+ 
++static inline int kvmppc_get_cap_count_cache_flush_assist(void)
++{
++    return 0;
++}
++
+ static inline int kvmppc_enable_hwrng(void)
+ {
+     return -1;
+-- 
+2.21.0
+

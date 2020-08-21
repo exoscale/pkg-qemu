@@ -1,0 +1,104 @@
+From 988a27754bbbc45698f7acb54352e5a1ae699514 Mon Sep 17 00:00:00 2001
+From: Tiwei Bie <tiwei.bie@intel.com>
+Date: Thu, 24 May 2018 18:33:31 +0800
+Subject: [PATCH] vhost: allow backends to filter memory sections
+Bug-Ubuntu: https://bugs.launchpad.net/ubuntu/+source/qemu/+bug/1887525
+Origin: upstream, https://git.qemu.org/?p=qemu.git;a=commit;h=988a27754bbbc45698f7acb54352e5a1ae699514
+
+This patch introduces a vhost op for vhost backends to allow
+them to filter the memory sections that they can handle.
+
+Signed-off-by: Tiwei Bie <tiwei.bie@intel.com>
+Reviewed-by: Michael S. Tsirkin <mst@redhat.com>
+Signed-off-by: Michael S. Tsirkin <mst@redhat.com>
+---
+ hw/virtio/vhost-user.c            | 11 +++++++++++
+ hw/virtio/vhost.c                 |  9 +++++++--
+ include/hw/virtio/vhost-backend.h |  4 ++++
+ 3 files changed, 22 insertions(+), 2 deletions(-)
+
+--- a/hw/virtio/vhost-user.c
++++ b/hw/virtio/vhost-user.c
+@@ -925,6 +925,16 @@ static void vhost_user_set_iotlb_callbac
+     /* No-op as the receive channel is not dedicated to IOTLB messages. */
+ }
+ 
++static bool vhost_user_mem_section_filter(struct vhost_dev *dev,
++                                          MemoryRegionSection *section)
++{
++    bool result;
++
++    result = memory_region_get_fd(section->mr) >= 0;
++
++    return result;
++}
++
+ const VhostOps user_ops = {
+         .backend_type = VHOST_BACKEND_TYPE_USER,
+         .vhost_backend_init = vhost_user_init,
+@@ -951,4 +961,5 @@ const VhostOps user_ops = {
+         .vhost_net_set_mtu = vhost_user_net_set_mtu,
+         .vhost_set_iotlb_callback = vhost_user_set_iotlb_callback,
+         .vhost_send_device_iotlb_msg = vhost_user_send_device_iotlb_msg,
++        .vhost_backend_mem_section_filter = vhost_user_mem_section_filter,
+ };
+--- a/hw/virtio/vhost.c
++++ b/hw/virtio/vhost.c
+@@ -609,10 +609,17 @@ static void vhost_set_memory(MemoryListe
+     used_memslots = dev->mem->nregions;
+ }
+ 
+-static bool vhost_section(MemoryRegionSection *section)
++static bool vhost_section(struct vhost_dev *dev, MemoryRegionSection *section)
+ {
+-    return memory_region_is_ram(section->mr) &&
++    bool result = memory_region_is_ram(section->mr) &&
+         !memory_region_is_rom(section->mr);
++
++    if (result && dev->vhost_ops->vhost_backend_mem_section_filter) {
++        result &=
++            dev->vhost_ops->vhost_backend_mem_section_filter(dev, section);
++    }
++
++    return result;
+ }
+ 
+ static void vhost_begin(MemoryListener *listener)
+@@ -683,7 +690,7 @@ static void vhost_region_add(MemoryListe
+     struct vhost_dev *dev = container_of(listener, struct vhost_dev,
+                                          memory_listener);
+ 
+-    if (!vhost_section(section)) {
++    if (!vhost_section(dev, section)) {
+         return;
+     }
+ 
+@@ -702,7 +709,7 @@ static void vhost_region_del(MemoryListe
+                                          memory_listener);
+     int i;
+ 
+-    if (!vhost_section(section)) {
++    if (!vhost_section(dev, section)) {
+         return;
+     }
+ 
+--- a/include/hw/virtio/vhost-backend.h
++++ b/include/hw/virtio/vhost-backend.h
+@@ -85,6 +85,9 @@ typedef void (*vhost_set_iotlb_callback_
+ typedef int (*vhost_send_device_iotlb_msg_op)(struct vhost_dev *dev,
+                                               struct vhost_iotlb_msg *imsg);
+ 
++typedef bool (*vhost_backend_mem_section_filter_op)(struct vhost_dev *dev,
++                                                MemoryRegionSection *section);
++
+ typedef struct VhostOps {
+     VhostBackendType backend_type;
+     vhost_backend_init vhost_backend_init;
+@@ -118,6 +121,7 @@ typedef struct VhostOps {
+     vhost_vsock_set_running_op vhost_vsock_set_running;
+     vhost_set_iotlb_callback_op vhost_set_iotlb_callback;
+     vhost_send_device_iotlb_msg_op vhost_send_device_iotlb_msg;
++    vhost_backend_mem_section_filter_op vhost_backend_mem_section_filter;
+ } VhostOps;
+ 
+ extern const VhostOps user_ops;

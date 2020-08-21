@@ -1,4 +1,306 @@
-qemu (1:2.11+dfsg-1ubuntu7.14+exo1) bionic-security; urgency=medium
+qemu (1:2.11+dfsg-1ubuntu7.31+exo1) UNRELEASED; urgency=medium
+
+  * Bump up to 1610612736 bytes the DEFAULT_L2_CACHE_BYTE_SIZE
+
+ -- alessandro ratti <alessandro@exoscale.com>  Fri, 21 Aug 2020 14:35:45 +0000
+
+qemu (1:2.11+dfsg-1ubuntu7.31) bionic-security; urgency=medium
+
+  * SECURITY UPDATE: out-of-bounds read in slirp networking
+    - debian/patches/CVE-2020-10756.patch: drop bogus IPv6 messages in
+      slirp/src/ip6_input.c.
+    - CVE-2020-10756
+  * SECURITY UPDATE: out-of-bounds read and write in sm501
+    - debian/patches/CVE-2020-12829-pre1.patch: use values from the pitch
+      register for 2D operations.
+    - debian/patches/CVE-2020-12829-pre2.patch: implement negated
+      destination raster operation mode.
+    - debian/patches/CVE-2020-12829-pre3.patch: log unimplemented raster
+      operation modes.
+    - debian/patches/CVE-2020-12829-pre4.patch: fix support for non-zero
+      frame buffer start address.
+    - debian/patches/CVE-2020-12829-pre5.patch: set updated region dirty
+      after 2D operation.
+    - debian/patches/CVE-2020-12829-pre6.patch: adjust endianness of pixel
+      value in rectangle fill.
+    - debian/patches/CVE-2020-12829-pre7.patch: convert printf +
+      abort to qemu_log_mask.
+    - debian/patches/CVE-2020-12829-pre8.patch: shorten long
+      variable names in sm501_2d_operation.
+    - debian/patches/CVE-2020-12829-pre9.patch: use BIT(x) macro to
+      shorten constant.
+    - debian/patches/CVE-2020-12829-pre10.patch: clean up local
+      variables in sm501_2d_operation.
+    - debian/patches/CVE-2020-12829.patch: replace hand written
+      implementation with pixman where possible.
+    - debian/patches/CVE-2020-12829-2.patch: optimize small overlapping
+      blits.
+    - debian/patches/CVE-2020-12829-3.patch: fix bounds checks.
+    - debian/patches/CVE-2020-12829-4.patch: drop unneded variable.
+    - debian/patches/CVE-2020-12829-5.patch: do not allow guest to set
+      invalid format.
+    - debian/patches/CVE-2020-12829-6.patch: introduce variable for
+      commonly used value for better readability.
+    - debian/patches/CVE-2020-12829-7.patch: fix and optimize overlap
+      check.
+    - CVE-2020-12829
+  * SECURITY UPDATE: out-of-bounds read during sdhci_write() operations
+    - debian/patches/CVE-2020-13253.patch: do not switch to ReceivingData
+      if address is invalid in hw/sd/sd.c.
+    - CVE-2020-13253
+  * SECURITY UPDATE: out-of-bounds access during es1370_write() operation
+    - debian/patches/CVE-2020-13361.patch: check total frame count against
+      current frame in hw/audio/es1370.c.
+    - CVE-2020-13361
+  * SECURITY UPDATE: out-of-bounds read via crafted reply_queue_head
+    - debian/patches/CVE-2020-13362-1.patch: use unsigned type for
+      reply_queue_head and check index in hw/scsi/megasas.c.
+    - debian/patches/CVE-2020-13362-2.patch: avoid NULL pointer dereference
+      in hw/scsi/megasas.c.
+    - debian/patches/CVE-2020-13362-3.patch: use unsigned type for positive
+      numeric fields in hw/scsi/megasas.c.
+    - CVE-2020-13362
+  * SECURITY UPDATE: NULL pointer dereference related to BounceBuffer
+    - debian/patches/CVE-2020-13659.patch: set map length to zero when
+      returning NULL in exec.c, include/exec/memory.h.
+    - CVE-2020-13659
+  * SECURITY UPDATE: out-of-bounds access via msi-x mmio operation
+    - debian/patches/CVE-2020-13754-1.patch: revert accepting mismatching
+      sizes in memory_region_access_valid in memory.c.
+    - debian/patches/CVE-2020-13754-2.patch: accept byte and word access to
+      core ACPI registers in hw/acpi/core.c.
+    - CVE-2020-13754
+  * SECURITY UPDATE: invalid memory copy operation via rom_copy
+    - debian/patches/CVE-2020-13765.patch: add extra check to
+      hw/core/loader.c.
+    - CVE-2020-13765
+  * SECURITY UPDATE: buffer overflow in XGMAC Ethernet controller
+    - debian/patches/CVE-2020-15863.patch: check bounds in hw/net/xgmac.c.
+    - CVE-2020-15863
+  * SECURITY UPDATE: reachable assertion failure
+    - debian/patches/CVE-2020-16092.patch: fix assertion failure in
+      hw/net/net_tx_pkt.c.
+    - CVE-2020-16092
+
+ -- Marc Deslauriers <marc.deslauriers@ubuntu.com>  Tue, 11 Aug 2020 13:19:33 -0400
+
+qemu (1:2.11+dfsg-1ubuntu7.30) bionic; urgency=medium
+
+  * d/p/ubuntu/lp-1805256-async-use-explicit-mem-barriers-arm-only.patch:
+    - More conservative and less intrusive approach of the Aarch64 AIO
+      race window fix. Contained to Aarch64 builds only. (LP: #1805256)
+
+ -- Rafael David Tinoco <rafaeldtinoco@ubuntu.com>  Mon, 20 Jul 2020 11:48:06 +0000
+
+qemu (1:2.11+dfsg-1ubuntu7.29) bionic; urgency=medium
+
+  * allow vhost-user driver to ignore some unneeded mem regions,
+    to stay under its api limit of 8 mem regions (LP: #1887525)
+    - d/p/lp1887525/0001-vhost-fix-memslot-limit-check.patch
+    - d/p/lp1887525/0002-vhost-allow-backends-to-filter-memory-sections.patch
+
+ -- Dan Streetman <ddstreet@canonical.com>  Tue, 14 Jul 2020 09:35:16 -0400
+
+qemu (1:2.11+dfsg-1ubuntu7.28) bionic; urgency=medium
+
+  * Revert the fixes in 1:2.11+dfsg-1ubuntu7.27 for LP: 1805256 as they
+    were causing regressions for some iothread use cases (LP: #1885419)
+
+ -- Christian Ehrhardt <christian.ehrhardt@canonical.com>  Tue, 30 Jun 2020 08:57:18 +0200
+
+qemu (1:2.11+dfsg-1ubuntu7.27) bionic; urgency=medium
+
+  * d/p/ubuntu/lp-1805256*: Fixes for QEMU on aarch64 ARM hosts
+    - aio: rename aio_context_in_iothread() to in_aio_context_home_thread()
+    - aio: Do aio_notify_accept only during blocking aio_poll
+    - aio-posix: Assert that aio_poll() is always called in home thread
+    - async: use explicit memory barriers (LP: #1805256)
+    - aio-wait: delegate polling of main AioContext if BQL not held
+    - aio-posix: Don't count ctx->notifier as progress when polling
+
+ -- Rafael David Tinoco <rafaeldtinoco@ubuntu.com>  Tue, 26 May 2020 17:39:21 +0000
+
+qemu (1:2.11+dfsg-1ubuntu7.26) bionic-security; urgency=medium
+
+  * SECURITY UPDATE: memory leak in zrle_compress_data
+    - debian/patches/ubuntu/CVE-2019-20382.patch: fix memory leak when vnc
+      disconnect in ui/vnc-enc-tight.c, ui/vnc-enc-zrle.inc.c, ui/vnc.c,
+      ui/vnc.h.
+    - CVE-2019-20382
+  * SECURITY UPDATE: use-after-free in ip_reass()
+    - debian/patches/ubuntu/CVE-2020-1983.patch: fix buffer handling in
+      slirp/ip_input.c.
+    - CVE-2020-1983
+
+ -- Marc Deslauriers <marc.deslauriers@ubuntu.com>  Thu, 14 May 2020 13:36:56 -0400
+
+qemu (1:2.11+dfsg-1ubuntu7.25) bionic; urgency=medium
+
+  * d/rules: match how 2.11 stores PKGVERSION (LP: 1847361)
+
+ -- Christian Ehrhardt <christian.ehrhardt@canonical.com>  Thu, 14 May 2020 10:02:30 +0200
+
+qemu (1:2.11+dfsg-1ubuntu7.24) bionic; urgency=medium
+
+  * allow qemu to load old modules post upgrade (LP: #1847361)
+    - d/p/ubuntu/lp-1847361-modules-load-upgrade.patch: to fallback module
+      load to a versioned path
+    - d/qemu-block-extra.*.in: save shared objects on upgrade
+    - d/rules: generate maintainer scripts matching package version on build
+    - d/rules: enable --enable-module-upgrades where --enable-modules is set
+
+ -- Christian Ehrhardt <christian.ehrhardt@canonical.com>  Mon, 02 Mar 2020 15:21:27 +0100
+
+qemu (1:2.11+dfsg-1ubuntu7.23) bionic-security; urgency=medium
+
+  * SECURITY UPDATE: OOB heap access via unexpected iSCSI Server response
+    - debian/patches/CVE-2020-1711.patch: cap block count from GET LBA
+      STATUS in block/iscsi.c.
+    - CVE-2020-1711
+  * SECURITY UPDATE: heap-based overflow in slirp networking
+    - debian/patches/CVE-2020-7039-1.patch: fix oob issue in
+      slirp/tcp_subr.c.
+    - debian/patches/CVE-2020-7039-2.patch: use correct size while
+      emulating IRC commands in slirp/tcp_subr.c.
+    - debian/patches/CVE-2020-7039-3.patch: use correct size while
+      emulating commands in slirp/tcp_subr.c.
+    - CVE-2020-7039
+  * SECURITY UPDATE: buffer overflow via incorrect snprintf return codes
+    - debian/patches/CVE-2020-8608-1.patch: add slirp_fmt() helpers to
+      slirp/slirp.c, slirp/slirp.h.
+    - debian/patches/CVE-2020-8608-2.patch: fix unsafe snprintf() usages in
+      slirp/tcp_subr.c.
+    - CVE-2020-8608
+
+ -- Marc Deslauriers <marc.deslauriers@ubuntu.com>  Wed, 12 Feb 2020 13:56:45 -0500
+
+qemu (1:2.11+dfsg-1ubuntu7.22) bionic; urgency=medium
+
+  * d/p/lp1859527-virtio-blk-fix-out-of-bounds-access-to-bitmap-in-not.patch:
+    fix bitmap index to prevent OOB access when # of vqs > 64 (LP: #1859527)
+
+ -- Dan Streetman <ddstreet@canonical.com>  Wed, 22 Jan 2020 08:55:45 -0500
+
+qemu (1:2.11+dfsg-1ubuntu7.21) bionic; urgency=medium
+
+  * d/p/lp-1842774-s390x-cpumodel-Add-the-z15-name-to-the-description-o.patch:
+    update the z15 model name (LP: #1842774)
+  * d/p/u/lp-1847948-*: allow MSIX BAR mapping on VFIO in general and use that
+    instead of emulation on ppc64 increasing performance of e.g. NVME
+    passthrough (LP: #1847948)
+
+ -- Christian Ehrhardt <christian.ehrhardt@canonical.com>  Tue, 15 Oct 2019 11:23:23 +0200
+
+qemu (1:2.11+dfsg-1ubuntu7.20) bionic-security; urgency=medium
+
+  * SECURITY UPDATE: infinite loop when executing LSI scsi adapter
+    emulator scripts
+    - d/p/u/CVE-2019-12068.patch: Move the existing loop exit
+    - CVE-2019-12068
+  * SECURITY UPDATE: null pointer dereference in qxl display driver
+    - d/p/u/CVE-2019-12155.patch: qxl: check release info object
+    - CVE-2019-12155
+  * SECURITY UPDATE: qemu-bridge-helper interface name buffer overflow
+    - d/p/u/CVE-2019-13164.patch: qemu-bridge-helper: restrict
+      interface name to IFNAMSIZ
+    - CVE-2019-13164
+  * SECURITY UPDATE: heap overflow in slirp
+    - d/p/u/CVE-2019-14378.patch: slirp: Fix heap overflow in ip_reass
+      on big packet input
+    - CVE-2019-14378
+  * SECURITY UPDATE: use after free vulnerability in slirp
+    - d/p/u/CVE-2019-15890.patch: slirp: ip_reass: Fix use after free
+    - CVE-2019-15890
+  * Add support for exposing "taa-no" flag to guests:
+    - d/p/u/CVE-2019-11135-taa-no.patch
+    - CVE-2019-11135
+  * Add support for exposing "pschange-mc-no" to guests:
+    - d/p/u/pschange-mce.patch
+
+ -- Steve Beattie <sbeattie@ubuntu.com>  Thu, 07 Nov 2019 22:30:29 -0800
+
+qemu (1:2.11+dfsg-1ubuntu7.19) bionic; urgency=medium
+
+  * d/p/ubuntu/lp-1837869-block-Fix-flags-in-reopen-queue.patch: avoid
+    issues on block reopen (LP: #1837869)
+
+ -- Christian Ehrhardt <christian.ehrhardt@canonical.com>  Wed, 18 Sep 2019 08:29:32 +0200
+
+qemu (1:2.11+dfsg-1ubuntu7.18) bionic; urgency=medium
+
+  * d/p/ubuntu/lp-1832622-*: count cache flush Spectre v2 mitigation for ppc64
+    (LP: #1832622)
+  * d/p/ubuntu/lp-1840745-*: add amd ssbd / no-ssbd features (LP: #1840745)
+  * d/p/ubuntu/lp-1836154-*: add HW CPU model for newer s390x machines
+    (LP: #1836154)
+
+ -- Christian Ehrhardt <christian.ehrhardt@canonical.com>  Thu, 13 Jun 2019 08:08:33 +0200
+
+qemu (1:2.11+dfsg-1ubuntu7.17) bionic; urgency=medium
+
+  * {Ice,Cascade}Lake IA32_ARCH_CAPABILITIES support (LP: 1828495)
+    Needed patch is in d/p/u/lp1828495-:
+    - 0017-target-i386-add-MDS-NO-feature.patch:
+      target/i386: add MDS-NO feature
+
+ -- Rafael David Tinoco <rafaeldtinoco@ubuntu.com>  Mon, 05 Aug 2019 19:12:08 +0000
+
+qemu (1:2.11+dfsg-1ubuntu7.16) bionic; urgency=medium
+
+  [ Christian Ehrhardt ]
+  * d/p/ubuntu/lp-1830243-s390-bios-Skip-bootmap-signature-entries.patch:
+    tolerate guests with secure boot loaders (LP: #1830243)
+
+  [ Rafael David Tinoco ]
+  * {Ice,Cascade}Lake CPUs + IA32_ARCH_CAPABILITIES support (LP: #1828495)
+    Needed patches are in d/p/u/lp1828495-:
+    - 0001-guidance-cpu-models.patch:
+      docs: add guidance on configuring CPU models for x86
+      + d/qemu-system-common.install: include man/man7/qemu-cpu-models.7
+    - 0002-msr-new-msr-indices.patch:
+      i386: Add new MSR indices for IA32_PRED_CMD and IA32_ARCH_CAPABILITIES
+    - 0003-cpuid-feature-ia32-arch-capabilities.patch:
+      i386: Add CPUID bit and feature words for IA32_ARCH_CAPABILITIES MSR
+    - 0004-cpuid-bit-for-wbnoinvd.patch:
+      i386: Add CPUID bit for WBNOINVD
+    - 0005-new-cpu-model-for-icelake.patch:
+      i386: Add new CPU model Icelake-{Server,Client}
+    - 0006-update-headers-to-4.16-rc5.patch:
+      update Linux headers to 4.16-rc5
+    - 0007-kvm-get-msr-feature-index_list.patch:
+      kvm: Add support to KVM_GET_MSR_FEATURE_INDEX_LIST and
+    - 0008-x86-msr-related-data-structure-changes.patch:
+      x86: Data structure changes to support MSR based features
+    - 0009-feature-wordS-arch-capabilities.patch:
+      x86: define a new MSR based feature word -- FEATURE_WORDS_ARCH
+    - 0010-use-kvm-get-msr-index-list.patch:
+      kvm: Use KVM_GET_MSR_INDEX_LIST for MSR_IA32_ARCH_CAPABILITIES support
+    - 0011-disable-arch-cap-when-no-msr.patch:
+      i386: kvm: Disable arch_capabilities if MSR can't be set
+    - 0012-arch-capabilities-migratable.patch:
+      i386: Make arch_capabilities migratable
+    - 0013-cascadelake-server.patch:
+      i386: Add new model of Cascadelake-Server
+    - 0014-remove-cpuid-pconfig.patch:
+      i386: remove the new CPUID 'PCONFIG' from Icelake-Server CPU model
+    - 0015-remove-cpuid-intel_pt.patch:
+      i386: remove the 'INTEL_PT' CPUID bit from named CPU models
+    - 0016-no-ospke-on-some.patch:
+      i386: Disable OSPKE on CPU model definitions
+
+ -- Christian Ehrhardt <christian.ehrhardt@canonical.com>  Thu, 04 Jul 2019 14:47:56 +0200
+
+qemu (1:2.11+dfsg-1ubuntu7.15) bionic; urgency=medium
+
+  * d/p/ubuntu/define-ubuntu-machine-types.patch: fix wily machine type being
+    broken since 2.11 due to 2.3/2.4 version mismatch in its definition to
+    fix migrations from old machines (LP: #1829868).
+  * d/p/ubuntu/lp-1830704-s390x-cpumodel-ignore-csske-for-expansion.patch
+    toleration for future machines (LP: #1830704
+
+ -- Christian Ehrhardt <christian.ehrhardt@canonical.com>  Wed, 22 May 2019 13:14:15 +0200
+
+qemu (1:2.11+dfsg-1ubuntu7.14) bionic-security; urgency=medium
 
   * Add qemu-guest-agent Breaks: for unattended-upgrades versions not being
     able to install it to avoid qemu-guest-agent blocking other security
@@ -6,19 +308,7 @@ qemu (1:2.11+dfsg-1ubuntu7.14+exo1) bionic-security; urgency=medium
 
  -- Balint Reczey <rbalint@ubuntu.com>  Thu, 23 May 2019 15:09:48 +0200
 
-qemu (1:2.11+dfsg-1ubuntu7.13+exo3) bionic-security; urgency=medium
-
-  * Add fix-clock_is_reliable-on-migration.patch [launchpad #1775555]
-
- -- Jean-Philippe Menil <jpmenil@exoscale.ch>  Tue, 03 Jun 2019 17:55:00 +0200
-
-qemu (1:2.11+dfsg-1ubuntu7.13+exo2) bionic-security; urgency=medium
-
-  * Add kvm-block-Fix-flags-in-reopen-queue.patch [bz#1554946]
-
- -- Jean-Philippe Menil <jpmenil@exoscale.ch>  Tue, 21 May 2019 11:30:00 +0200
-
-qemu (1:2.11+dfsg-1ubuntu7.13+exo1) bionic-security; urgency=medium
+qemu (1:2.11+dfsg-1ubuntu7.13) bionic-security; urgency=medium
 
   * SECURITY UPDATE: Add support for exposing md-clear functionality
     to guests
