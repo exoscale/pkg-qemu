@@ -1,0 +1,40 @@
+From 1049f4c62c4070618cc5defc9963c6a17ae7a5ae Mon Sep 17 00:00:00 2001
+From: Denis Plotnikov <dplotnikov@virtuozzo.com>
+Date: Tue, 24 Dec 2019 11:14:46 +0300
+Subject: [PATCH] virtio-mmio: update queue size on guest write
+
+Some guests read back queue size after writing it.
+Always update the on size write otherwise they might be confused.
+
+Cc: qemu-stable@nongnu.org
+Signed-off-by: Denis Plotnikov <dplotnikov@virtuozzo.com>
+Message-Id: <20191224081446.17003-1-dplotnikov@virtuozzo.com>
+Reviewed-by: Michael S. Tsirkin <mst@redhat.com>
+Signed-off-by: Michael S. Tsirkin <mst@redhat.com>
+
+Origin: upstream, https://git.qemu.org/?p=qemu.git;a=commit;h=1049f4c62c4070618cc5defc9963c6a17ae7a5ae
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/1867519
+Last-Update: 2020-03-18
+
+---
+ hw/virtio/virtio-mmio.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/hw/virtio/virtio-mmio.c b/hw/virtio/virtio-mmio.c
+index ef40b7a9b2..872f2cd237 100644
+--- a/hw/virtio/virtio-mmio.c
++++ b/hw/virtio/virtio-mmio.c
+@@ -308,8 +308,9 @@ static void virtio_mmio_write(void *opaque, hwaddr offset, uint64_t value,
+         break;
+     case VIRTIO_MMIO_QUEUE_NUM:
+         trace_virtio_mmio_queue_write(value, VIRTQUEUE_MAX_SIZE);
++        virtio_queue_set_num(vdev, vdev->queue_sel, value);
++
+         if (proxy->legacy) {
+-            virtio_queue_set_num(vdev, vdev->queue_sel, value);
+             virtio_queue_update_rings(vdev, vdev->queue_sel);
+         } else {
+             proxy->vqs[vdev->queue_sel].num = value;
+-- 
+2.25.1
+

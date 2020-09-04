@@ -1,9 +1,10 @@
 #!/bin/sh
 
 # Detect our host arch
-arch=`arch`
+arch=$(arch)
 test -z "$arch" && exit 0
 
+modlist=""
 case "$arch" in
     x86_64 | i686)
         kvm=/usr/bin/qemu-system-x86_64
@@ -14,24 +15,22 @@ case "$arch" in
         fi
         ;;
     ppc*)
-        SMT=$(/usr/sbin/ppc64_cpu --smt 2>&1 | grep -q "SMT=[248]")
+        SMT=$(/usr/sbin/ppc64_cpu --smt 2>&1 | grep "SMT=[248]")
         if [ -n "$SMT" ]
         then
-          echo "Error: You must disable SMT if you want to run QEMU/KVM on ppc64le archtecture"
-          echo "In order to disable SMT, run: # ppc64_cpu --smt=off"
+          if grep -q -e '^cpu\s*:\s*POWER8'  /proc/cpuinfo; then
+            echo "Error: You must disable SMT if you want to run QEMU/KVM on Power8 based ppc64le architecture"
+            echo "In order to disable SMT, run: # ppc64_cpu --smt=off"
+          fi
         fi
         kvm=/usr/bin/qemu-system-ppc64
-        if [ `uname -m` != "ppc64le" ]; then
+        if [ "$(uname -m)" != "ppc64le" ]; then
             exit 0
         fi
         if systemd-detect-virt --quiet --vm; then
             echo "Info: second level virtualization not supported, kvm-hv load might fail"
         fi
         modlist="kvm-hv"
-        ;;
-    *)
-        # not supported on other arches
-        exit 0
         ;;
 esac
 
@@ -40,6 +39,7 @@ if [ -z "$kvm" -o ! -e "$kvm" ]; then
     exit 0
 fi
 
+# shellcheck disable=SC1091
 [ -r /etc/default/qemu-kvm ] && . /etc/default/qemu-kvm
 
 start() {
@@ -55,23 +55,14 @@ start() {
 
     # Determine if we are running inside a VM
     IS_VM=0
-    if type systemd-detect-virt 2>&1 >/dev/null; then
+    if command -v systemd-detect-virt >/dev/null 2>&1; then
         systemd-detect-virt -vq && IS_VM=1
-    else
-        VM_STRINGS="KVM QEMU VMware VirtualBox Xen"
-        VM_DETECT="$(dmesg | egrep -e '(Hypervisor detected|Booting paravirtualized kernel)' || true)"
-        VM_DMIDECODE="$(cat /sys/class/dmi/id/*_vendor || true)"
-        VM_SEARCH="${VM_DETECT}${VM_DMIDECODE} "
-        for vm_string in $VM_STRINGS; do
-            if [ -z "${VM_SEARCH##*$vm_string*}" ]; then
-                IS_VM=1; break;
-            fi
-        done
     fi
 
     # Enable KSM, respecting the default configuration file. If 'AUTO' is
     # set, enable only if we aren't running inside a VM.
-    if [ "$KSM_ENABLED" = "1" -o \( "$KSM_ENABLED" = "AUTO" -a "$IS_VM" = "0" \) ]; then
+    if [ "$KSM_ENABLED" = "1" ] || [ "$KSM_ENABLED" = "AUTO" ] && [ "$IS_VM" = "0" ]; then
+        # shellcheck disable=SC2015
         [ -w /sys/kernel/mm/ksm/run ] && echo 1 > /sys/kernel/mm/ksm/run || true
         if [ -w /sys/kernel/mm/ksm/sleep_millisecs ]; then
             if [ -n "$SLEEP_MILLISECS" ]; then
@@ -79,26 +70,8 @@ start() {
             fi
         fi
     else
+        # shellcheck disable=SC2015
         [ -w /sys/kernel/mm/ksm/run ] && echo 0 > /sys/kernel/mm/ksm/run || true
-    fi
-
-    # If /etc/default/qemu-kvm says to, load vhost_net.  Default is not to.
-    if [ "$VHOST_NET_ENABLED" = "1" ]; then
-        modprobe -b vhost_net || true
-    fi
-
-    # mount hugepages if available and requested
-    if [ "x$KVM_HUGEPAGES" = "x1" ]; then
-        if ! grep -q hugetlbfs /proc/filesystems; then
-            logger -t qemu-kvm "Error: hugepages not available in the kernel!"
-        elif grep -q /run/hugepages/kvm /proc/mounts; then
-            logger -t qemu-kvm "/run/hugepages/kvm already mounted"
-        elif ! getent group kvm > /dev/null 2>&1; then
-            logger -t qemu-kvm "Error: group kvm does not exist!"
-        else
-            mkdir -p /run/hugepages/kvm
-            mount -t hugetlbfs hugetlbfs-kvm -o mode=775,gid=kvm /run/hugepages/kvm
-        fi
     fi
 }
 

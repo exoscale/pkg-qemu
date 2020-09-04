@@ -1,98 +1,1156 @@
-qemu (1:2.11+dfsg-1ubuntu7.14+exo1) bionic-security; urgency=medium
+qemu (1:4.2-3ubuntu6.4+exo2) UNRELEASED; urgency=medium
 
-  * Add qemu-guest-agent Breaks: for unattended-upgrades versions not being
-    able to install it to avoid qemu-guest-agent blocking other security
-    updates. (LP: #1823872)
+  * Porting from ubuntu/focal-updates
+  * debian/patches/exoscale/pre-bionic-256k-ipxe-efi-roms-2.11.patch:
+    trying to get rid of old unmaintained ROMs. This will enforce
+    the use of compat from Ubuntu.
 
- -- Balint Reczey <rbalint@ubuntu.com>  Thu, 23 May 2019 15:09:48 +0200
+ -- Alessandro Ratti <alessandro@exoscale.com>  Fri, 28 Aug 2020 07:05:31 +0000
 
-qemu (1:2.11+dfsg-1ubuntu7.13+exo3) bionic-security; urgency=medium
+qemu (1:4.2-3ubuntu6.4) focal-security; urgency=medium
 
-  * Add fix-clock_is_reliable-on-migration.patch [launchpad #1775555]
+  * SECURITY UPDATE: assert failure in nbd
+    - debian/patches/ubuntu/CVE-2020-10761.patch: avoid long error message
+      assertions in nbd/server.c, tests/qemu-iotests/143,
+      tests/qemu-iotests/143.out.
+    - CVE-2020-10761
+  * SECURITY UPDATE: out-of-bounds read and write in sm501
+    - debian/patches/ubuntu/CVE-2020-12829-pre1.patch: convert printf +
+      abort to qemu_log_mask.
+    - debian/patches/ubuntu/CVE-2020-12829-pre2.patch: shorten long
+      variable names in sm501_2d_operation.
+    - debian/patches/ubuntu/CVE-2020-12829-pre3.patch: use BIT(x) macro to
+      shorten constant.
+    - debian/patches/ubuntu/CVE-2020-12829-pre4.patch: clean up local
+      variables in sm501_2d_operation.
+    - debian/patches/ubuntu/CVE-2020-12829.patch: replace hand written
+      implementation with pixman where possible.
+    - debian/patches/ubuntu/CVE-2020-12829-2.patch: optimize small
+      overlapping blits.
+    - debian/patches/ubuntu/CVE-2020-12829-3.patch: fix bounds checks.
+    - debian/patches/ubuntu/CVE-2020-12829-4.patch: drop unneded variable.
+    - debian/patches/ubuntu/CVE-2020-12829-5.patch: do not allow guest to
+      set invalid format.
+    - debian/patches/ubuntu/CVE-2020-12829-6.patch: introduce variable for
+      commonly used value for better readability.
+    - debian/patches/ubuntu/CVE-2020-12829-7.patch: fix and optimize
+      overlap check.
+    - CVE-2020-12829
+  * SECURITY UPDATE: out-of-bounds read during sdhci_write() operations
+    - debian/patches/ubuntu/CVE-2020-13253.patch: do not switch to
+      ReceivingData if address is invalid in hw/sd/sd.c.
+    - CVE-2020-13253
+  * SECURITY UPDATE: out-of-bounds access during es1370_write() operation
+    - debian/patches/ubuntu/CVE-2020-13361.patch: check total frame count
+      against current frame in hw/audio/es1370.c.
+    - CVE-2020-13361
+  * SECURITY UPDATE: out-of-bounds read via crafted reply_queue_head
+    - debian/patches/ubuntu/CVE-2020-13362-1.patch: use unsigned type for
+      reply_queue_head and check index in hw/scsi/megasas.c.
+    - debian/patches/ubuntu/CVE-2020-13362-2.patch: avoid NULL pointer
+      dereference in hw/scsi/megasas.c.
+    - debian/patches/ubuntu/CVE-2020-13362-3.patch: use unsigned type for
+      positive numeric fields in hw/scsi/megasas.c.
+    - CVE-2020-13362
+  * SECURITY UPDATE: NULL pointer dereference related to BounceBuffer
+    - debian/patches/ubuntu/CVE-2020-13659.patch: set map length to zero
+      when returning NULL in exec.c, include/exec/memory.h.
+    - CVE-2020-13659
+  * SECURITY UPDATE: out-of-bounds access via msi-x mmio operation
+    - debian/patches/ubuntu/CVE-2020-13754-1.patch: revert accepting
+      mismatching sizes in memory_region_access_valid in memory.c.
+    - debian/patches/ubuntu/CVE-2020-13754-2.patch: accept byte and word
+      access to core ACPI registers in hw/acpi/core.c.
+    - CVE-2020-13754
+  * SECURITY UPDATE: infinite recursion in ati-vga
+    - debian/patches/ubuntu/CVE-2020-13800.patch: check mm_index before
+      recursive call in hw/display/ati.c.
+    - CVE-2020-13800
+  * SECURITY UPDATE: division by zero in oss_write()
+    - debian/patches/ubuntu/CVE-2020-14415.patch: fix buffer pos
+      calculation in audio/ossaudio.c.
+    - CVE-2020-14415
+  * SECURITY UPDATE: buffer overflow in XGMAC Ethernet controller
+    - debian/patches/ubuntu/CVE-2020-15863.patch: check bounds in
+      hw/net/xgmac.c.
+    - CVE-2020-15863
+  * SECURITY UPDATE: reachable assertion failure
+    - debian/patches/ubuntu/CVE-2020-16092.patch: fix assertion failure in
+      hw/net/net_tx_pkt.c.
+    - CVE-2020-16092
 
- -- Jean-Philippe Menil <jpmenil@exoscale.ch>  Tue, 03 Jun 2019 17:55:00 +0200
+ -- Marc Deslauriers <marc.deslauriers@ubuntu.com>  Tue, 11 Aug 2020 12:30:06 -0400
 
-qemu (1:2.11+dfsg-1ubuntu7.13+exo2) bionic-security; urgency=medium
+qemu (1:4.2-3ubuntu6.3) focal; urgency=medium
 
-  * Add kvm-block-Fix-flags-in-reopen-queue.patch [bz#1554946]
+  * debian/patches/ubuntu/lp-1878973-*: fix assert in qemu-guest-agent that
+    crashes it on shutdown (LP: #1878973)
+  * d/p/ubuntu/lp-1882774-*: fix issues with VMX subfeatures on systems not
+    supporting to set them (LP: #1882774)
 
- -- Jean-Philippe Menil <jpmenil@exoscale.ch>  Tue, 21 May 2019 11:30:00 +0200
+ -- Christian Ehrhardt <christian.ehrhardt@canonical.com>  Tue, 02 Jun 2020 10:42:49 +0200
 
-qemu (1:2.11+dfsg-1ubuntu7.13+exo1) bionic-security; urgency=medium
+qemu (1:4.2-3ubuntu6.2) focal; urgency=medium
+
+  * d/p/ubuntu/lp-1805256*: Fixes for QEMU on aarch64 ARM hosts
+    - async: use explicit memory barriers (LP: #1805256)
+    - aio-wait: delegate polling of main AioContext if BQL not held
+
+ -- Rafael David Tinoco <rafaeldtinoco@ubuntu.com>  Wed, 27 May 2020 21:19:20 +0000
+
+qemu (1:4.2-3ubuntu6.1) focal-security; urgency=medium
+
+  * SECURITY UPDATE: DoS via integer overflow in ati_2d_blt()
+    - debian/patches/ubuntu/CVE-2020-11869.patch: fix checks in
+      ati_2d_blt() to avoid crash in hw/display/ati_2d.c.
+    - CVE-2020-11869
+
+ -- Marc Deslauriers <marc.deslauriers@ubuntu.com>  Thu, 14 May 2020 08:25:24 -0400
+
+qemu (1:4.2-3ubuntu6) focal; urgency=medium
+
+  [ Christian Ehrhardt ]
+  * enable riscv build (LP: #1872931)
+    [ changes picked from Debian ]
+    - enable support for riscv64 hosts
+    - only enable librbd on architectures where it is built
+    - ceph: do not list librados-dev as we only use librbd-dev and the latter
+      depends on the former
+    - seccomp grew up, no need in versioned build-dep
+    - enable seccomp only on architectures where it can be built
+  * d/p/ubuntu/lp-1872931-*: fix build on non KVM platforms
+  * d/p/ubuntu/lp-1872945-*: fix riscv emulation errors that e.g. hung ssh
+    and clobbered doubles (LP: #1872945)
+
+  [ William Grant ]
+  * d/control-in: disable rbd support unavailable on riscv (LP: 1872931)
+
+ -- Christian Ehrhardt <christian.ehrhardt@canonical.com>  Wed, 15 Apr 2020 14:27:15 +0200
+
+qemu (1:4.2-3ubuntu5) focal; urgency=medium
+
+  [ Christian Ehrhardt ]
+  * d/p/ubuntu/lp-1871830-*: avoid crash when using QEMU_MODULE_DIR
+    (LP: #1871830)
+  * Security and packaging fixes (LP: #1872937)
+    - arm-fix-PAuth-sbox-functions-CVE-2020-10702.patch
+    - net-tulip-check-frame-size-and-r-w-data-length-CVE-2020-11102.patch
+      CVE-2020-10702
+      CVE-2020-11102
+    - fix external spice UI
+      + install ui-spice-app.so in qemu-system-common
+      + install ui-spice-app.so only if built, spice is optional
+    - switch binfmt registration to use update-binfmts --[un]import (#866756)
+    - qemu-system-gui: Multi-Arch=same, not foreign (#956763)
+    - qemu-system-data: s/highcolor/hicolor/ (#955741)
+  * d/p/ubuntu/lp-1872107*: fix migration while rebooting guests (LP: #1872107)
+
+ -- Christian Ehrhardt <christian.ehrhardt@canonical.com>  Wed, 15 Apr 2020 11:26:44 +0200
+
+qemu (1:4.2-3ubuntu4) focal; urgency=medium
+
+  * d/p/ubuntu/lp-1835546-*: backport the s390x protvirt feature (LP: #1835546)
+  * remove d/p/ubuntu/expose-vmx_qemu64cpu.patch: Stop adding VMX to qemu64
+    to avoid broken nesting (LP: #1868692)
+
+ -- Christian Ehrhardt <christian.ehrhardt@canonical.com>  Fri, 20 Mar 2020 08:02:16 +0100
+
+qemu (1:4.2-3ubuntu3) focal; urgency=medium
+
+  * d/p/stable/lp-1867519-*: Stabilize qemu 4.2 with upstream
+    patches @qemu-stable (LP: #1867519)
+
+ -- Christian Ehrhardt <christian.ehrhardt@canonical.com>  Wed, 18 Mar 2020 13:57:57 +0100
+
+qemu (1:4.2-3ubuntu2) focal; urgency=medium
+
+  * allow qemu to load old modules post upgrade (LP: #1847361)
+    - d/p/ubuntu/lp-1847361-modules-load-upgrade.patch: to fallback module
+      load to a versioned path
+    - d/qemu-block-extra.*.in, d/qemu-system-gui.*.in: save shared objects on
+      upgrade
+    - d/rules: generate maintainer scripts matching package version on build
+    - d/rules: enable --enable-module-upgrades where --enable-modules is set
+  * d/p/ubuntu/lp-1847361-vhost-correctly-turn-on-VIRTIO_F_IOMMU_PLATFORM.patch:
+    avoid unnecessary IOTLB transactions (LP: #1866207)
+
+ -- Christian Ehrhardt <christian.ehrhardt@canonical.com>  Mon, 02 Mar 2020 15:21:27 +0100
+
+qemu (1:4.2-3ubuntu1) focal; urgency=medium
+
+  * Merge with Debian testing, remaining changes:
+    - qemu-kvm to systemd unit
+      - d/qemu-kvm-init: script for QEMU KVM preparation modules, ksm,
+        hugepages and architecture specifics
+      - d/qemu-system-common.qemu-kvm.service: systemd unit to call
+        qemu-kvm-init
+      - d/qemu-system-common.install: install helper script
+      - d/qemu-system-common.maintscript: clean old sysv and upstart scripts
+      - d/qemu-system-common.qemu-kvm.default: defaults for
+        /etc/default/qemu-kvm
+      - d/rules: call dh_installinit and dh_installsystemd for qemu-kvm
+    - Distribution specific machine type (LP: 1304107 1621042)
+      - d/p/ubuntu/define-ubuntu-machine-types.patch: define distro machine
+        types
+      - d/qemu-system-x86.NEWS Info on fixed machine type definitions
+        for host-phys-bits=true (LP: 1776189)
+      - add an info about -hpb machine type in debian/qemu-system-x86.NEWS
+      - provide pseries-bionic-2.11-sxxm type as convenience with all
+        meltdown/spectre workarounds enabled by default. (LP: 1761372).
+      - ubuntu-q35 alias added to auto-select the most recent q35 ubuntu type
+    - Enable nesting by default
+      - d/p/ubuntu/expose-vmx_qemu64cpu.patch: expose nested kvm by default
+        in qemu64 cpu type.
+      - d/p/ubuntu/enable-svm-by-default.patch: Enable nested svm by default
+        in qemu64 on amd
+        [ No more strictly needed, but required for backward compatibility ]
+    - improved dependencies
+      - Make qemu-system-common depend on qemu-block-extra
+      - Make qemu-utils depend on qemu-block-extra
+      - let qemu-utils recommend sharutils
+    - improved s390x support
+      - d/rules: build s390-ccw.img with upstream Makefile
+      - d/rules: build s390-netboot.img with upstream Makefile
+    - arch aware kvm wrappers
+    - tolerate ipxe size change on migrations to >=18.04 (LP: 1713490)
+      - d/p/ubuntu/pre-bionic-256k-ipxe-efi-roms.patch: old machine types
+        reference 256k path
+      - d/control-in: depend on ipxe-qemu-256k-compat-efi-roms to be able to
+        handle incoming migrations from former releases.
+    - d/control-in: Disable capstone disassembler library support (universe)
+    - d/binfmt-update-in: fix binfmt being called in some containers
+      (LP 1840956)
+    - d/p/ubuntu/lp-1857033-*: add support for Cooper Lake cpu model
+      (LP 1857033)
+    - d/qemu-system-x86.README.Debian: add info about updated nesting changes
+    - d/control*, d/rules: disable xen by default, but provide universe
+      package qemu-system-x86-xen as alternative
+    - d/p/lp-1859527-*: avoid breakage on high virtqueue counts (LP 1859527)
+  - Dropped changes [ in Debian ]
+    - d/control: update VCS links
+    - d/control-in: bump debhelper build-dep for compat 12
+    - d/control: disable bluetooth being deprecated
+    - d/not-installed: ignore new interop docs and extra icons for now
+    - d/not-installed: do not install elf2dmp until namespaced
+    - d/qemu-utils.install: install new tools qemu-edid and qemu-keymap
+      [ not needed ]
+    - d/control-in: promote qemu-efi/ovmf in Ubuntu (LP 1570617)
+    - s390x support
+      - Create qemu-system-s390x package
+      - Enable numa support for s390x
+    - d/control*: enable libpmem support for nvdimms (LP 1790856)
+  * Added changes
+    - d/control: regenerate debian/control out of control-in
+    - qemu-system-x86-microvm package
+      In addition to the generic multi-purpose qemu also provide a minimal
+      feature binary that is loading faster for use cases with microvm machine
+      type and qboot bios
+      - d/control-in: add a new qemu-system-x86-microvm package
+      - d/rules: add an extra config/build step to get the minimal qemu
+    - d/control-in: disable pmem on ppc64 as it is currently considered
+      experimental on that architecture (pmdk v1.8-1)
+    - d/rules: makefile definitions can't be recursive - sys_systems for s390x
+    - d/p/ubuntu/vhost-user-gpu-Drop-trailing-json-comma.patch: fix parsing of
+      vhost-user-gpu
+    - d/rules: report config log from the correct subdir
+    - d/rules: --disable-xen for user-static builds
+
+ -- Christian Ehrhardt <christian.ehrhardt@canonical.com>  Wed, 12 Feb 2020 15:21:56 +0100
+
+qemu (1:4.2-3) unstable; urgency=medium
+
+  * mention closing of #909743 in previous changelog (Closes: #909743)
+  * do not link to qemu-skiboot from qemu-system-ppc (Closes: #950431)
+  * provide+conflict qemu-skiboot from qemu-system-data,
+    as we are not using this package anymore
+
+ -- Michael Tokarev <mjt@tls.msk.ru>  Sat, 01 Feb 2020 22:10:57 +0300
+
+qemu (1:4.2-2) unstable; urgency=medium
+
+  [ Fabrice Bauzac ]
+  * Fix a typo in the description of the qemu binary package
+
+  [ Frédéric Bonnard ]
+  * Enable powernv emulation with skiboot firmware
+
+  [ Michael R. Crusoe ]
+  * Modernize watch file (Closes: #909743)
+
+  [ Christian Ehrhardt ]
+  * d/control-in: promote qemu-efi/ovmf in Ubuntu
+  * d/control-in: bump debhelper build-dep for compat 12
+  * - d/control-in: update VCS links
+  * - d/control-in: disable bluetooth being deprecated
+  * d/not-installed: ignore new interop docs and extra icons for now
+  * do not install elf2dmp until namespaced
+  * d/control-in: Enable numa support for s390x
+  * Create qemu-system-s390x package (Ubuntu only for now)
+
+  [ Michael Tokarev ]
+  * stop using inttypes.h in qboot code;
+    this makes dependency on libc6-dev-i386 to be unnecessary
+  * qboot-no-jump-tables.diff - use #pragma for one file in qboot
+  * do not install qemu-edid and qemu-keymap for now
+  * no need in bluetooth patches as bluetooth is disabled
+  * scsi-cap-block-count-from-GET-LBA-STATUS-CVE-2020-1711.patch
+    (Closes: #949731, CVE-2020-1711)
+  * enable libpmem support on amd64|arm64|ppc64el (Closes: #935327)
+
+ -- Michael Tokarev <mjt@tls.msk.ru>  Fri, 31 Jan 2020 23:51:09 +0300
+
+qemu (1:4.2-1ubuntu2) focal; urgency=medium
+
+  * d/control: avoid upgrade issues triggered by moving ivshmem tools after
+    Debian. Fixed by by bumping the related Breaks/Replaces to the
+    Version Ubuntu introduced the change (LP: #1862287)
+
+ -- Christian Ehrhardt <christian.ehrhardt@canonical.com>  Fri, 07 Feb 2020 07:31:21 +0100
+
+qemu (1:4.2-1ubuntu1) focal; urgency=medium
+
+  * Merge with Debian testing, Among many other things this fixes LP Bugs:
+    LP: #1847806 - add mff* instructions to not break on ppc64 with newer glibc
+    LP: #1812822 - avoid crashes on detaching vhost_net interfaces
+    LP: #1852744 - Crypto Passthrough Interrupt Support
+    LP: #1853316 - CCW IPL Support
+    Remaining changes:
+    - qemu-kvm to systemd unit
+      - d/qemu-kvm-init: script for QEMU KVM preparation modules, ksm,
+        hugepages and architecture specifics
+      - d/qemu-system-common.qemu-kvm.service: systemd unit to call
+        qemu-kvm-init
+      - d/qemu-system-common.install: install helper script
+      - d/qemu-system-common.maintscript: clean old sysv and upstart scripts
+      - d/qemu-system-common.qemu-kvm.default: defaults for
+        /etc/default/qemu-kvm
+      - d/rules: call dh_installinit and dh_installsystemd for qemu-kvm
+    - Distribution specific machine type (LP: 1304107 1621042)
+      - d/p/ubuntu/define-ubuntu-machine-types.patch: define distro machine
+        types
+      - d/qemu-system-x86.NEWS Info on fixed machine type definitions
+        for host-phys-bits=true (LP: 1776189)
+      - add an info about -hpb machine type in debian/qemu-system-x86.NEWS
+      - provide pseries-bionic-2.11-sxxm type as convenience with all
+        meltdown/spectre workarounds enabled by default. (LP: 1761372).
+    - Enable nesting by default
+      - d/p/ubuntu/expose-vmx_qemu64cpu.patch: expose nested kvm by default
+        in qemu64 cpu type.
+      - d/p/ubuntu/enable-svm-by-default.patch: Enable nested svm by default
+        in qemu64 on amd
+        [ No more strictly needed, but required for backward compatibility ]
+    - improved dependencies
+      - Make qemu-system-common depend on qemu-block-extra
+      - Make qemu-utils depend on qemu-block-extra
+      - let qemu-utils recommend sharutils
+    - s390x support
+      - Create qemu-system-s390x package
+      - Enable numa support for s390x
+      - d/rules: build s390-ccw.img with upstream Makefile
+      - d/rules: build s390-netboot.img with upstream Makefile
+    - arch aware kvm wrappers
+    - d/control: update VCS links
+    - tolerate ipxe size change on migrations to >=18.04 (LP: 1713490)
+      - d/p/ubuntu/pre-bionic-256k-ipxe-efi-roms.patch: old machine types
+        reference 256k path
+      - d/control-in: depend on ipxe-qemu-256k-compat-efi-roms to be able to
+        handle incoming migrations from former releases.
+    - d/control-in: Disable capstone disassembler library support (universe)
+    - d/control: disable bluetooth being deprecated
+    - d/not-installed: ignore new interop docs and extra icons for now
+    - d/not-installed: do not install elf2dmp until namespaced
+    - d/qemu-utils.install: install new tools qemu-edid and qemu-keymap
+    - d/control-in: promote qemu-efi/ovmf in Ubuntu (LP 1570617)
+    - d/binfmt-update-in: fix binfmt being called in some containers
+      (LP 1840956)
+  - Dropped changes (in Debian)
+    - qemu-guest-agent: freeze-hook fixes (LP: 1484990)
+      - d/qemu-guest-agent.install: provide /etc/qemu/fsfreeze-hook
+      - d/qemu-guest-agent.dirs: provide /etc/qemu/fsfreeze-hook.d
+    - d/control-in: enable RDMA support in qemu (LP: 1692476)
+        - enable RDMA config option
+        - add libibumad-dev build-dep
+    - d/p/ubuntu/lp-1790901-partial-SLOF-for-s390x-netboot.patch: bring back
+      some SLOF bits stripped in DFSG to be able to build s390x-netboot roms
+      As that hack to build s390-ccw.img rom can't build s390x-netboot.img
+      replace it with a build-indep using the upstream makefiles.
+      This is less prone to miss future changes/fixes that are done to the
+      makefiles
+    - remove /dev/kvm permission handling (moved to systemd 239-6) (#892945)
+    - d/p/debianize-qemu-guest-service.patch: fix path of qemu-ga
+    - d/rules: fix qemu-kvm service for debhelper compat >=12
+    - Refreshed patches for v4.0 context changes
+    - d/control*: remove sdlabi which was removed upstream
+    - d/control*: enable docs (now explicit) and provide new build-dep
+      python3-sphinx
+    - d/qemu-system-data.install: use new paths for formerly used icons
+    - Merge with Upstream release of qemu 4.0
+    - d/p/ubuntu/lp-1790901-partial-SLOF-for-s390x-netboot.patch
+  - Dropped changes (Upstream)
+    - d/p/ubuntu/lp-1830243-*: s390x Secure Linux Boot Toleration (LP 1830243)
+    - d/p/ubuntu/lp-1830238-*: s390x hardware cpu model (LP 1830238)
+    - d/p/ubuntu/linux-user-fix-__NR_semtimedop-undeclared-error.patch:
+      fix i386 build error
+    - d/p/ubuntu/lp-1836066-s390-cpumodel-fix-description-for-the-new-vector-fac:
+      fix naming of the new vector facitlity (LP 1836066)
+    - d/p/ubuntu/lp-1836159-fix-with-latest-kernel.patch: fix build issues
+      for missing SIOCGSTAMP definition; final fix is still in discussion
+      upstream (LP: 1836159)
+    - d/p/ubuntu/lp-1836154-*: further fixups for HW CPU model for newer
+      s390x machines (LP 1836154)
+    - d/p/ubuntu/lp-1841066-*: fix detection of arch_capability flags
+      (LP 1841066)
+    - d/p/lp-1842774-s390x-cpumodel-Add-the-z15-name-to-the-description-o.patch:
+      update the z15 model name (LP 1842774)
+    - d/p/ubuntu/lp-1848556-curl-Handle-success-in-multi_check_completion.patch:
+      fix a potential hang when qemu or qemu-img where accessing http backed
+      disks via libcurl (LP 1848556)
+    - d/p/u/lp-1848497-virtio-balloon-fix-QEMU-4.0-config-size-migration-*:
+      fix migration issue from qemu <4.0 when using virtio-balloon (LP 1848497)
+    - d/p/ubuntu/lp-1830704-s390x-cpumodel-ignore-csske-for-expansion.patch
+      toleration for future machines (LP 1830704)
+    - SECURITY UPDATE: Add support for exposing md-clear functionality
+      to guests
+      - d/p/ubuntu/enable-md-clear.patch
+      - d/p/ubuntu/enable-md-no.patch
+      - CVE-2018-12126, CVE-2018-12127, CVE-2018-12130, CVE-2019-11091
+    - SECURITY UPDATE: heap overflow when loading device tree blob
+      - d/p/ubuntu/CVE-2018-20815.patch: specify how large the buffer to
+        copy the device tree blob into is.
+      - CVE-2018-20815
+    - SECURITY UPDATE: device driver denial of service via NULL pointer
+      dereference
+      - d/p/ubuntu/CVE-2019-5008.patch: Define skeleton 'power_mem_read'
+        routine
+      - CVE-2019-5008
+    - SECURITY UPDATE: information leak in SLiRP
+      - d/p/ubuntu/CVE-2019-9824.patch: check sscanf result when
+        emulating ident.
+      - CVE-2019-9824
+    - d/p/ubuntu/lp-1812384-s390x-Return-specification-exception-for-
+      unimplement.patch: properly return architecture defined exception
+      on bad subcodes of diag 308 (LP 1812384)
+  * Dropped changes (no more needed)
+    - d/qemu-guest-agent.pre{rm|inst}/.postrm: special handling for
+      mv_conffile since the new path is a directory in the old package
+      version which can not be handled by mv_conffile.
+      [ only needed between disco and eoan ]
+    - disable pvrdma
+      [ CVEs all fixed now ]
+    - d/p/ubuntu/Revert-target-i386-kvm-add-VMX-migration-blocker.patch:
+      avoid misdetection of simplified nesting blocking all migrations
+      [ qemu now detects and handles nesting - needs kernel >=4.20 ]
+    - Enable nesting by default
+      - d/qemu-system-x86.modprobe: set nested=1 module option on intel.
+        (is default on amd)
+      - d/qemu-system-x86.postinst: re-load kvm_intel.ko if it was loaded
+        without nested=1
+        [ nesting is default in kernel modules and default selected cpu types ]
+  * Added changes
+    - d/control: regenerate debian/control out of control-in
+    - updated ubuntu machine types to match qemu 4.2 in Ubuntu 20.04 Focal
+      - added ubuntu focal types for qemu 4.2
+      - ubuntu-q35 alias added to auto-select the most recent q35 ubuntu type
+    - d/p/ubuntu/lp-1857033-*: add support for Cooper Lake cpu model
+      (LP: #1857033)
+    - d/qemu-system-x86.README.Debian: add info about updated nesting changes
+    - d/control*, d/rules: disable xen by default, but provide universe
+      package qemu-system-x86-xen as alternative
+    - fix typos in changelog and d/qemu-system-x86.NEWS
+    - d/p/lp-1859527-*: avoid breakage on high virtqueue counts (LP: #1859527)
+    - d/control*: enable libpmem support for nvdimms (LP: #1790856)
+
+ -- Christian Ehrhardt <christian.ehrhardt@canonical.com>  Wed, 08 Jan 2020 15:27:42 +0100
+
+qemu (1:4.2-1) unstable; urgency=medium
+
+  * new upstream release (4.2.0)
+  * removed patches: v4.1.1.diff, enable-pschange-mc-no.patch
+  * do not make sgabios.bin executable (lintian)
+  * add s390-netboot.img lintian overrides for qemu-system-data
+  * build qboot (bios-microvm.bin)
+  * build-depend-indep on libc6-dev-i386 for qboot
+    (includes some system headers)
+
+ -- Michael Tokarev <mjt@tls.msk.ru>  Sat, 14 Dec 2019 14:07:27 +0300
+
+qemu (1:4.1-3) unstable; urgency=medium
+
+  * mention #939869 (CVE-2019-15890) in previous changelog entry
+  * add Provides: sgabios to qemu-data (Closes: #945924)
+  * fix qemu-debootsrtap (add hppa arch, print correct error message)
+    thanks to Helge Deller (Closes: #923410)
+  * enable long binfmt masks again for mips/mips32 (Closes: #829243)
+
+ -- Michael Tokarev <mjt@tls.msk.ru>  Mon, 02 Dec 2019 13:24:58 +0300
+
+qemu (1:4.1-2) unstable; urgency=medium
+
+  * build sgabios in build-indep, conflict with sgabios package
+  * qemu-system-ppc: build and install canyonlands.dtb in addition to bamboo.dtb
+  * remove duplicated CVE-2018-20123 & CVE-2018-20124 in prev changelog
+  * move s390 firmware build rules to debian/s390fw.mak, build s390-netboot.img
+  * imported v4.1.1.diff - upstream stable branch
+    Closes: CVE-2019-12068
+    Closes: #945258, #945072
+  * enable-pschange-mc-no.patch: i386: add PSCHANGE_MC_NO feature
+    to allow disabling ITLB multihit mitigations in nested hypervisors
+    Closes: #944623
+  * build-depend on nettle-dev, enable nettle, and clarify --enable-lzo
+  * switch to system libslirp, build-depend on libslirp-dev
+    Closes: #939869, CVE-2019-15890
+
+ -- Michael Tokarev <mjt@tls.msk.ru>  Mon, 25 Nov 2019 12:54:05 +0300
+
+qemu (1:4.1-1) unstable; urgency=medium
+
+  * new upstream release v4.1
+    Closes: #933741, CVE-2019-14378 (slirp buff overflow in packet reassembly)
+     (use internal slirp copy for now)
+    Closes: #931351, CVE-2019-13164 (qemu-bridge-helper long IFNAME)
+    Closes: #922923, CVE-2019-8934 (ppc64 emulator leaks hw identity)
+    Closes: #916442, CVE-2018-20123 (pvrdma memory leak in device hotplug)
+    Closes: #922461, CVE-2018-20124 (pvrdma num_sge can exceed MAX_SGE)
+    Closes: #927924 (new upstream version)
+    Closes: #897054 (AMD Zen CPU support)
+    Closes: #935324 (FTBFS due to gluster API change)
+    Closes: CVE-2018-20125 (pvrdma: DoS in create_cq_ring|create_qp_rings)
+    Closes: CVE-2018-20126 (pvrdma: memleaks in create_cq_ring|create_qp_rings)
+    Closes: CVE-2018-20191 (pvrdma: DoS due to missing read operation impl.)
+    Closes: CVE-2018-20216 (pvrdma: infinite loop in pvrdma_dev_ring.c)
+  * remove patches which are applied upstream, refresh remaining patches
+    (bt-use-size_t-...-CVE-2018-19665.patch hasn't been applied upstream,
+    bluetooth subsystem is going to be removed, we keep it for now)
+  * debian/source/options: ignore slirp/ submodule
+  * use python3 for building, not python
+  * debian/optionrom.mk: add pvh.bin
+  * switch from libssh2 to libssh, and enable libssh support in ubuntu
+  * bump spice version requiriment to 0.12.5
+  * enable pvrdma
+  * debian/control-in: remove reference to libsdl
+  * debian/rules: add new objects for s390-ccw fw
+  * debian/control: add build dependency on python3-sphinx for docs
+  * install ui/icons/qemu.svg and qemu.desktop
+  * debian/rules: remove pc-bios/bamboo.dtb before building it
+  * install vhost-user-gpu binary and 50-qemu-gpu.json
+  * debian/rules: remove old maintscript-helper invocations, not needed anymore
+  * remove +dfsg for now, upload whole upstream source, will trim it later
+
+ -- Michael Tokarev <mjt@tls.msk.ru>  Tue, 27 Aug 2019 12:43:43 +0300
+
+qemu (1:4.0+dfsg-0ubuntu10) focal; urgency=medium
+
+  * d/p/ubuntu/lp-1848556-curl-Handle-success-in-multi_check_completion.patch:
+    fix a potential hang when qemu or qemu-img where accessing http backed
+    disks via libcurl (LP: #1848556)
+  * d/p/u/lp-1848497-virtio-balloon-fix-QEMU-4.0-config-size-migration-in.patch:
+    fix migration issue from qemu <4.0 when using virtio-balloon (LP: #1848497)
+
+ -- Christian Ehrhardt <christian.ehrhardt@canonical.com>  Mon, 21 Oct 2019 14:51:45 +0200
+
+qemu (1:4.0+dfsg-0ubuntu9) eoan; urgency=medium
+
+  * d/p/lp-1842774-s390x-cpumodel-Add-the-z15-name-to-the-description-o.patch:
+    update the z15 model name (LP: #1842774)
+
+ -- Christian Ehrhardt <christian.ehrhardt@canonical.com>  Tue, 24 Sep 2019 11:42:58 +0200
+
+qemu (1:4.0+dfsg-0ubuntu8) eoan; urgency=medium
+
+  * d/binfmt-update-in: fix binfmt being called in some containers
+    (LP: #1840956)
+
+ -- Christian Ehrhardt <christian.ehrhardt@canonical.com>  Mon, 09 Sep 2019 11:03:13 +0200
+
+qemu (1:4.0+dfsg-0ubuntu7) eoan; urgency=medium
+
+  * No-change upload with strops.h and sys/strops.h removed in glibc.
+
+ -- Matthias Klose <doko@ubuntu.com>  Thu, 05 Sep 2019 11:07:25 +0000
+
+qemu (1:4.0+dfsg-0ubuntu6) eoan; urgency=medium
+
+  * d/p/ubuntu/lp-1841066-*: fix detection of arch_capability flags
+    (LP: #1841066)
+
+ -- Christian Ehrhardt <christian.ehrhardt@canonical.com>  Mon, 26 Aug 2019 12:08:04 +0200
+
+qemu (1:4.0+dfsg-0ubuntu5) eoan; urgency=medium
+
+  * d/p/ubuntu/lp-1836154-*: further fixups for HW CPU model for newer
+    s390x machines (LP: #1836154)
+
+ -- Christian Ehrhardt <christian.ehrhardt@canonical.com>  Wed, 17 Jul 2019 13:20:42 +0200
+
+qemu (1:4.0+dfsg-0ubuntu4) eoan; urgency=medium
+
+  * d/control-in: promote qemu-efi/ovmf in Ubuntu (LP: #1570617)
+    - pick Debian change for (#889885)
+      move ovmf to recommends on debian and update aarch ovmf refs
+    - stop Ubuntu to drop ovmf/qemu-efi to a suggest
+
+ -- Christian Ehrhardt <christian.ehrhardt@canonical.com>  Fri, 12 Jul 2019 12:48:24 +0200
+
+qemu (1:4.0+dfsg-0ubuntu3) eoan; urgency=medium
+
+  * d/p/ubuntu/lp-1836159-fix-with-latest-kernel.patch: fix build issues
+    for missing SIOCGSTAMP definition; final fix is still in discussion
+    upstream (LP: 1836159)
+
+ -- Christian Ehrhardt <christian.ehrhardt@canonical.com>  Thu, 11 Jul 2019 10:10:00 +0200
+
+qemu (1:4.0+dfsg-0ubuntu2) eoan; urgency=medium
+
+  * d/p/ubuntu/lp-1836066-s390-cpumodel-fix-description-for-the-new-vector-fac:
+    fix naming of the new vector facitlity (LP: #1836066)
+  * d/control-in: update VCS links in control template as well
+
+ -- Christian Ehrhardt <christian.ehrhardt@canonical.com>  Thu, 11 Jul 2019 08:18:44 +0200
+
+qemu (1:4.0+dfsg-0ubuntu1) eoan; urgency=medium
+
+  * Merge with Upstream release of qemu 4.0.
+    Among many other things this fixes LP Bugs:
+    LP: #1782206 - SnowRidge Accelerator Interfacing Architecture (AIA)
+    LP: #1828038 - Update s390x CPU Model for more HW support
+    LP: #1832622 - count cache flush Spectre v2 mitigation for ppc64el
+    Remaining Changes:
+    - qemu-kvm to systemd unit
+      - d/qemu-kvm-init: script for QEMU KVM preparation modules, ksm,
+        hugepages and architecture specifics
+      - d/qemu-system-common.qemu-kvm.service: systemd unit to call
+        qemu-kvm-init
+      - d/qemu-system-common.install: install helper script
+      - d/qemu-system-common.maintscript: clean old sysv and upstart scripts
+      - d/qemu-system-common.qemu-kvm.default: defaults for
+        /etc/default/qemu-kvm
+      - d/rules: call dh_installinit and dh_installsystemd for qemu-kvm
+    - Enable nesting by default
+      - d/qemu-system-x86.modprobe: set nested=1 module option on intel.
+        (is default on amd)
+      - d/qemu-system-x86.postinst: re-load kvm_intel.ko if it was loaded
+        without nested=1
+      - d/p/ubuntu/expose-vmx_qemu64cpu.patch: expose nested kvm by default
+        in qemu64 cpu type.
+      - d/p/ubuntu/enable-svm-by-default.patch: Enable nested svm by default
+        in qemu64 on amd
+      - d/qemu-system-x86.README.Debian: document intention of nested being
+        default is comfort, not full support
+    - Distribution specific machine type (LP: 1304107 1621042)
+      - d/p/ubuntu/define-ubuntu-machine-types.patch: define distro machine
+        types
+      - d/qemu-system-x86.NEWS Info on fixed machine type definitions
+        for host-phys-bits=true (LP: 1776189)
+      - add an info about -hpb machine type in debian/qemu-system-x86.NEWS
+      - provide pseries-bionic-2.11-sxxm type as convenience with all
+        meltdown/spectre workarounds enabled by default. (LP: 1761372).
+    - improved dependencies
+      - Make qemu-system-common depend on qemu-block-extra
+      - Make qemu-utils depend on qemu-block-extra
+      - let qemu-utils recommend sharutils
+    - s390x support
+      - Create qemu-system-s390x package
+      - Enable numa support for s390x
+    - arch aware kvm wrappers
+    - d/control: update VCS links
+    - qemu-guest-agent: freeze-hook fixes (LP: 1484990)
+      - d/qemu-guest-agent.install: provide /etc/qemu/fsfreeze-hook
+      - d/qemu-guest-agent.dirs: provide /etc/qemu/fsfreeze-hook.d
+    - d/control-in: enable RDMA support in qemu (LP: 1692476)
+        - enable RDMA config option
+        - add libibumad-dev build-dep
+    - tolerate ipxe size change on migrations to >=18.04 (LP: 1713490)
+      - d/p/ubuntu/pre-bionic-256k-ipxe-efi-roms.patch: old machine types
+        reference 256k path
+      - d/control-in: depend on ipxe-qemu-256k-compat-efi-roms to be able to
+        handle incoming migrations from former releases.
+    - d/control-in: Disable capstone disassembler library support (universe)
+    - Move s390x roms to a new qemu-system-data-s390x
+      - d/qemu-system-data.install: install s390x roms as architecture:all in
+        qemu-system-data
+      - d/rules: build s390-ccw.img with upstream Makefile
+      - d/rules: build s390-netboot.img with upstream Makefile
+      - d/p/ubuntu/lp-1790901-partial-SLOF-for-s390x-netboot.patch: bring back
+        some SLOF bits stripped in DFSG to be able to build s390x-netboot roms
+        As that hack to build s390-ccw.img rom can't build s390x-netboot.img
+        replace it with a build-indep using the upstream makefiles.
+        This is less prone to miss future changes/fixes that are done to the
+        makefiles
+      - d/control-in: add breaks/replaces for moving s390x roms from
+        qemu-system-s390x to qemu-system-data
+    - remove /dev/kvm permission handling (moved to systemd 239-6) (#892945)
+      [From not yet uploaded Debian branch]
+    - d/p/debianize-qemu-guest-service.patch: fix path of qemu-ga
+    - d/rules: fix qemu-kvm service for debhelper compat >=12
+    - disable pvrdma - besides several security holes there are many other
+      bugs there as well
+  * Dropped patches that are upstream in v4.0
+    - d/p/do-not-link-everything-with-xen.patch
+    - d/p/usb-mtp-use-O_NOFOLLOW-and-O_CLOEXEC-CVE-2018-16872.patch
+    - d/p/hw_usb-fix-mistaken-de-initialization-of-CCID-state.patch
+    - d/p/scsi-generic-avoid-possible-oob-access-to-r-buf-CVE-2019-6501.patch
+    - d/p/slirp-check-data-length-while-emulating-ident-function-CVE-2019-6778
+    - d/p/i2c-ddc-fix-oob-read-CVE-2019-3812.patch
+    - d/p/ubuntu/lp-1759509-qmp-query-current-machine-with-wakeup-suspend-suppor
+      (LP: 1759509)
+    - d/p/ubuntu/lp-1759509-qga-update-guest-suspend-ram-and-guest-suspend-hybri
+    - d/p/ubuntu/lp-1759509-qmp-hmp-Make-system_wakeup-check-wake-up-support-and
+    - d/p/ubuntu/lp-1812384-s390x-Return-specification-exception-for-unimplement
+    - d/p/ubuntu/CVE-2018-20815.patch
+    - d/p/ubuntu/CVE-2019-5008.patch
+    - d/p/ubuntu/CVE-2019-9824.patch
+    - d/p/ubuntu/Revert-target-i386-kvm-add-VMX-migration-blocker.patch:
+      avoid misdetection of simplified nesting blocking all migrations
+  * Dropped further patches
+    d/p/bt-use-size_t-type-for-length-parameters-instead-of-int-CVE-2018-19665
+    [upstream deprecated the whole subsystem instead of applying the fix]
+  * Added Changes
+    - updated ubuntu machine types for v4.0
+      - added eoan types
+      - fixed s390x issue of upstream types having a "v" prefix
+      - add back dropped machine types to avoid more issues like LP: 1802944
+      - fix kvm split irqchip default in ubuntu q35 machine type
+      - drop no more needed spapr_machine_2_11_sxxm_instance_options and
+        adapt updated CamelCase
+      - -hpb types now need to use GlobalProperties
+      - pc_compat_2_0 got a _fn suffix and slight changes
+    - d/p/ubuntu/lp-1790901-partial-SLOF-for-s390x-netboot.patch: update to
+      SLOF of qemu 4.0
+    - Refreshed patches still needed for v4.0 context changes
+      - d/p/use-fixed-data-path.patch
+      - d/p/ubuntu/enable-svm-by-default.patch
+      - d/p/ubuntu/enable-md-clear.patch
+      - d/p/ubuntu/pre-bionic-256k-ipxe-efi-roms.patch
+    - d/p/ubuntu/lp-1830243-*: s390x Secure Linux Boot Toleration
+      (LP: #1830243)
+    - d/control: disable bluetooth being deprecated
+    - d/control*: remove sdlabi which was removed upstream
+    - d/p/ubuntu/lp-1830238-*: s390x hardware cpu model (LP: #1830238)
+    - d/control*: enable docs (now explicit) and provide new build-dep
+      python3-sphinx
+    - d/not-installed: ignore new interop docs and extra icons for now
+    - d/not-installed: do not install elf2dmp until namespaced
+    - d/qemu-utils.install: install new tools qemu-edid and qemu-keymap
+    - d/qemu-system-data.install: use new paths for formerly used icons
+    - d/p/ubuntu/linux-user-fix-__NR_semtimedop-undeclared-error.patch:
+      fix i386 build error
+
+ -- Christian Ehrhardt <christian.ehrhardt@canonical.com>  Mon, 24 Jun 2019 16:33:19 +0200
+
+qemu (1:3.1+dfsg-8) unstable; urgency=high
+
+  * sun4u-add-power_mem_read-routine-CVE-2019-5008.patch
+    fixes a null-pointer dereference in sparc/sun4u emulated hw
+    Closes: #927439, CVE-2019-5008
+  * enable-md-no.patch & enable-md-clear.patch
+    mitigation for MDS (Microarchitectural Data Sampling) issues
+    Closes: #929067,
+    CVE-2018-12126, CVE-2018-12127, CVE-2018-12130, CVE-2019-11091
+  * qxl-check-release-info-object-CVE-2019-12155.patch
+    fixes null-pointer deref in qxl cleanup code
+    Closes: #929353, CVE-2019-12155
+  * aarch32-exception-return-to-switch-from-hyp-mon.patch
+    fixes booting U-Boot in UEFI mode on aarch32
+    Closes: #927763
+  * stop qemu-system-common pre-depending on adduser
+    Closes: #929261
+
+ -- Michael Tokarev <mjt@tls.msk.ru>  Mon, 27 May 2019 07:49:25 +0300
+
+qemu (1:3.1+dfsg-7) unstable; urgency=high
+
+  [ Michael Tokarev ]
+  * device_tree-don-t-use-load_image-CVE-2018-20815.patch
+    fix heap buffer overflow while loading device tree blob
+    (Closes: CVE-2018-20815)
+
+  [ Christian Ehrhardt ]
+  * qemu-guest-agent: fix path of fsfreeze-hook (LP: #1820291)
+   - d/qemu-guest-agent.install: use correct path for fsfreeze-hook
+   - d/qemu-guest-agent.pre{rm|inst}/.postrm: special handling for
+     mv_conffile since the new path is a directory in the old package
+     version which can not be handled by mv_conffile.
+
+ -- Michael Tokarev <mjt@tls.msk.ru>  Wed, 27 Mar 2019 14:24:06 +0300
+
+qemu (1:3.1+dfsg-6) unstable; urgency=high
+
+  * slirp-check-sscanf-result-when-emulating-ident-CVE-2019-9824.patch
+    fix information leakage in slirp code (Closes: CVE-2019-9824)
+
+ -- Michael Tokarev <mjt@tls.msk.ru>  Mon, 18 Mar 2019 14:41:51 +0300
+
+qemu (1:3.1+dfsg-5) unstable; urgency=high
+
+  * i2c-ddc-fix-oob-read-CVE-2019-3812.patch fixes
+    OOB read in hw/i2c/i2c-ddc.c which allows for memory disclosure.
+    Closes: #922635, CVE-2019-3812
+
+ -- Michael Tokarev <mjt@tls.msk.ru>  Mon, 11 Mar 2019 14:30:44 +0300
+
+qemu (1:3.1+dfsg-4) unstable; urgency=medium
+
+  * mention closing of #855043 by 3.1+dfsg-3
+  * disable pvrdma for now, it is a bit too buggy.
+    Besides several security holes there are many other bugs there as well,
+    and the amount of patches applied upstream after 3.1 release is large
+    (Closes, or really makes unimportant again: CVE-2018-20123 CVE-2018-20124
+     CVE-2018-20125 CVE-2018-20126 CVE-2018-20191 CVE-2018-20216)
+
+ -- Michael Tokarev <mjt@tls.msk.ru>  Mon, 11 Feb 2019 14:00:09 +0300
+
+qemu (1:3.1+dfsg-3) unstable; urgency=medium
+
+  [ Michael Tokarev ]
+  * mention #696289 closed by 2.10
+  * move ovmf to recommends on debian and update aarch ovmf refs
+    (Closes: #889885, #855043)
+  * remove /dev/kvm permission handling (moved to systemd 239-6)
+    (Closes: #892945)
+  * build qemu-palcode using alpha cross-compiler
+    (Closes: #913103)
+  * fix path in qemu-guest-agent.service (#918378), fixs Bind[s]To
+    (Closes: #918378
+  * use int for sparc64 timeval.tv_usec
+    (Closes: #920032)
+  * build-depend on libglusterfs-dev not glusterfs-common
+    (Closes: #919668, #881527)
+  * add breaks: qemu-system-data to qemu-system-common,
+    to close #916279 completely (all this can be removed after buster)
+    (Closes: #916279)
+  * scsi-generic-avoid-possible-oob-access-to-r-buf-CVE-2019-6501.patch
+    (Closes: #920222, CVE-2019-6501)
+  * slirp-check-data-length-while-emulating-ident-function-CVE-2019-6778.patch
+    (Closes: #921525)
+  * pvrdma-release-device-resources-on-error-CVE-2018-20123.patch
+    (Closes: #916442, CVE-2018-20123)
+  * enable rdma and pvrdma, build-depend on
+    librdmacm-dev, libibverbs-dev, libibumad-dev
+  * sync debian/qemu-user-static.1 and debian/qemu-user.1 generate the latter
+    from the former (finally Closes: #901407)
+  * move ivshmem-server & ivshmem-client from qemu-utils to qemu-system-common
+    (the binaries are also specific to qemu-system, not useable alone)
+  * move qemu-pr-helper from qemu-utils to qemu-system-common -
+    this is an internal qemu-system helper, with possible socket activation,
+    not intended for use outside of qemu-system
+
+  [ Christian Ehrhardt ]
+  * qemu-guest-agent: freeze-hook to ignore dpkg files (packaging changes)
+
+ -- Michael Tokarev <mjt@tls.msk.ru>  Wed, 06 Feb 2019 12:23:01 +0300
+
+qemu (1:3.1+dfsg-2ubuntu5) eoan; urgency=medium
+
+  * d/p/ubuntu/define-ubuntu-machine-types.patch: fix wily machine type being
+    broken since 2.11 due to 2.3/2.4 version mismatch in its definition to
+    fix migrations from old machines (LP: #1829868).
+  * d/p/ubuntu/lp-1830704-s390x-cpumodel-ignore-csske-for-expansion.patch
+    toleration for future machines (LP: #1830704
+
+ -- Christian Ehrhardt <christian.ehrhardt@canonical.com>  Tue, 28 May 2019 11:30:42 +0200
+
+qemu (1:3.1+dfsg-2ubuntu4) eoan; urgency=medium
 
   * SECURITY UPDATE: Add support for exposing md-clear functionality
     to guests
     - d/p/ubuntu/enable-md-clear.patch
+    - d/p/ubuntu/enable-md-no.patch
     - CVE-2018-12126, CVE-2018-12127, CVE-2018-12130, CVE-2019-11091
   * SECURITY UPDATE: heap overflow when loading device tree blob
     - d/p/ubuntu/CVE-2018-20815.patch: specify how large the buffer to
       copy the device tree blob into is.
     - CVE-2018-20815
+  * SECURITY UPDATE: device driver denial of service via NULL pointer
+    dereference
+    - d/p/ubuntu/CVE-2019-5008.patch: Define skeleton 'power_mem_read'
+      routine
+    - CVE-2019-5008
   * SECURITY UPDATE: information leak in SLiRP
     - d/p/ubuntu/CVE-2019-9824.patch: check sscanf result when
       emulating ident.
     - CVE-2019-9824
 
- -- Steve Beattie <sbeattie@ubuntu.com>  Wed, 08 May 2019 23:24:12 -0700
+ -- Steve Beattie <sbeattie@ubuntu.com>  Wed, 08 May 2019 09:27:53 -0700
 
-qemu (1:2.11+dfsg-1ubuntu7.12) bionic-security; urgency=medium
+qemu (1:3.1+dfsg-2ubuntu3) disco; urgency=medium
 
-  [ Marc Deslauriers ]
-  * SECURITY UPDATE: TOCTTOU in MTP
-    - debian/patches/CVE-2018-16872.patch: use O_NOFOLLOW and O_CLOEXEC in
-      hw/usb/dev-mtp.c.
-    - CVE-2018-16872
-  * SECURITY UPDATE: race during file renaming in v9fs_wstat
-    - debian/patches/CVE-2018-19489.patch: add locks to hw/9pfs/9p.c.
-    - CVE-2018-19489
-  * SECURITY UPDATE: out-of-bounds read via i2 commands
-    - debian/patches/CVE-2019-3812.patch: add bounds check to
-      hw/i2c/i2c-ddc.c.
-    - CVE-2019-3812
-  * SECURITY UPDATE: heap based buffer overflow in slirp
-    - debian/patches/CVE-2019-6778.patch: check data length while emulating
-      ident function in slirp/tcp_subr.c.
-    - CVE-2019-6778
-
-  [ Christian Ehrhardt ]
-  * fix crash when performing block pull on partial cluster (LP: #1818264)
-    - d/p/ubuntu/lp-1818264-block-Fix-copy-on-read-crash-with-partial.patch
   * qemu-guest-agent: fix path of fsfreeze-hook (LP: #1820291)
     - d/qemu-guest-agent.install: use correct path for fsfreeze-hook
     - d/qemu-guest-agent.pre{rm|inst}/.postrm: special handling for
       mv_conffile since the new path is a directory in the old package
-      version which can not be handled by mv_conffile
+      version which can not be handled by mv_conffile.
+  * i2c-ddc-fix-oob-read-CVE-2019-3812.patch fixes
+    OOB read in hw/i2c/i2c-ddc.c which allows for memory disclosure.
+    Closes: #922635 (Thanks to Gerd Hoffmann and Michael Tokarev)
+    CVE-2019-3812
 
- -- Marc Deslauriers <marc.deslauriers@ubuntu.com>  Mon, 25 Mar 2019 08:32:58 -0400
+ -- Christian Ehrhardt <christian.ehrhardt@canonical.com>  Mon, 18 Mar 2019 09:20:07 +0100
 
-qemu (1:2.11+dfsg-1ubuntu7.10) bionic; urgency=medium
+qemu (1:3.1+dfsg-2ubuntu2) disco; urgency=medium
 
-  * d/p/ubuntu/lp-1806104-spapr_pci-Remove-unhelpful-pagesize-warning.patch:
-    remove misleading page size warning on qemu-system-ppc64 (LP: #1806104)
-  * d/p/ubuntu/lp-1812384-s390x-Return-specification-exception.patch: ensure
-    a proper exception on unknown diag 308 subcodes
-    (LP: #1812384)
-  * d/p/ubuntu/lp-1809083-*: fix backward migration on ppc64el (LP: #1809083)
+  * disable pvrdma - besides several security holes there are many other
+    bugs there as well, and the amount of patches applied upstream after
+    3.1 release is large (Closes, or actuallymakes unimportant again)
+    - CVE-2018-20123
+    - CVE-2018-20124
+    - CVE-2018-20125
+    - CVE-2018-20126
+    - CVE-2018-20191
+    - CVE-2018-20216
+  * scsi-generic-avoid-possible-oob-access-to-r-buf-CVE-2019-6501.patch
+    - CVE-2019-6501
+  * slirp-check-data-length-while-emulating-ident-function-CVE-2019-6778.patch
+    - CVE-2019-6778
 
- -- Christian Ehrhardt <christian.ehrhardt@canonical.com>  Thu, 31 Jan 2019 14:07:51 +0100
+ -- Christian Ehrhardt <christian.ehrhardt@canonical.com>  Tue, 19 Feb 2019 06:43:04 +0100
 
-qemu (1:2.11+dfsg-1ubuntu7.9) bionic; urgency=medium
+qemu (1:3.1+dfsg-2ubuntu1) disco; urgency=medium
 
-  * debian/patches/ubuntu/lp1787405-*: Support guest dedicated Crypto
-    Adapters on s390x (LP: #1787405)
+  * Merge with Debian testing, Among many other things this fixes LP Bugs:
+    LP: #1806104 - fix misleading page size error on ppc64el
+    LP: #1782205 - SnowRidge enabled new ISAs
+    LP: #1786956 - upgrade to qemu >= 3.0
+    LP: #1809083 - Backward migration to Xenial on ppc64el
+    LP: #1803315 - s390x Huge page enablement
+    LP: #1657409 - enable virglrenderer
+    Remaining Changes:
+    - qemu-kvm to systemd unit
+      - d/qemu-kvm-init: script for QEMU KVM preparation modules, ksm,
+        hugepages and architecture specifics
+      - d/qemu-kvm.service: systemd unit to call qemu-kvm-init
+      - d/qemu-system-common.install: install systemd unit and helper script
+      - d/qemu-system-common.maintscript: clean old sysv and upstart scripts
+      - d/qemu-system-common.qemu-kvm.default: defaults for
+        /etc/default/qemu-kvm
+      - d/rules: install /etc/default/qemu-kvm
+    - Enable nesting by default
+      - d/qemu-system-x86.modprobe: set nested=1 module option on intel.
+        (is default on amd)
+      - d/qemu-system-x86.postinst: re-load kvm_intel.ko if it was loaded
+        without nested=1
+      - d/p/ubuntu/expose-vmx_qemu64cpu.patch: expose nested kvm by default
+        in qemu64 cpu type.
+      - d/p/ubuntu/enable-svm-by-default.patch: Enable nested svm by default
+        in qemu64 on amd
+      - d/qemu-system-x86.README.Debian: document intention of nested being
+        default is comfort, not full support
+    - Distribution specific machine type (LP: 1304107 1621042 1776189 1761372)
+      - d/p/ubuntu/define-ubuntu-machine-types.patch: define distro machine
+        types
+      - d/qemu-system-x86.NEWS Info on fixed machine type definitions
+        for host-phys-bits=true (LP: 1776189)
+      - add an info about -hpb machine type in debian/qemu-system-x86.NEWS
+      - d/p/ubuntu/lp-1761372-*: provide pseries-bionic-2.11-sxxm type as
+        convenience with all meltdown/spectre workarounds enabled by default.
+        (LP: 1761372).
+    - improved dependencies
+      - Make qemu-system-common depend on qemu-block-extra
+      - Make qemu-utils depend on qemu-block-extra
+      - let qemu-utils recommend sharutils
+    - s390x support
+      - Create qemu-system-s390x package
+      - Enable numa support for s390x
+    - arch aware kvm wrappers
+    - d/control: update VCS links (updated to match latest Ubuntu)
+    - qemu-guest-agent: freeze-hook fixes (LP: 1484990)
+      - d/qemu-guest-agent.install: provide /etc/qemu/fsfreeze-hook
+      - d/qemu-guest-agent.dirs: provide /etc/qemu/fsfreeze-hook.d
+    - d/control-in: enable RDMA support in qemu (LP: 1692476)
+        - enable RDMA config option
+        - add libibumad-dev build-dep
+    - tolerate ipxe size change on migrations to >=18.04 (LP: 1713490)
+      - d/p/ubuntu/pre-bionic-256k-ipxe-efi-roms.patch: old machine types
+        reference 256k path
+      - d/control-in: depend on ipxe-qemu-256k-compat-efi-roms to be able to
+        handle incoming migrations from former releases.
+    - d/control-in: Disable capstone disassembler library support (universe)
+  * Added Changes:
+    - d/p/ubuntu/define-ubuntu-machine-types.patch: update machine type changes
+      for qemu 3.1 in the Ubuntu Disco release
+    - d/p/ubuntu/lp-1759509-* fix waking up VMs from dompmsuspend (LP: #1759509)
+    - Move s390x roms to a new qemu-system-data-s390x
+      - d/qemu-system-data.install: install s390x roms as architecture:all in
+        qemu-system-data
+      - d/rules: build s390-ccw.img with upstream Makefile
+      - d/rules: build s390x-netboot.img with upstream Makefile
+      - d/p/ubuntu/lp-1790901-partial-SLOF-for-s390x-netboot.patch: bring back
+        some SLOF bits stripped in DFSG to be able to build s390x-netboot roms
+        As that hack to build s390-ccw.img rom can't build s390x-netboot.img
+        replace it with a build-indep using the upstream makefiles.
+        This is less prone to miss future changes/fixes that are done to the
+        makefiles
+      - d/control-in: add breaks/replaces for moving s390x roms from
+        qemu-system-s390x to qemu-system-data
+    - remove /dev/kvm permission handling (moved to systemd 239-6) (#892945)
+      [From not yet uploaded Debian branch]
+    - d/p/debianize-qemu-guest-service.patch: fix path of qemu-ga
+      (Closes: #918378)
+    - d/rules: fix qemu-kvm service for debhelper compat >=12
+    - d/p/ubuntu/Revert-target-i386-kvm-add-VMX-migration-blocker.patch:
+      avoid misdetection of simplified nesting blocking all migrations
+    - d/p/ubuntu/lp-1812384-s390x-Return-specification-exception-for-
+      unimplement.patch: properly return archicture defined exception
+      on bad subcodes of diag 308 (LP: #1812384)
+  * Dropped Changes:
+    - Include s390-ccw.img firmware (old style native build)
+    - d/rules enable install s390x-netboot.img (old style native build)
+    - libvirt/qemu user/group support
+      - qemu-system-common.postinst: remove acl placed by udev, and add udevadm
+        trigger.
+        [ Droppable since logind properly sets ACLs now ]
+      - qemu-system-common.preinst: add kvm group if needed
+        [ Droppable because systemd/udev take care of it since 239-6]
+    - d/p/guest-agent-freeze-hook-skip-dpkg-artifacts.patch of qemu-guest-agent
+      freeze-hook fixes (LP: 1484990)
+      [upstream]
+    - d/p/ubuntu/CVE-2018-3639/* update for qemu 2.12 using the final patches
+      merged upstream
+      [upstream]
+    - d/p/ubuntu/CVE-2018-11806-slirp-correct-size.patch: slirp: correct size
+      computation while concatenating mbuf.
+      CVE-2018-11806
+      [upstream]
+    - d/p/ubuntu/lp-1781526-powerpc64-align-memory-THP.patch: align to 2MB
+      for powerpc64 to speed up translation (LP: 1781526)
+      [upstream]
+    - d/p/ubuntu/lp-1780773-s390x-cpumodels-add-z14-Model-ZR1.patch: Add
+      cpu model for z14 ZR1 (LP: 1780773).
+      [upstream]
+    - Mark qemu-system-data foreign to be able to install it e.g. on i386
+      (Closes: 903562)
+      [in Debian]
+    - d/control-in: qemu-keymaps is provided by qemu-system-data now (from yet
+      unreleased Debian version)
+      [in Debian]
+    - d/p/lp-1755912-qxl-fix-local-renderer-crash.patch: Fix an issue triggered
+      by migrations with UI frontends or frequent guest resolution changes
+      (LP #1755912)
+      [upstream]
+    - d//ubuntu/target-ppc-extend-eieio-for-POWER9.patch: Backport to
+      extend eieio for POWER9 emulation (LP: 1787408).
+      [upstream]
+    - d/p/ubuntu/lp-1789551-seccomp-set-the-seccomp-filter-to-all-threads.patch:
+      ensure that the seccomp blacklist is applied to all threads (LP: 1789551)
+      [upstream]
+    - improve s390x spectre mitigation with etoken facility (LP: 1790457)
+      [upstream]
+    - Update pxe netboot images for KVM s390x to qemu 3.0 level (LP: 1790901)
+      [upstream]
+    - d/control-in: our addition of a qemu-system-s390x package needs to follow
+      the split of qemu-system-data by adding a dependency to it (LP: 1798084)
+      [in Debian]
+    - debian/patches/ubuntu/lp1787405-*: Support guest dedicated Crypto
+      Adapters on s390x (LP: 1787405)
+      [upstream]
+    - enable opengl for vfio-MDEV support (LP: 1804766)
+      [in Debian]
+    - SECURITY UPDATE: integer overflow in NE2000 NIC emulation
+      [upstream]
+    - SECURITY UPDATE: integer overflow via crafted QMP command
+      [upstream]
+    - SECURITY UPDATE: OOB heap buffer r/w access in NVM Express Controller
+      [upstream]
+    - SECURITY UPDATE: buffer overflow in rtl8139
+      [upstream]
+    - SECURITY UPDATE: buffer overflow in pcnet
+      [upstream]
+    - SECURITY UPDATE: DoS via large packet sizes
+      [upstream]
+    - SECURITY UPDATE: DoS in lsi53c895a
+      [upstream]
+    - SECURITY UPDATE: Out-of-bounds r/w stack access in ppc64
+      [upstream]
+    - SECURITY UPDATE: race condition in 9p
+      [upstream]
 
- -- Christian Ehrhardt <christian.ehrhardt@canonical.com>  Thu, 15 Nov 2018 12:29:56 +0100
+ -- Christian Ehrhardt <christian.ehrhardt@canonical.com>  Tue, 08 Jan 2019 09:41:08 +0100
 
-qemu (1:2.11+dfsg-1ubuntu7.8) bionic-security; urgency=medium
+qemu (1:3.1+dfsg-2) unstable; urgency=medium
 
+  * d/rules: split arch and indep builds
+  * enable s390x cross-compiler and build s390-ccw.img (Closes: #684909)
+  * build x86 optionrom in qemu-system-data (was in seabios/debian/)
+  * qemu-system-data: Multi-Arch: allowed=>foreign (Closes: #903562)
+  * fix Replaces: version for qemu-system-common (Closes: #916279)
+  * add simple udev rules file for systemd guest agent (Closes: #916674)
+  * usb-mtp-use-O_NOFOLLOW-and-O_CLOEXEC-CVE-2018-16872.patch
+    Race condition in usb_mtp implementation (Closes: #916397)
+  * bt-use-size_t-type-for-length-parameters-instead-of-int-CVE-2018-19665.patch
+    Memory corruption in bluetooth subsystem (Closes: #916278)
+  * hw_usb-fix-mistaken-de-initialization-of-CCID-state.patch (Closes: #917007)
+  * bump debhelper compat to 12 (>>11)
+  * d/rules: use dh_missing instead of dh_install --list-missing (compat=12)
+  * use dh_installsystemd for guest agent (Closes: #916625)
+  * mention closing by 3.1: Closes: #912655, CVE-2018-16847
+  * mention closing by 2.10:
+    Closes: #849798, CVE-2016-10028
+    Closes: CVE-2017-9060
+    Closes: CVE-2017-8284
+
+ -- Michael Tokarev <mjt@tls.msk.ru>  Fri, 21 Dec 2018 16:51:39 +0300
+
+qemu (1:3.1+dfsg-1) unstable; urgency=medium
+
+  * new upstream release (3.1)
+  * Security bugs fixed by upstream:
+    Closes: #910431, CVE-2018-10839:
+     integer overflow leads to buffer overflow issue
+    Closes: #911468, CVE-2018-17962
+     pcnet: integer overflow leads to buffer overflow
+    Closes: #911469, CVE-2018-17963
+     net: ignore packets with large size
+    Closes: #908682, CVE-2018-3639
+     qemu should be able to pass the ssbd cpu flag
+    Closes: #901017, CVE-2018-11806
+     m_cat in slirp/mbuf.c in Qemu has a heap-based buffer overflow
+     via incoming fragmented datagrams
+    Closes: #902725, CVE-2018-12617
+     qmp_guest_file_read in qemu-ga has an integer overflow
+    Closes: #907500, CVE-2018-15746
+     qemu-seccomp might allow local OS guest users to cause a denial of service
+    Closes: #915884, CVE-2018-16867
+     dev-mtp: path traversal in usb_mtp_write_data of the MTP
+    Closes: #911499, CVE-2018-17958
+     Buffer Overflow in rtl8139_do_receive in hw/net/rtl8139.c
+     because an incorrect integer data type is used
+    Closes: #911470, CVE-2018-18438
+     integer overflows because IOReadHandler and its associated functions
+     use a signed integer data type for a size value
+    Closes: #912535, CVE-2018-18849
+     lsi53c895a: OOB msg buffer access leads to DoS
+    Closes: #914604, CVE-2018-18954
+     pnv_lpc_do_eccb function in hw/ppc/pnv_lpc.c in Qemu before 3.1
+     allows out-of-bounds write or read access to PowerNV memory
+    Closes: #914599, CVE-2018-19364
+     Use-after-free due to race condition while updating fid path
+    Closes: #914727, CVE-2018-19489
+     9pfs: crash due to race condition in renaming files
+    Closes: #912655, CVE-2018-16847
+     Out-of-bounds r/w buffer access in cmb operations
+  * remove patches which were applied upstream
+  * add new manpage qemu-cpu-models.7
+  * qemu-system-ppcemb is gone, use qemu-system-ppc[64]
+  * do-not-link-everything-with-xen.patch (trivial)
+  * get-orig-source: handle 3.x and 4.x, and remove roms again, as
+    upstream wants us to use separate source packages for that stuff
+  * move generated data from qemu-system-data back to qemu-system-common
+  * d/control: enable spice on arm64 (Closes: #902501)
+    (probably should enable on all)
+  * d/control: change git@salsa urls to https
+  * add qemu-guest-agent.service (Closes: #795486)
+  * enable opengl support and virglrenderer (Closes: #813658)
+  * simplify d/rules just a little bit
+  * build-depend on libudev-dev, for qga
+
+ -- Michael Tokarev <mjt@tls.msk.ru>  Sun, 02 Dec 2018 19:10:27 +0300
+
+qemu (1:2.12+dfsg-3ubuntu9) disco; urgency=medium
+
+  [ Marc Deslauriers ]
   * SECURITY UPDATE: integer overflow in NE2000 NIC emulation
     - debian/patches/CVE-2018-10839.patch: use proper type in
       hw/net/ne2000.c.
     - CVE-2018-10839
-  * SECURITY UPDATE: buffer overflow via incoming fragmented datagrams
-    - debian/patches/CVE-2018-11806.patch: correct size computation in
-      slirp/mbuf.c, slirp/mbuf.h.
-    - CVE-2018-11806
   * SECURITY UPDATE: integer overflow via crafted QMP command
     - debian/patches/CVE-2018-12617.patch: check bytes count read by
       guest-file-read in qga/commands-posix.c.
@@ -126,80 +1184,320 @@ qemu (1:2.11+dfsg-1ubuntu7.8) bionic-security; urgency=medium
       hw/9pfs/9p.c.
     - CVE-2018-19364
 
- -- Marc Deslauriers <marc.deslauriers@ubuntu.com>  Wed, 21 Nov 2018 14:17:51 -0500
+  [ Christian Ehrhardt]
+  * debian/patches/ubuntu/lp1787405-*: Support guest dedicated Crypto
+    Adapters on s390x (LP: #1787405)
+  * enable opengl for vfio-MDEV support (LP: #1804766)
+    - d/control-in: set --enable-opengl
+    - d/control-in: add gl related build-dependencies
 
-qemu (1:2.11+dfsg-1ubuntu7.7) bionic; urgency=medium
+ -- Christian Ehrhardt <christian.ehrhardt@canonical.com>  Wed, 21 Nov 2018 13:17:01 -0500
+
+qemu (1:2.12+dfsg-3ubuntu8) cosmic; urgency=medium
+
+  * d/control-in: our addition of a qemu-system-s390x package needs to follow
+    the split of qemu-system-data by adding a dependency to it (LP: #1798084)
+
+ -- Christian Ehrhardt <christian.ehrhardt@canonical.com>  Wed, 17 Oct 2018 10:50:27 +0200
+
+qemu (1:2.12+dfsg-3ubuntu7) cosmic; urgency=medium
 
   * Update pxe netboot images for KVM s390x to qemu 3.0 level (LP: #1790901)
     The SLOF source pieces in src:qemu are only used for s390x netboot,
     which are independent ROMs (no linking). All other binaries out of this
     are part of src:slof and independent.
-    - d/p/ubuntu/lp-1790901-partial-SLOF-for-s390x-netboot-2.11-to-3.0.patch
+    - d/p/ubuntu/lp-1790901-partial-SLOF-for-s390x-netboot-2.12-to-3.0.patch
     - d/p/ubuntu/lp-1790901-0*: backport s390x pxelinux netboot capabilities
       and related fixes
 
  -- Christian Ehrhardt <christian.ehrhardt@canonical.com>  Tue, 25 Sep 2018 13:31:15 +0200
 
-qemu (1:2.11+dfsg-1ubuntu7.6) bionic; urgency=medium
+qemu (1:2.12+dfsg-3ubuntu6) cosmic; urgency=medium
 
-  [ Christian Ehrhardt ]
-  * Add cpu model for z14 ZR1 (LP: #1780773)
-  * d/p/ubuntu/lp-1789551-seccomp-set-the-seccomp-filter-to-all-threads.patch:
-    ensure that the seccomp blacklist is applied to all threads (LP: #1789551)
-    - CVE-2018-15746
   * improve s390x spectre mitigation with etoken facility (LP: #1790457)
     - debian/patches/ubuntu/lp-1790457-s390x-kvm-add-etoken-facility.patch
     - debian/patches/ubuntu/lp-1790457-partial-s390x-linux-headers-update.patch
 
-  [ Phillip Susi ]
-  * d/p/ubuntu/lp-1787267-fix-en_us-vnc-pipe.patch: Fix pipe, greater than and
-    less than keys over vnc when using en_us kemaps (LP: #1787267).
+ -- Christian Ehrhardt <christian.ehrhardt@canonical.com>  Wed, 12 Sep 2018 10:06:48 +0200
 
- -- Christian Ehrhardt <christian.ehrhardt@canonical.com>  Wed, 29 Aug 2018 11:46:37 +0200
+qemu (1:2.12+dfsg-3ubuntu5) cosmic; urgency=medium
 
-qemu (1:2.11+dfsg-1ubuntu7.5) bionic; urgency=medium
+  * d/p/ubuntu/lp-1789551-seccomp-set-the-seccomp-filter-to-all-threads.patch:
+    ensure that the seccomp blacklist is applied to all threads (LP: #1789551)
+    - CVE-2018-15746
 
-  [Christian Ehrhardt]
+ -- Christian Ehrhardt <christian.ehrhardt@canonical.com>  Wed, 29 Aug 2018 08:50:36 +0200
+
+qemu (1:2.12+dfsg-3ubuntu4) cosmic; urgency=medium
+
+  [ Murilo Opsfelder Araujo ]
+  * d//ubuntu/target-ppc-extend-eieio-for-POWER9.patch: Backport to
+    extend eieio for POWER9 emulation (LP: #1787408).
+
+ -- Christian Ehrhardt <christian.ehrhardt@canonical.com>  Mon, 20 Aug 2018 11:52:39 +0200
+
+qemu (1:2.12+dfsg-3ubuntu3) cosmic; urgency=medium
+
   * d/p/lp-1755912-qxl-fix-local-renderer-crash.patch: Fix an issue triggered
     by migrations with UI frontends or frequent guest resolution changes
     (LP: #1755912)
 
-  [ Murilo Opsfelder Araujo ]
-  * d/p/ubuntu/target-ppc-extend-eieio-for-POWER9.patch: Backport to
-    extend eieio for POWER9 emulation (LP: #1787408).
+ -- Christian Ehrhardt <christian.ehrhardt@canonical.com>  Thu, 19 Jul 2018 08:26:52 +0200
 
- -- Christian Ehrhardt <christian.ehrhardt@canonical.com>  Tue, 21 Aug 2018 11:25:45 +0200
+qemu (1:2.12+dfsg-3ubuntu2) cosmic; urgency=medium
 
-qemu (1:2.11+dfsg-1ubuntu7.4) bionic; urgency=medium
+  * Disable capstone disassembler library support (universe dependency)
+
+ -- Christian Ehrhardt <christian.ehrhardt@canonical.com>  Tue, 17 Jul 2018 08:35:32 +0200
+
+qemu (1:2.12+dfsg-3ubuntu1) cosmic; urgency=medium
+
+  * Merge with Debian testing, Remaining Changes:
+    - Among other things this fixes (LP: #1780768, LP: #1780769, LP: #1780772)
+    - qemu-kvm to systemd unit
+      - d/qemu-kvm-init: script for QEMU KVM preparation modules, ksm,
+        hugepages and architecture specifics
+      - d/qemu-kvm.service: systemd unit to call qemu-kvm-init
+      - d/qemu-system-common.install: install systemd unit and helper script
+      - d/qemu-system-common.maintscript: clean old sysv and upstart scripts
+      - d/qemu-system-common.qemu-kvm.default: defaults for
+        /etc/default/qemu-kvm
+      - d/rules: install /etc/default/qemu-kvm
+    - Enable nesting by default
+      - set nested=1 module option on intel. (is default on amd)
+      - re-load kvm_intel.ko if it was loaded without nested=1
+      - d/p/ubuntu/expose-vmx_qemu64cpu.patch: expose nested kvm by default
+        in qemu64 cpu type.
+      - d/p/ubuntu/enable-svm-by-default.patch: Enable nested svm by default
+        in qemu64 on amd
+      - d/qemu-system-x86.README.Debian: document intention of nested being
+        default is comfort, not full support
+    - libvirt/qemu user/group support
+      - qemu-system-common.postinst: remove acl placed by udev, and add udevadm
+        trigger.
+      - qemu-system-common.preinst: add kvm group if needed
+    - Distribution specific machine type
+      - d/p/ubuntu/define-ubuntu-machine-types.patch: define distro machine
+        types to ease future live vm migration.
+      - d/qemu-system-x86.NEWS Info on fixed machine type definitions
+      - d/p/ubuntu/machine-type-hpb.patch: add -hpb machine type
+        for host-phys-bits=true (LP: 1776189)
+      - add an info about -hpb machine type in debian/qemu-system-x86.NEWS
+      - d/p/ubuntu/lp-1761372-*: provide pseries-bionic-2.11-sxxm type as
+        convenience with all meltdown/spectre workarounds enabled by default.
+        (LP: 1761372).
+    - improved dependencies
+      - Make qemu-system-common depend on qemu-block-extra
+      - Make qemu-utils depend on qemu-block-extra
+      - let qemu-utils recommend sharutils
+    - s390x support
+      - Create qemu-system-s390x package
+      - Include s390-ccw.img firmware
+      - Enable numa support for s390x
+    - arch aware kvm wrappers
+    - update VCS-git (updated to match cosmic)
+    - qemu-guest-agent: freeze-hook fixes (LP: 1484990)
+      - d/p/guest-agent-freeze-hook-skip-dpkg-artifacts.patch
+      - d/qemu-guest-agent.install: provide /etc/qemu/fsfreeze-hook
+      - d/qemu-guest-agent.dirs: provide /etc/qemu/fsfreeze-hook.d
+    - Create and install pxe netboot images for KVM s390x (LP: 1732094)
+      - d/rules enable install s390x-netboot.img
+    - d/control-in: enable RDMA support in qemu (LP: 1692476)
+    - tolerate ipxe size change on migrations to >=18.04 (LP: 1713490)
+      - d/p/ubuntu/pre-bionic-256k-ipxe-efi-roms.patch: old machine types
+        reference 256k path
+      - d/control: depend on ipxe-qemu-256k-compat-efi-roms to be able to
+        handle incoming migrations from former releases.
+    - SECURITY UPDATE: Speculative Store Bypass
+      - debian/patches/ubuntu/CVE-2018-3639/0001*.patch: define the 'ssbd'
+        CPUID feature bit in target/i386/cpu.*.
+      - debian/patches/ubuntu/CVE-2018-3639/0002*.patch: define the AMD
+        'virt-ssbd' CPUID feature bit in target/i386/cpu.c.
+      - debian/patches/ubuntu/CVE-2018-3639/0003*.patch: define the Virt SSBD
+        MSR and handling of it in target/i386/cpu.h, target/i386/kvm.c,
+        target/i386/machine.c.
+      - CVE-2018-3639
+  * Added Changes:
+    - update machine type changes for qemu 2.12 and the Ubuntu Cosmic release
+      - add cosmic types for base and -hpb
+      - drop no more supported types (zesty and yakkety)
+      - d/p/series: group machine type changes
+    - d/p/ubuntu/CVE-2018-3639/* update for qemu 2.12 using the final patches
+      merged upstream
+    - d/p/ubuntu/CVE-2018-11806-slirp-correct-size.patch: slirp: correct size
+      computation while concatenating mbuf.
+      CVE-2018-11806
+    - d/qemu-kvm-init, d/qemu-system-common.qemu-kvm.default: drop the
+      deprecated handling of VHOST_NET_ENABLED and KVM_HUGEPAGES.
+    - d/qemu-kvm-init: do not exit early on non x86/ppc64el (LP: #1763275)
+    - d/qemu-kvm-init, d/kvm.powerpc: clean up typos and shellcheck warnings
+    - d/qemu-kvm-init, d/kvm.powerpc: fix SMT detection and make it only apply
+      to POWER8
+    - d/qemu-kvm-init: drop old VM detection that was broken in some cases and
+      is no more needed with systemd-detect-virt being more mature and always
+      present.
+    - d/kvm.powerpc: drop old powerpc (non-ppc64el) code.
+    - d/control-in: add libibumad-dev which is now needed for rdma
+    - d/rules: update s390x delta to match new Debian packaging
+    - d/p/ubuntu/lp-1781526-powerpc64-align-memory-THP.patch: align to 2MB
+      for powerpc64 to speed up translation (LP: #1781526)
+    - d/p/ubuntu/lp-1780773-s390x-cpumodels-add-z14-Model-ZR1.patch: Add
+      cpu model for z14 ZR1 (LP: #1780773).
+    - Mark qemu-system-data foreign to be able to install it e.g. on i386
+      (Closes: 903562)
+    - d/control-in: qemu-keymaps is provided by qemu-system-data now (from yet
+      unreleased Debian version)
+  * Dropped Changes:
+    - debian/patches/ubuntu/partial-SLOF-for-s390x-netboot-compilation.patch
+      (No more removed when building DFSG orig tarball in Debian)
+    - sdl2 is yet too unstable for the LTS Ubuntu release given the reports
+      we still see upstream and in Debian - furthermore sdl2 isn't in main yet,
+      so we revert related changes to stick with the proven for now:
+      - 0fd25810 - do not build-depend on libx11-dev (libsdl2-dev already
+                   depends on it)
+      - 9594f820 - switch from sdl1.2 to sdl2 (#870025)
+      (Debian switched to gtk which seems to work better and has all
+      dependencies in main.)
+    - d/control-in: enable seccomp on s390x (in Debian for Linux-any)
+    - Changes that are now upstream with qemu 2.12
+      - d/p/ubuntu/lp1753826-memfd-fix-configure-test.patch: fix FTBFS with
+        newer versions of glibc >=2.27 (LP: 1753826)
+      - d/p/ubuntu/qemu-stable-2.11.1.patch: add stable release
+      - d/p/ubuntu/lp1739665-SSE-AVX-AVX512-cpu-features.patch: Enable new
+        SSE/AVX/AVX512 cpu features (LP: 1739665)
+      - d/p/ubuntu/lp1740219-continuous-space-commpage.patch: make Arm
+        space+commpage continuous which avoids long startup times on
+        qemu-user-static (LP: 1740219)
+      - provide pseries-2.12-sxxm type (LP: 1761372)
+      - d/p/ubuntu/lp-1704312-1-* provide means to manually handle
+        filesystem-dax with pmem by backporting align and unarmed options
+        (LP: 1704312).
+      - d/p/ubuntu/lp-1762315-slirp-Add-domainname.patch: slirp: Add domainname
+        option to slirp's DHCP server (LP: 1762315)
+      - d/p/ubuntu/lp-1762854-*: fix issue with SCSI-2 devices denying
+        Protection information (LP: 1762854).
+      - d/p/ubuntu/lp-1763468-*: fix VSMT handling to fix ppc64el P8/P9
+        migration (LP: 1763468).
+      - SECURITY UPDATE: out-of-bounds access during migration via ps2
+        CVE-2017-16845
+      - SECURITY UPDATE: arbitrary code execution via load_multiboot
+        CVE-2018-7550
+      - SECURITY UPDATE: denial of service in Cirrus CLGD 54xx VGA
+        CVE-2018-7858
+
+ -- Christian Ehrhardt <christian.ehrhardt@canonical.com>  Thu, 21 Jun 2018 14:24:06 +0200
+
+qemu (1:2.12+dfsg-3) unstable; urgency=medium
+
+  * make qemu-system-foo depending
+    on qemu-system-data >>ver~, not >>ver
+    (Closes: #900585)
+  * do not build qemu-system-gui on hppa
+  * use dh_lintian for lintian overrides
+  * update VCS fields to point to salsa.debian.org
+
+ -- Michael Tokarev <mjt@tls.msk.ru>  Fri, 01 Jun 2018 21:42:29 +0300
+
+qemu (1:2.12+dfsg-2) unstable; urgency=medium
+
+  * create new package, qemu-system-gui,
+    and package GTK module and audio modules in there
+    Closes: #850584
+  * add an item about qemu-system-gui to debian/qemu-system-common.NEWS
+  * qemu-system-*: require more recent qemu-system-common
+  * switch all builds to be in a single b/ subdir
+  * d/get-orig-source: remove .oco (object) files from roms/SLOF/
+  * refresh patches/use-fixed-data-path.patch: remove now-unused local var too
+  * ccid-card-passthru-fix-regression-in-realize.patch (Closes: #900006)
+  * debian/control-in: enable seccomp on linux-any (Closes: #900055)
+  * create new arch-indep package qemu-system-data, for data and firmware files.
+    Move common data files from qemu-system-common to it, for now
+  * fix sata/ahci stalls (ahci-fix-PxCI-register-race.patch)
+  * tcg-i386-Fix-dup_vec-in-non-AVX2-codepath.patch (Closes: #900372)
+
+ -- Michael Tokarev <mjt@tls.msk.ru>  Thu, 31 May 2018 13:22:55 +0300
+
+qemu (1:2.12+dfsg-1) unstable; urgency=medium
+
+  * new upstream release
+  * get-orig-source: do not remove roms/* directories,
+    since we will use these to build the roms
+  * disable building on hppa arch (not supported upstream since ong time)
+  * Use https://download.qemu.org to download new tarballs (Closes: #895067)
+  * add Breaks: binfmt-support (<<2.1.7) so that --fix-binary works;
+    also fix qemu-user-static description (Closes: #896478)
+
+ -- Michael Tokarev <mjt@tls.msk.ru>  Thu, 26 Apr 2018 20:29:36 +0300
+
+qemu (1:2.12~rc3+dfsg-2) unstable; urgency=medium
+
+  * fix typo in previous changelog entry
+  * add riscv32/riscv64 to qemu-debootstrap
+  * install gtk message catalogs into qemu-system-common (Closes: #878130)
+    (and install-gtk-message-catalogs-if-CONFIG_GTK.patch)
+  * tcg_mips-handle-large-offsets-from-target-env-to-tlb_table.patch:
+    fix FTBFS on mips targets
+
+ -- Michael Tokarev <mjt@tls.msk.ru>  Sat, 14 Apr 2018 17:01:24 +0300
+
+qemu (1:2.12~rc3+dfsg-1) unstable; urgency=medium
+
+  * new upstream 2.12 release (Release Candidate 3)
+    Closes: #892041, CVE-2018-7550
+    Closes: #884806, CVE-2017-15124
+    Closes: #887392, CVE-2018-5683
+    Closes: #892497, CVE-2018-7858
+    Closes: #882136, CVE-2017-16845
+    Closes: #886532, #892947, #891375, #887892, #860822, #851694
+  * refresh local debian patches
+  * d/rules: enable new system (hppa riscv32 riscv64) and
+    user (aarch64_be xtensa xtensaeb riscv32 riscv64) targets
+    Closes: #893767
+  * fix d/source/options to match current reality
+  * drop use-data-path.patch, upstream now has --firmwarepath= option
+  * enable capstone disassembler library support
+    (build-depend on libcapstone-dev)
+  * debian/extract-config-opts: use tab for option / condition separator
+  * qemu-block-extra: install only block modules
+  * make `qemu' metapackage to be dummy, to remove it in a future release
+  * do not suggest kmod, it is pointless
+  * install /usr/bin/qemu-pr-helper to qemu-utils package
+  * switch from sdl2 to gtk ui
+    Closes: #839695, #886671, #879536, #879534, #879532, #879193, #894852
+  * qemu-system-ppc: forgotten qemu-system-ppc64le.1 link
+  * mention closing of #880582 by 2.11
+  * package will built against spice 0.14, so Closes: #854959
+  * check sfdisk presence in qemu-make-debian-root (Closes: #872098)
+  * check mke2fs presence in qemu-make-debian-root (Closes: #887207)
+  * debian/binfmt-update-in: include forgotten hppa (Closes: #891261)
+  * debian/TODO: removed some old ToDo items
+  * use binfmt-support --fix-binary option (Closes: #868030)
+
+ -- Michael Tokarev <mjt@tls.msk.ru>  Thu, 12 Apr 2018 19:04:03 +0300
+
+qemu (1:2.11+dfsg-1ubuntu11) cosmic; urgency=medium
 
   * d/p/ubuntu/machine-type-hpb.patch: add -hpb machine type
     for host-phys-bits=true (LP: #1776189)
     - add an info about this change in debian/qemu-system-x86.NEWS
 
- -- Christian Ehrhardt <christian.ehrhardt@canonical.com>  Wed, 13 Jun 2018 10:41:34 +0200
+ -- Christian Ehrhardt <christian.ehrhardt@canonical.com>  Tue, 12 Jun 2018 09:01:00 +0200
 
-qemu (1:2.11+dfsg-1ubuntu7.3) bionic-security; urgency=medium
+qemu (1:2.11+dfsg-1ubuntu10) cosmic; urgency=medium
 
   * SECURITY UPDATE: Speculative Store Bypass
-    - debian/patches/ubuntu/CVE-2018-3639-2.patch: define the AMD
+    - debian/patches/ubuntu/CVE-2018-3639/0001*.patch: define the 'ssbd'
+      CPUID feature bit in target/i386/cpu.*.
+    - debian/patches/ubuntu/CVE-2018-3639/0002*.patch: define the AMD
       'virt-ssbd' CPUID feature bit in target/i386/cpu.c.
-    - debian/patches/ubuntu/CVE-2018-3639-3.patch: define the Virt SSBD MSR
-      and handling of it in target/i386/cpu.h, target/i386/kvm.c,
+    - debian/patches/ubuntu/CVE-2018-3639/0003*.patch: define the Virt SSBD
+      MSR and handling of it in target/i386/cpu.h, target/i386/kvm.c,
       target/i386/machine.c.
     - CVE-2018-3639
 
- -- Marc Deslauriers <marc.deslauriers@ubuntu.com>  Wed, 23 May 2018 07:57:07 -0400
+ -- Marc Deslauriers <marc.deslauriers@ubuntu.com>  Tue, 22 May 2018 09:34:52 -0400
 
-qemu (1:2.11+dfsg-1ubuntu7.2) bionic-security; urgency=medium
-
-  * SECURITY UPDATE: Speculative Store Bypass
-    - debian/patches/ubuntu/CVE-2018-3639.patch: add bit(2) of SPEC_CTRL
-      MSR support - Reduced Data Speculation to target/i386/cpu.*.
-    - CVE-2018-3639
-
- -- Marc Deslauriers <marc.deslauriers@ubuntu.com>  Thu, 17 May 2018 09:57:26 -0400
-
-qemu (1:2.11+dfsg-1ubuntu7.1) bionic-security; urgency=medium
+qemu (1:2.11+dfsg-1ubuntu9) cosmic; urgency=medium
 
   * SECURITY UPDATE: out-of-bounds access during migration via ps2
     - debian/patches/ubuntu/CVE-2017-16845.patch: check PS2Queue pointers
@@ -214,7 +1512,13 @@ qemu (1:2.11+dfsg-1ubuntu7.1) bionic-security; urgency=medium
       hw/display/vga.c.
     - CVE-2018-7858
 
- -- Marc Deslauriers <marc.deslauriers@ubuntu.com>  Fri, 11 May 2018 13:26:42 -0400
+ -- Marc Deslauriers <marc.deslauriers@ubuntu.com>  Wed, 16 May 2018 14:14:20 -0400
+
+qemu (1:2.11+dfsg-1ubuntu8) cosmic; urgency=medium
+
+  * No-change rebuild for ncurses soname changes.
+
+ -- Matthias Klose <doko@ubuntu.com>  Thu, 03 May 2018 14:18:39 +0000
 
 qemu (1:2.11+dfsg-1ubuntu7) bionic; urgency=medium
 
@@ -323,7 +1627,7 @@ qemu (1:2.11+dfsg-1ubuntu1) bionic; urgency=medium
     - Distribution specific machine type
       - d/p/ubuntu/define-ubuntu-machine-types.patch: define distro machine
         types to ease future live vm migration.
-      - d/qemu-system-x86.NEWS Info on fixed machine type defintions
+      - d/qemu-system-x86.NEWS Info on fixed machine type definitions
     - improved dependencies
       - Make qemu-system-common depend on qemu-block-extra
       - Make qemu-utils depend on qemu-block-extra
@@ -413,6 +1717,7 @@ qemu (1:2.11+dfsg-1) unstable; urgency=medium
     Closes: #880836, CVE-2017-15268
     Closes: #883399, CVE-2017-15119
     Closes: #883406, CVE-2017-15118
+    Closes: #880582
   * update to new upstream, remove old patches, refresh debian patches
   * disable sdl audio driver (pulse or oss should work fine)
   * do not build-depend on libx11-dev (libsdl2-dev already depends on it)
@@ -480,6 +1785,7 @@ qemu (1:2.10.0-1) unstable; urgency=medium
     Closes: #867978
     Closes: #871648, #871702, #872257
     Closes: #851694
+    Closes: #696289
     Closed in this upstream release:
      #865755, CVE-2017-9524
      #863840, CVE-2017-9310
@@ -492,6 +1798,9 @@ qemu (1:2.10.0-1) unstable; urgency=medium
      #867751, CVE-2017-10806
      #866674, CVE-2017-10664
      #873849, CVE-2017-12809
+     #849798, CVE-2016-10028
+     CVE-2017-9060
+     CVE-2017-8284
   * dropped all fixes, applied upstream
   * dropped 02_kfreebsd.patch - apparently not relevant anymore
   * dropped +dfsg, use upstream tarball directly: we do not use
@@ -571,7 +1880,7 @@ qemu (1:2.10+dfsg-0ubuntu1) artful; urgency=medium
     - Distribution specific machine type
       - d/p/ubuntu/define-ubuntu-machine-types.patch: define distro machine
         types to ease future live vm migration.
-      - d/qemu-system-x86.NEWS Info on fixed machine type defintions
+      - d/qemu-system-x86.NEWS Info on fixed machine type definitions
     - improved dependencies
       - Make qemu-system-common depend on qemu-block-extra
       - Make qemu-utils depend on qemu-block-extra
@@ -636,7 +1945,7 @@ qemu (1:2.10~rc4+dfsg-0ubuntu1) artful; urgency=medium
     - Distribution specific machine type
       - d/p/ubuntu/define-ubuntu-machine-types.patch: define distro machine
         types to ease future live vm migration.
-      - d/qemu-system-x86.NEWS Info on fixed machine type defintions
+      - d/qemu-system-x86.NEWS Info on fixed machine type definitions
     - improved dependencies
       - Make qemu-system-common depend on qemu-block-extra
       - Make qemu-utils depend on qemu-block-extra
@@ -710,7 +2019,7 @@ qemu (1:2.10~rc3+dfsg-0ubuntu1) artful; urgency=medium
     - Distribution specific machine type
       - d/p/ubuntu/define-ubuntu-machine-types.patch: define distro machine
         types to ease future live vm migration.
-      - d/qemu-system-x86.NEWS Info on fixed machine type defintions
+      - d/qemu-system-x86.NEWS Info on fixed machine type definitions
     - improved dependencies
       - Make qemu-system-common depend on qemu-block-extra
       - Make qemu-utils depend on qemu-block-extra
@@ -2883,9 +4192,16 @@ qemu (2.1+dfsg-2) unstable; urgency=medium
 qemu (2.1+dfsg-1) unstable; urgency=medium
 
   * new upstream release
-    Closes: #739589 CVE-2014-3461
+    Closes: #739589:
+     CVE-2013-4148 CVE-2013-4149 CVE-2013-4150 CVE-2013-4151
+     CVE-2013-4526 CVE-2013-4527 CVE-2013-4528
+     CVE-2013-4530 CVE-2013-4531 CVE-2013-4532 CVE-2013-4533 CVE-2013-4534
+     CVE-2013-4535 CVE-2013-4536 CVE-2013-4537 CVE-2013-4538 CVE-2013-4539
+     CVE-2013-4540 CVE-2013-4541 CVE-2013-4542
+     CVE-2013-6399 CVE-2014-0182 CVE-2014-3461
     Closes: #735618
     Closes: #754336
+    Closes: CVE-2014-3471 (pcie hotplug/hotunplug)
   * versioned build-depend on libiscsi-dev (>>1.9.0~)
   * added ppc64le user target
   * fix description of qemu-user-binfmt wrt "empty" (Closes: #755988)
@@ -3057,6 +4373,9 @@ qemu (2.0.0+dfsg-2) unstable; urgency=medium
 
 qemu (2.0.0+dfsg-1) unstable; urgency=low
 
+  * new upstream major release
+     Closes: #744213 CVE-2013-4544
+     Closes: #745157 CVE-2014-2894
   * 2.0 actually does not close #739589,
     remove it from from last changelog entry
   * mention closing of #707629 by 2.0
@@ -3147,6 +4466,70 @@ qemu (2.0.0~rc1+dfsg-0ubuntu1) trusty; urgency=medium
   * debian/control-in: don't make qemu-system-aarch64 ubuntu-specific
 
  -- Serge Hallyn <serge.hallyn@ubuntu.com>  Tue, 25 Feb 2014 22:31:43 -0600
+
+qemu (1.7.0+dfsg-9) unstable; urgency=medium
+
+  * remove rbd/rados/ceph support *again*, till they'll actually provide
+    some symbol/library version mechanism
+    (Closes:  #744364, Reopens: #729961, #689239)
+
+ -- Michael Tokarev <mjt@tls.msk.ru>  Sun, 13 Apr 2014 18:49:46 +0400
+
+qemu (1.7.0+dfsg-8) unstable; urgency=low
+
+  * fix a brown-paper-bag bug in the previous upload
+
+ -- Michael Tokarev <mjt@tls.msk.ru>  Fri, 11 Apr 2014 22:01:32 +0400
+
+qemu (1.7.0+dfsg-7) unstable; urgency=high
+
+  * fix guest-triggerable buffer overrun in virtio-net device
+    (Closes: #744221 CVE-2014-0150)
+
+ -- Michael Tokarev <mjt@tls.msk.ru>  Fri, 11 Apr 2014 20:27:16 +0400
+
+qemu (1.7.0+dfsg-6) unstable; urgency=medium
+
+  * make ceph (rbd) support linux-only, since it exists only on linux
+
+ -- Michael Tokarev <mjt@tls.msk.ru>  Sat, 05 Apr 2014 13:59:48 +0400
+
+qemu (1.7.0+dfsg-5) unstable; urgency=medium
+
+  * remove OVMF.fd symlink added in -4, it belongs to ovmf (Closes: #741494)
+  * qemu-debootstrap: add support for arm64 architecture (Closes: #740112)
+  * mention closing of #725176 by 1.7.0
+
+ -- Michael Tokarev <mjt@tls.msk.ru>  Thu, 13 Mar 2014 06:21:01 +0400
+
+qemu (1.7.0+dfsg-4) unstable; urgency=medium
+
+  [ Michael Tokarev ]
+  * 1.7.1 stable upstream release (Closes: #719633)
+    Closes: CVE-2013-4377
+  * implement-posix-timers.diff from upstream (Closes: #732258)
+  * address_space_translate-do-not-cross-page-boundaries.diff -
+    upstream bugfix for xen
+  * break libvirt << 1.2, not just 1.0, we need 1.2+ after qemu-1.6.
+  * add linux-user-fixed-s390x-clone-argument-order.patch (Closes: #739800)
+  * re-enable cepth (rbd) support (Closes: #729961, #689239)
+
+  [ Steve Langasek ]
+  * (from Ubuntu) add symlink for OVMF.fd, which is now available in Debian
+    non-free.
+  * libusbredir is enabled in Ubuntu too, so sync debian/control.
+  * Enable building for ppc64el (in both Debian and Ubuntu): Debian does not
+    have a ppc64el port yet, but qemu builds out of the box there so it's
+    safe/appropriate to enable.
+  * Merge in Ubuntu-specific (and Ubuntu-tagged) debian/control changes.
+  * Enable building for arm64; the arm64 target is not yet merged, but the
+    package doesn't need arm64 target support to build for an arm64 host.
+
+  [ Riku Voipio ]
+  * control: build-depend on python:any (change originally made
+    in Aug-2013 but reverted by mjt later)
+
+ -- Michael Tokarev <mjt@tls.msk.ru>  Wed, 12 Mar 2014 18:34:03 +0400
 
 qemu (1.7.0+dfsg-3ubuntu7) trusty; urgency=low
 
@@ -3403,7 +4786,7 @@ qemu (1.7.0+dfsg-2) unstable; urgency=low
 
 qemu (1.7.0+dfsg-1) unstable; urgency=low
 
-  * new upstream release (Closes: #724758, #326886, #390444, #706237)
+  * new upstream release (Closes: #724758, #326886, #390444, #706237, #725176)
     Also fixes CVE-2013-4375 (xen-specific qemu disk backend (qdisk)
     resource leak)
   * tweak kvm loading script to not load module for 3.4+ kernel
@@ -3485,7 +4868,7 @@ qemu (1.6.0+dfsg-2ubuntu1) trusty; urgency=low
 qemu (1.6.0+dfsg-2) unstable; urgency=low
 
   * Build-depend in seccomp again once it is in -testing
-  * 1.6.1 upstream bugfix release (Closes: #725944, #721713)
+  * 1.6.1 upstream bugfix release (Closes: #725944, #721713, #710971)
   * fix "allows [one] to" in qemu-ga description
   * fix descriptions for qemu-system and qemu-system-common packages
 
@@ -3493,8 +4876,7 @@ qemu (1.6.0+dfsg-2) unstable; urgency=low
 
 qemu (1.6.0+dfsg-1) unstable; urgency=low
 
-  [ Michael Tokarev ]
-  * final upstream v1.6.0 (Closes: #718180, #714273, #605525, #701855)
+  * final upstream v1.6.0 (Closes: #718180, #714273, #605525, #701855, #674201)
   * removed configure-explicitly-disable-virtfs-if-softmmu=no.patch
   * mention closing of #717724 by 1.6
   * mention closing of #710971 by 1.5 (which disabled gtk support)
@@ -3853,11 +5235,6 @@ qemu (1.4.0+dfsg-1exp) experimental; urgency=low
   * fix manpage "links" generation (man qemu-system-* was broken)
   * change Vcs fields to point to anonscm.debian.org (lintian)
   * add a check for (lxc) container to qemu-system-x86 initscript
-
-  [ Michael Tokarev - committed after 1.4.0+dfsg-1exp]
-  * fix distribution field in last qemu-system.NEWS entry
-  * bump Standards-Version to 3.9.4 (no changes needed)
-  * pre-Depend on adduser for qemu-system-common (Closes: #700840)
 
   [ Steve Langasek ]
   * Pass --enable-uname-release=2.6.32 for the user emulation builds, so that
@@ -4238,6 +5615,40 @@ qemu (1.3.0+dfsg-1~exp2) experimental; urgency=low
   * build-depend on debhelper 9, and set debian/compat to 9
 
  -- Michael Tokarev <mjt@tls.msk.ru>  Mon, 31 Dec 2012 01:40:35 +0400
+
+qemu (1.3.0+dfsg-1~exp1) experimental; urgency=low
+
+  [ Michael Tokarev ]
+  * new upstream version (1.3.0)
+    (Closes: #676374, #622319, #597527, #593547, #660154)
+   - Removed patches included upstream:
+     do-not-include-libutil.h.patch
+     configure-nss-usbredir.patch
+     tcg_s390-fix-ld_st-with-CONFIG_TCG_PASS_AREG0.patch
+     net-add--netdev-options-to-man-page.patch
+   - update 02_kfreebsd.patch
+   - do not build mpc8544ds.dtb
+   - include new targets
+  * Cleaned up the build system ALOT.  Larger changes:
+    - used explicit lists of emulated targets in debian/rules
+      and generate everything else from there, instead of repeating
+      these lists in lots of places.
+    - stop using debian/$pkg.manpages and other auxilary files like this,
+      moving eveything to debian/$pkg.install, because with the number
+      of packages growing, amount of these small files becomes very
+      large and the result is difficult to maintain.
+  * ship forgotten target-x86_64.conf in qemu-system.
+  * ship virtfs-proxy-helper in qemu-utils.
+  * stop shipping tundev.c, since it does not reflect the reality for
+    a long time now (Closes: #325761, #325754).
+  * re-introduce support parallel build using DEB_BUILD_OPTIONS=parallel=N,
+    this time by adding to $MAKEFLAGS instead of passing down to submakes
+  * build-depend on libcap-ng-dev (for virtfs-proxy-helper)
+
+  [ Vagrant Cascadian ]
+  * Add libcap-dev to Build-Depends to support virtfs-proxy-helper.
+
+ -- Michael Tokarev <mjt@tls.msk.ru>  Sun, 30 Dec 2012 01:52:21 +0400
 
 qemu (1.2.0.dfsg-1~exp1-0ubuntu2) raring; urgency=low
 

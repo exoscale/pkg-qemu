@@ -12,23 +12,19 @@ Author: Stefan Bader <stefan.bader@canonical.com>
 Bug-Ubuntu: https://bugs.launchpad.net/ubuntu/+source/libvirt/+bug/1561019
 Forwarded: no
 
-Index: qemu/hw/i386/pc_piix.c
-===================================================================
---- qemu.orig/hw/i386/pc_piix.c
-+++ qemu/hw/i386/pc_piix.c
-@@ -308,7 +308,6 @@ static void pc_compat_2_2(MachineState *
- static void pc_compat_2_1(MachineState *machine)
+--- a/hw/i386/pc_piix.c
++++ b/hw/i386/pc_piix.c
+@@ -326,7 +326,6 @@ static void pc_compat_2_2_fn(MachineStat
+ static void pc_compat_2_1_fn(MachineState *machine)
  {
-     pc_compat_2_2(machine);
+     pc_compat_2_2_fn(machine);
 -    x86_cpu_change_kvm_default("svm", NULL);
  }
  
- static void pc_compat_2_0(MachineState *machine)
-Index: qemu/target/i386/cpu.c
-===================================================================
---- qemu.orig/target/i386/cpu.c
-+++ qemu/target/i386/cpu.c
-@@ -1403,7 +1403,6 @@ static PropValue kvm_default_props[] = {
+ static void pc_compat_2_0_fn(MachineState *machine)
+--- a/target/i386/cpu.c
++++ b/target/i386/cpu.c
+@@ -2953,7 +2953,6 @@ static PropValue kvm_default_props[] = {
      { "x2apic", "on" },
      { "acpi", "off" },
      { "monitor", "off" },

@@ -1,0 +1,98 @@
+From fcc54ab5c7ca84ae72e8bf3781c33c9193a911aa Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Alex=20Benn=C3=A9e?= <alex.bennee@linaro.org>
+Date: Tue, 25 Feb 2020 17:49:08 +0000
+Subject: [PATCH] tcg: save vaddr temp for plugin usage
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+While do_gen_mem_cb does copy (via extu_tl_i64) vaddr into a new temp
+this won't help if the vaddr temp gets clobbered by the actual
+load/store op. To avoid this clobbering we explicitly copy vaddr
+before the op to ensure it is live my the time we do the
+instrumentation.
+
+Suggested-by: Richard Henderson <richard.henderson@linaro.org>
+Signed-off-by: Alex Bennée <alex.bennee@linaro.org>
+Reviewed-by: Richard Henderson <richard.henderson@linaro.org>
+Reviewed-by: Emilio G. Cota <cota@braap.org>
+Cc: qemu-stable@nongnu.org
+Message-Id: <20200225124710.14152-18-alex.bennee@linaro.org>
+
+Origin: upstream, https://git.qemu.org/?p=qemu.git;a=commit;h=fcc54ab5c7ca84ae72e8bf3781c33c9193a911aa
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/1867519
+Last-Update: 2020-03-18
+
+---
+ tcg/tcg-op.c | 23 ++++++++++++++++++++---
+ 1 file changed, 20 insertions(+), 3 deletions(-)
+
+diff --git a/tcg/tcg-op.c b/tcg/tcg-op.c
+index 7d782002e3..e2e25ebf7d 100644
+--- a/tcg/tcg-op.c
++++ b/tcg/tcg-op.c
+@@ -2794,13 +2794,26 @@ static void tcg_gen_req_mo(TCGBar type)
+     }
+ }
+ 
++static inline TCGv plugin_prep_mem_callbacks(TCGv vaddr)
++{
++#ifdef CONFIG_PLUGIN
++    if (tcg_ctx->plugin_insn != NULL) {
++        /* Save a copy of the vaddr for use after a load.  */
++        TCGv temp = tcg_temp_new();
++        tcg_gen_mov_tl(temp, vaddr);
++        return temp;
++    }
++#endif
++    return vaddr;
++}
++
+ static inline void plugin_gen_mem_callbacks(TCGv vaddr, uint16_t info)
+ {
+ #ifdef CONFIG_PLUGIN
+-    if (tcg_ctx->plugin_insn == NULL) {
+-        return;
++    if (tcg_ctx->plugin_insn != NULL) {
++        plugin_gen_empty_mem_callback(vaddr, info);
++        tcg_temp_free(vaddr);
+     }
+-    plugin_gen_empty_mem_callback(vaddr, info);
+ #endif
+ }
+ 
+@@ -2822,6 +2835,7 @@ void tcg_gen_qemu_ld_i32(TCGv_i32 val, TCGv addr, TCGArg idx, MemOp memop)
+         }
+     }
+ 
++    addr = plugin_prep_mem_callbacks(addr);
+     gen_ldst_i32(INDEX_op_qemu_ld_i32, val, addr, memop, idx);
+     plugin_gen_mem_callbacks(addr, info);
+ 
+@@ -2868,6 +2882,7 @@ void tcg_gen_qemu_st_i32(TCGv_i32 val, TCGv addr, TCGArg idx, MemOp memop)
+         memop &= ~MO_BSWAP;
+     }
+ 
++    addr = plugin_prep_mem_callbacks(addr);
+     gen_ldst_i32(INDEX_op_qemu_st_i32, val, addr, memop, idx);
+     plugin_gen_mem_callbacks(addr, info);
+ 
+@@ -2905,6 +2920,7 @@ void tcg_gen_qemu_ld_i64(TCGv_i64 val, TCGv addr, TCGArg idx, MemOp memop)
+         }
+     }
+ 
++    addr = plugin_prep_mem_callbacks(addr);
+     gen_ldst_i64(INDEX_op_qemu_ld_i64, val, addr, memop, idx);
+     plugin_gen_mem_callbacks(addr, info);
+ 
+@@ -2967,6 +2983,7 @@ void tcg_gen_qemu_st_i64(TCGv_i64 val, TCGv addr, TCGArg idx, MemOp memop)
+         memop &= ~MO_BSWAP;
+     }
+ 
++    addr = plugin_prep_mem_callbacks(addr);
+     gen_ldst_i64(INDEX_op_qemu_st_i64, val, addr, memop, idx);
+     plugin_gen_mem_callbacks(addr, info);
+ 
+-- 
+2.25.1
+

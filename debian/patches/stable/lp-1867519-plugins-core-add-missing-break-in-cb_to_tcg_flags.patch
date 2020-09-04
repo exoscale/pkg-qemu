@@ -1,0 +1,41 @@
+From dcc474c69e6a59044b9bb54624bd636cbfd98aa9 Mon Sep 17 00:00:00 2001
+From: "Emilio G. Cota" <cota@braap.org>
+Date: Tue, 25 Feb 2020 12:47:02 +0000
+Subject: [PATCH] plugins/core: add missing break in cb_to_tcg_flags
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Fixes: 54cb65d8588
+Reported-by: Robert Henry <robhenry@microsoft.com>
+Signed-off-by: Emilio G. Cota <cota@braap.org>
+Signed-off-by: Alex Bennée <alex.bennee@linaro.org>
+Reviewed-by: Richard Henderson <richard.henderson@linaro.org>
+Reviewed-by: Philippe Mathieu-Daudé <f4bug@amsat.org>
+Message-Id: <20200105072940.32204-1-cota@braap.org>
+Cc: qemu-stable@nongnu.org
+Message-Id: <20200225124710.14152-12-alex.bennee@linaro.org>
+
+Origin: upstream, https://git.qemu.org/?p=qemu.git;a=commit;h=dcc474c69e6a59044b9bb54624bd636cbfd98aa9
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/1867519
+Last-Update: 2020-03-18
+
+---
+ plugins/core.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/plugins/core.c b/plugins/core.c
+index 9e1b9e7a91..ed863011ba 100644
+--- a/plugins/core.c
++++ b/plugins/core.c
+@@ -286,6 +286,7 @@ static inline uint32_t cb_to_tcg_flags(enum qemu_plugin_cb_flags flags)
+     switch (flags) {
+     case QEMU_PLUGIN_CB_RW_REGS:
+         ret = 0;
++        break;
+     case QEMU_PLUGIN_CB_R_REGS:
+         ret = TCG_CALL_NO_WG;
+         break;
+-- 
+2.25.1
+

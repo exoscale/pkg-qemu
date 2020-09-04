@@ -1,0 +1,48 @@
+From c8fa6079eb35888587f1be27c1590da4edcc5098 Mon Sep 17 00:00:00 2001
+From: Niek Linnenbank <nieklinnenbank@gmail.com>
+Date: Fri, 20 Dec 2019 14:03:00 +0000
+Subject: [PATCH] arm/arm-powerctl: rebuild hflags after setting CP15 bits in
+ arm_set_cpu_on()
+
+After setting CP15 bits in arm_set_cpu_on() the cached hflags must
+be rebuild to reflect the changed processor state. Without rebuilding,
+the cached hflags would be inconsistent until the next call to
+arm_rebuild_hflags(). When QEMU is compiled with debugging enabled
+(--enable-debug), this problem is captured shortly after the first
+call to arm_set_cpu_on() for CPUs running in ARM 32-bit non-secure mode:
+
+  qemu-system-arm: target/arm/helper.c:11359: cpu_get_tb_cpu_state:
+  Assertion `flags == rebuild_hflags_internal(env)' failed.
+  Aborted (core dumped)
+
+Fixes: 0c7f8c43daf65
+Cc: qemu-stable@nongnu.org
+Signed-off-by: Niek Linnenbank <nieklinnenbank@gmail.com>
+Reviewed-by: Richard Henderson <richard.henderson@linaro.org>
+Signed-off-by: Peter Maydell <peter.maydell@linaro.org>
+
+Origin: upstream, https://git.qemu.org/?p=qemu.git;a=commit;h=c8fa6079eb35888587f1be27c1590da4edcc5098
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/1867519
+Last-Update: 2020-03-18
+
+---
+ target/arm/arm-powerctl.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/target/arm/arm-powerctl.c b/target/arm/arm-powerctl.c
+index b064513d44..b75f813b40 100644
+--- a/target/arm/arm-powerctl.c
++++ b/target/arm/arm-powerctl.c
+@@ -127,6 +127,9 @@ static void arm_set_cpu_on_async_work(CPUState *target_cpu_state,
+         target_cpu->env.regs[0] = info->context_id;
+     }
+ 
++    /* CP15 update requires rebuilding hflags */
++    arm_rebuild_hflags(&target_cpu->env);
++
+     /* Start the new CPU at the requested address */
+     cpu_set_pc(target_cpu_state, info->entry);
+ 
+-- 
+2.25.1
+

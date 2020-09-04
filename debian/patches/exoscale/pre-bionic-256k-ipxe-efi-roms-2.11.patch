@@ -1,0 +1,24 @@
+From 354d52e9ef21c63a63987b1d2f28de9faabbcce2 Mon Sep 17 00:00:00 2001
+From: Alessandro Ratti <alessandro.ratti@exoscale.ch>
+Date: Fri, 28 Aug 2020 08:57:07 +0200
+Subject: [PATCH] pre-bionic-256k-ipxe-efi-roms 2.11
+
+---
+ hw/core/machine.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/hw/core/machine.c b/hw/core/machine.c
+index 1689ad3bf..902a71632 100644
+--- a/hw/core/machine.c
++++ b/hw/core/machine.c
+@@ -79,6 +79,7 @@ GlobalProperty hw_compat_2_11[] = {
+     { "virtio-blk-pci", "vectors", "2" },
+     { "vhost-user-blk-pci", "vectors", "2" },
+     { "e1000", "migrate_tso_props", "off" },
++    { "virtio-net-pci", "romfile", "compat-256k-efi-virtio.rom"  },
+ };
+ const size_t hw_compat_2_11_len = G_N_ELEMENTS(hw_compat_2_11);
+ 
+-- 
+2.27.0
+

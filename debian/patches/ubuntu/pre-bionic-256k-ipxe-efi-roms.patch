@@ -28,38 +28,19 @@ Last-Update: 2018-02-19
  compat.h |   41 +++++++++++++++++++++++++++++++++++++++++
  1 file changed, 41 insertions(+)
 
---- a/include/hw/compat.h
-+++ b/include/hw/compat.h
-@@ -10,7 +10,48 @@
-         .driver   = "virtio-tablet-device",\
-         .property = "wheel-axis",\
-         .value    = "false",\
-+    }, \
-+    { /* ipxe rom size change, see below for details */ \
-+        .driver   = "e1000",\
-+        .property = "romfile",\
-+        .value    = "compat-256k-efi-e1000.rom",\
-+    },\
-+    {\
-+        .driver   = "ne2000",\
-+        .property = "romfile",\
-+        .value    = "compat-256k-efi-ne2k_pci.rom",\
-+    },\
-+    {\
-+        .driver   = "pcnet",\
-+        .property = "romfile",\
-+        .value    = "compat-256k-efi-pcnet.rom",\
-+    },\
-+    {\
-+        .driver   = "rtl8139",\
-+        .property = "romfile",\
-+        .value    = "compat-256k-efi-rtl8139.rom",\
-+    },\
-+    {\
-+        .driver   = "virtio-net-pci",\
-+        .property = "romfile",\
-+        .value    = "compat-256k-efi-virtio.rom",\
-     },
+--- a/hw/core/machine.c
++++ b/hw/core/machine.c
+@@ -63,8 +63,29 @@ const size_t hw_compat_2_11_len = G_N_EL
+ GlobalProperty hw_compat_2_10[] = {
+     { "virtio-mouse-device", "wheel-axis", "false" },
+     { "virtio-tablet-device", "wheel-axis", "false" },
++    { "e1000", "romfile", "compat-256k-efi-e1000.rom" },
++    { "ne2000", "romfile", "compat-256k-efi-ne2k_pci.rom" },
++    { "pcnet", "romfile", "compat-256k-efi-pcnet.rom" },
++    { "rtl8139", "romfile", "compat-256k-efi-rtl8139.rom" },
++    { "virtio-net-pci", "romfile", "compat-256k-efi-virtio.rom" },
+ };
+ const size_t hw_compat_2_10_len = G_N_ELEMENTS(hw_compat_2_10);
 +/*
 + * ^^ (LP: #1713490)
 + * older IPXE roms were smaller, but just changing this size on ipxe upgrades
@@ -77,5 +58,5 @@ Last-Update: 2018-02-19
 + * which now crossed 256k to use the newer roms for anything else.
 + */
  
- #define HW_COMPAT_2_9 \
-     {\
+ GlobalProperty hw_compat_2_9[] = {
+     { "pci-bridge", "shpc", "off" },

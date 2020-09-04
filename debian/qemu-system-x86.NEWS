@@ -1,9 +1,9 @@
-qemu (1:2.11+dfsg-1ubuntu7.4) bionic; urgency=medium
+qemu (1:2.11+dfsg-1ubuntu11) cosmic; urgency=medium
 
   Summary:
   Adding new Ubuntu machine types with -hpb suffix to allow users to run
   guests >1TB using the qemu host-phys-bits setting. If a cpu provides more
-  physical adressing bits than the default virtual 40 one can drive larger
+  physical addressing bits than the default virtual 40 one can drive larger
   guests by setting host-phys-bits. Using a machine type to do so allows to
   control this through libvirt and higher virt stack components as of today.
 
