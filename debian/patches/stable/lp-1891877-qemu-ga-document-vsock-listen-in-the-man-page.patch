@@ -1,0 +1,70 @@
+From 8f5728cb97f25c9bfe86dc4b2eaa2156ebcc0c15 Mon Sep 17 00:00:00 2001
+From: Stefan Hajnoczi <stefanha@redhat.com>
+Date: Mon, 23 Mar 2020 11:04:08 +0000
+Subject: [PATCH] qemu-ga: document vsock-listen in the man page
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Although qemu-ga has supported vsock since 2016 it was not documented on
+the man page.
+
+Also add the socket address representation to the qga --help output.
+
+Fixes: 586ef5dee77180fc32e33bc08051600030630239
+       ("qga: add vsock-listen method")
+Signed-off-by: Stefan Hajnoczi <stefanha@redhat.com>
+Reviewed-by: Marc-André Lureau <marcandre.lureau@redhat.com>
+Reviewed-by: Stefano Garzarella <sgarzare@redhat.com>
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+(cherry picked from commit 7b46aadbbfb7b06cd45a3b113b1f7c003c68f603)
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+
+Origin: upstream, https://git.qemu.org/?p=qemu.git;a=commit;h=8f5728cb97
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/1891877
+Last-Update: 2020-08-19
+
+---
+ docs/interop/qemu-ga.rst | 5 +++--
+ qga/main.c               | 4 +++-
+ 2 files changed, 6 insertions(+), 3 deletions(-)
+
+diff --git a/docs/interop/qemu-ga.rst b/docs/interop/qemu-ga.rst
+index 1313a4ae1c..3063357bb5 100644
+--- a/docs/interop/qemu-ga.rst
++++ b/docs/interop/qemu-ga.rst
+@@ -36,13 +36,14 @@ Options
+ .. option:: -m, --method=METHOD
+ 
+   Transport method: one of ``unix-listen``, ``virtio-serial``, or
+-  ``isa-serial`` (``virtio-serial`` is the default).
++  ``isa-serial``, or ``vsock-listen`` (``virtio-serial`` is the default).
+ 
+ .. option:: -p, --path=PATH
+ 
+   Device/socket path (the default for virtio-serial is
+   ``/dev/virtio-ports/org.qemu.guest_agent.0``,
+-  the default for isa-serial is ``/dev/ttyS0``)
++  the default for isa-serial is ``/dev/ttyS0``). Socket addresses for
++  vsock-listen are written as ``<cid>:<port>``.
+ 
+ .. option:: -l, --logfile=PATH
+ 
+diff --git a/qga/main.c b/qga/main.c
+index c35c2a2120..6b9f025a70 100644
+--- a/qga/main.c
++++ b/qga/main.c
+@@ -234,7 +234,9 @@ QEMU_COPYRIGHT "\n"
+ "  -p, --path        device/socket path (the default for virtio-serial is:\n"
+ "                    %s,\n"
+ "                    the default for isa-serial is:\n"
+-"                    %s)\n"
++"                    %s).\n"
++"                    Socket addresses for vsock-listen are written as\n"
++"                    <cid>:<port>.\n"
+ "  -l, --logfile     set logfile path, logs to stderr by default\n"
+ "  -f, --pidfile     specify pidfile (default is %s)\n"
+ #ifdef CONFIG_FSFREEZE
+-- 
+2.28.0
+

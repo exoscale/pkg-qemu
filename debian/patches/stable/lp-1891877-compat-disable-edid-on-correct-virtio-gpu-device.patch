@@ -1,0 +1,49 @@
+From 219362f9655859056e8f15cf96fc3169d4dc80de Mon Sep 17 00:00:00 2001
+From: Cornelia Huck <cohuck@redhat.com>
+Date: Wed, 18 Mar 2020 10:39:19 +0100
+Subject: [PATCH] compat: disable edid on correct virtio-gpu device
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Commit bb15791166c1 ("compat: disable edid on virtio-gpu base
+device") tried to disable 'edid' on the virtio-gpu base device.
+However, that device is not 'virtio-gpu', but 'virtio-gpu-device'.
+Fix it.
+
+Fixes: bb15791166c1 ("compat: disable edid on virtio-gpu base device")
+Reported-by: Lukáš Doktor <ldoktor@redhat.com>
+Tested-by: Lukáš Doktor <ldoktor@redhat.com>
+Reviewed-by: Philippe Mathieu-Daudé <philmd@redhat.com>
+Signed-off-by: Cornelia Huck <cohuck@redhat.com>
+Message-id: 20200318093919.24942-1-cohuck@redhat.com
+Cc: qemu-stable@nongnu.org
+Signed-off-by: Cornelia Huck <cohuck@redhat.com>
+Signed-off-by: Gerd Hoffmann <kraxel@redhat.com>
+(cherry picked from commit 02501fc39381c4dabaf6becdd12c2a4754c3847c)
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+
+Origin: upstream, https://git.qemu.org/?p=qemu.git;a=commit;h=219362f965
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/1891877
+Last-Update: 2020-08-19
+
+---
+ hw/core/machine.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/hw/core/machine.c b/hw/core/machine.c
+index aa63231f31..1872263bf0 100644
+--- a/hw/core/machine.c
++++ b/hw/core/machine.c
+@@ -37,7 +37,7 @@ GlobalProperty hw_compat_4_0[] = {
+     { "secondary-vga",  "edid", "false" },
+     { "bochs-display",  "edid", "false" },
+     { "virtio-vga",     "edid", "false" },
+-    { "virtio-gpu",     "edid", "false" },
++    { "virtio-gpu-device", "edid", "false" },
+     { "virtio-device", "use-started", "false" },
+     { "virtio-balloon-device", "qemu-4-0-config-size", "true" },
+     { "pl031", "migrate-tick-offset", "false" },
+-- 
+2.28.0
+

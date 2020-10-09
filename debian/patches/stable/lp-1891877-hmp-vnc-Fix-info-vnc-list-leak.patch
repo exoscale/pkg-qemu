@@ -1,0 +1,54 @@
+From 674d3822250a8830fb8e9720ce499f2e8cef6a88 Mon Sep 17 00:00:00 2001
+From: "Dr. David Alan Gilbert" <dgilbert@redhat.com>
+Date: Mon, 23 Mar 2020 12:08:22 +0000
+Subject: [PATCH] hmp/vnc: Fix info vnc list leak
+
+We're iterating the list, and then freeing the iteration pointer rather
+than the list head.
+
+Fixes: 0a9667ecdb6d ("hmp: Update info vnc")
+Reported-by: Coverity (CID 1421932)
+Signed-off-by: Dr. David Alan Gilbert <dgilbert@redhat.com>
+Message-Id: <20200323120822.51266-1-dgilbert@redhat.com>
+Reviewed-by: Peter Maydell <peter.maydell@linaro.org>
+Signed-off-by: Dr. David Alan Gilbert <dgilbert@redhat.com>
+(cherry picked from commit d4ff109373ce871928c7e9ef648973eba642b484)
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+
+Origin: upstream, https://git.qemu.org/?p=qemu.git;a=commit;h=674d382225
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/1891877
+Last-Update: 2020-08-19
+
+---
+ monitor/hmp-cmds.c | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/monitor/hmp-cmds.c b/monitor/hmp-cmds.c
+index b2551c16d1..2fdc84ec99 100644
+--- a/monitor/hmp-cmds.c
++++ b/monitor/hmp-cmds.c
+@@ -729,10 +729,11 @@ static void hmp_info_vnc_servers(Monitor *mon, VncServerInfo2List *server)
+ 
+ void hmp_info_vnc(Monitor *mon, const QDict *qdict)
+ {
+-    VncInfo2List *info2l;
++    VncInfo2List *info2l, *info2l_head;
+     Error *err = NULL;
+ 
+     info2l = qmp_query_vnc_servers(&err);
++    info2l_head = info2l;
+     if (err) {
+         hmp_handle_error(mon, &err);
+         return;
+@@ -761,7 +762,7 @@ void hmp_info_vnc(Monitor *mon, const QDict *qdict)
+         info2l = info2l->next;
+     }
+ 
+-    qapi_free_VncInfo2List(info2l);
++    qapi_free_VncInfo2List(info2l_head);
+ 
+ }
+ #endif
+-- 
+2.28.0
+

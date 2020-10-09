@@ -1,0 +1,52 @@
+From 1190026fe415ce29605bdadbb68956a3315714e8 Mon Sep 17 00:00:00 2001
+From: Finn Thain <fthain@telegraphics.com.au>
+Date: Wed, 29 Jan 2020 20:27:49 +1100
+Subject: [PATCH] dp8393x: Always update RRA pointers and sequence numbers
+
+These operations need to take place regardless of whether or not
+rx descriptors have been used up (that is, EOL flag was observed).
+
+The algorithm is now the same for a packet that was withheld as for
+a packet that was not.
+
+Signed-off-by: Finn Thain <fthain@telegraphics.com.au>
+Tested-by: Laurent Vivier <laurent@vivier.eu>
+Signed-off-by: Jason Wang <jasowang@redhat.com>
+(cherry picked from commit 80b60673ea598869050c66d95d8339480e4cefd0)
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+
+Origin: upstream, https://git.qemu.org/?p=qemu.git;a=commit;h=1190026fe4
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/1891877
+Last-Update: 2020-08-19
+
+---
+ hw/net/dp8393x.c | 12 +++++++-----
+ 1 file changed, 7 insertions(+), 5 deletions(-)
+
+diff --git a/hw/net/dp8393x.c b/hw/net/dp8393x.c
+index 4ce2ef818b..aa7bd785f3 100644
+--- a/hw/net/dp8393x.c
++++ b/hw/net/dp8393x.c
+@@ -897,12 +897,14 @@ static ssize_t dp8393x_receive(NetClientState *nc, const uint8_t * buf,
+         /* Move to next descriptor */
+         s->regs[SONIC_CRDA] = s->regs[SONIC_LLFA];
+         s->regs[SONIC_ISR] |= SONIC_ISR_PKTRX;
+-        s->regs[SONIC_RSC] = (s->regs[SONIC_RSC] & 0xff00) | (((s->regs[SONIC_RSC] & 0x00ff) + 1) & 0x00ff);
++    }
+ 
+-        if (s->regs[SONIC_RCR] & SONIC_RCR_LPKT) {
+-            /* Read next RRA */
+-            dp8393x_do_read_rra(s);
+-        }
++    s->regs[SONIC_RSC] = (s->regs[SONIC_RSC] & 0xff00) |
++                         ((s->regs[SONIC_RSC] + 1) & 0x00ff);
++
++    if (s->regs[SONIC_RCR] & SONIC_RCR_LPKT) {
++        /* Read next RRA */
++        dp8393x_do_read_rra(s);
+     }
+ 
+     /* Done */
+-- 
+2.28.0
+

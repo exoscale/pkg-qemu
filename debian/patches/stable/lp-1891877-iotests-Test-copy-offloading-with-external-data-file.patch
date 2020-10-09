@@ -1,0 +1,71 @@
+From 373fd948ab33b6e74b227cd62d4ccc4c17417473 Mon Sep 17 00:00:00 2001
+From: Kevin Wolf <kwolf@redhat.com>
+Date: Tue, 11 Feb 2020 10:49:00 +0100
+Subject: [PATCH] iotests: Test copy offloading with external data file
+
+This adds a test for 'qemu-img convert' with copy offloading where the
+target image has an external data file. If the test hosts supports it,
+it tests both the case where copy offloading is supported and the case
+where it isn't (otherwise we just test unsupported twice).
+
+More specifically, the case with unsupported copy offloading tests
+qcow2_alloc_cluster_abort() with external data files.
+
+Signed-off-by: Kevin Wolf <kwolf@redhat.com>
+Message-Id: <20200211094900.17315-4-kwolf@redhat.com>
+Signed-off-by: Kevin Wolf <kwolf@redhat.com>
+(cherry picked from commit a0cf8daf77548786ced84d773f06fc70571c5d38)
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+
+Origin: upstream, https://git.qemu.org/?p=qemu.git;a=commit;h=373fd948ab
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/1891877
+Last-Update: 2020-08-19
+
+---
+ tests/qemu-iotests/244     | 14 ++++++++++++++
+ tests/qemu-iotests/244.out |  6 ++++++
+ 2 files changed, 20 insertions(+)
+
+diff --git a/tests/qemu-iotests/244 b/tests/qemu-iotests/244
+index 13978f93d2..2f5dfb9edd 100755
+--- a/tests/qemu-iotests/244
++++ b/tests/qemu-iotests/244
+@@ -194,6 +194,20 @@ $QEMU_IO -c 'read -P 0x11 0 1M' -f $IMGFMT "$TEST_IMG" | _filter_qemu_io
+ $QEMU_IMG map --output=human "$TEST_IMG" | _filter_testdir
+ $QEMU_IMG map --output=json "$TEST_IMG"
+ 
++echo
++echo "=== Copy offloading ==="
++echo
++
++# Make use of copy offloading if the test host can provide it
++_make_test_img -o "data_file=$TEST_IMG.data" 64M
++$QEMU_IMG convert -f $IMGFMT -O $IMGFMT -n -C "$TEST_IMG.src" "$TEST_IMG"
++$QEMU_IMG compare -f $IMGFMT -F $IMGFMT "$TEST_IMG.src" "$TEST_IMG"
++
++# blkdebug doesn't support copy offloading, so this tests the error path
++$QEMU_IMG amend -f $IMGFMT -o "data_file=blkdebug::$TEST_IMG.data" "$TEST_IMG"
++$QEMU_IMG convert -f $IMGFMT -O $IMGFMT -n -C "$TEST_IMG.src" "$TEST_IMG"
++$QEMU_IMG compare -f $IMGFMT -F $IMGFMT "$TEST_IMG.src" "$TEST_IMG"
++
+ # success, all done
+ echo "*** done"
+ rm -f $seq.full
+diff --git a/tests/qemu-iotests/244.out b/tests/qemu-iotests/244.out
+index 6a3d0067cc..e6f4dc7993 100644
+--- a/tests/qemu-iotests/244.out
++++ b/tests/qemu-iotests/244.out
+@@ -122,4 +122,10 @@ Offset          Length          Mapped to       File
+ 0               0x100000        0               TEST_DIR/t.qcow2.data
+ [{ "start": 0, "length": 1048576, "depth": 0, "zero": false, "data": true, "offset": 0},
+ { "start": 1048576, "length": 66060288, "depth": 0, "zero": true, "data": false}]
++
++=== Copy offloading ===
++
++Formatting 'TEST_DIR/t.IMGFMT', fmt=IMGFMT size=67108864 data_file=TEST_DIR/t.IMGFMT.data
++Images are identical.
++Images are identical.
+ *** done
+-- 
+2.28.0
+

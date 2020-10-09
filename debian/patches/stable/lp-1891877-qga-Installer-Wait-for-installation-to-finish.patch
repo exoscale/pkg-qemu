@@ -1,0 +1,42 @@
+From 7cc217b30d0270c9688f627e0bb377043067a442 Mon Sep 17 00:00:00 2001
+From: Basil Salman <basil@daynix.com>
+Date: Wed, 11 Mar 2020 19:04:15 +0200
+Subject: [PATCH] qga: Installer: Wait for installation to finish
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Installation might fail if we don't wait for the provider
+unregisteration process to finish.
+
+Signed-off-by: Sameeh Jubran <sjubran@redhat.com>
+Signed-off-by: Basil Salman <basil@daynix.com>
+Reviewed-by: Philippe Mathieu-Daudé <philmd@redhat.com>
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+(cherry picked from commit bb1ce44b15f159b67fafc5f4b285bbf20a1961e9)
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+
+Origin: upstream, https://git.qemu.org/?p=qemu.git;a=commit;h=7cc217b30d
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/1891877
+Last-Update: 2020-08-19
+
+---
+ qga/installer/qemu-ga.wxs | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/qga/installer/qemu-ga.wxs b/qga/installer/qemu-ga.wxs
+index 64bf90bd85..f6781752e6 100644
+--- a/qga/installer/qemu-ga.wxs
++++ b/qga/installer/qemu-ga.wxs
+@@ -81,7 +81,7 @@
+               Arguments="-d --retry-path"
+               >
+             </ServiceInstall>
+-            <ServiceControl Id="StartService" Start="install" Stop="both" Remove="uninstall" Name="QEMU-GA" Wait="no" />
++            <ServiceControl Id="StartService" Start="install" Stop="both" Remove="uninstall" Name="QEMU-GA" Wait="yes" />
+           </Component>
+           <?ifdef var.InstallVss?>
+           <Component Id="qga_vss_dll" Guid="{CB19C453-FABB-4BB1-ABAB-6B74F687BFBB}">
+-- 
+2.28.0
+

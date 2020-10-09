@@ -1,0 +1,75 @@
+From edd67a61f499982bcc2098962c8e04c5210f2f80 Mon Sep 17 00:00:00 2001
+From: Finn Thain <fthain@telegraphics.com.au>
+Date: Wed, 29 Jan 2020 20:27:49 +1100
+Subject: [PATCH] dp8393x: Update LLFA and CRDA registers from rx descriptor
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Follow the algorithm given in the National Semiconductor DP83932C
+datasheet in section 3.4.7:
+
+    At the next reception, the SONIC re-reads the last RXpkt.link field,
+    and updates its CRDA register to point to the next descriptor.
+
+The chip is designed to allow the host to provide a new list of
+descriptors in this way.
+
+Signed-off-by: Finn Thain <fthain@telegraphics.com.au>
+Tested-by: Laurent Vivier <laurent@vivier.eu>
+Reviewed-by: Philippe Mathieu-Daudé <philmd@redhat.com>
+Signed-off-by: Jason Wang <jasowang@redhat.com>
+(cherry picked from commit 5b0c98fcb7ac006bd8efe0e0fecba52c43a9d028)
+*drop context dep on 19f70347731
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+
+Origin: upstream, https://git.qemu.org/?p=qemu.git;a=commit;h=edd67a61f4
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/1891877
+Last-Update: 2020-08-19
+
+---
+ hw/net/dp8393x.c | 11 +++++++----
+ 1 file changed, 7 insertions(+), 4 deletions(-)
+
+diff --git a/hw/net/dp8393x.c b/hw/net/dp8393x.c
+index a696485a55..8dd6bf032c 100644
+--- a/hw/net/dp8393x.c
++++ b/hw/net/dp8393x.c
+@@ -784,12 +784,13 @@ static ssize_t dp8393x_receive(NetClientState *nc, const uint8_t * buf,
+         address = dp8393x_crda(s) + sizeof(uint16_t) * 5 * width;
+         address_space_rw(&s->as, address, MEMTXATTRS_UNSPECIFIED,
+                          (uint8_t *)s->data, size, 0);
+-        if (dp8393x_get(s, width, 0) & SONIC_DESC_EOL) {
++        s->regs[SONIC_LLFA] = dp8393x_get(s, width, 0);
++        if (s->regs[SONIC_LLFA] & SONIC_DESC_EOL) {
+             /* Still EOL ; stop reception */
+             return -1;
+-        } else {
+-            s->regs[SONIC_CRDA] = s->regs[SONIC_LLFA];
+         }
++        /* Link has been updated by host */
++        s->regs[SONIC_CRDA] = s->regs[SONIC_LLFA];
+     }
+ 
+     /* Save current position */
+@@ -837,7 +838,7 @@ static ssize_t dp8393x_receive(NetClientState *nc, const uint8_t * buf,
+     address_space_rw(&s->as, dp8393x_crda(s),
+         MEMTXATTRS_UNSPECIFIED, (uint8_t *)s->data, size, 1);
+ 
+-    /* Move to next descriptor */
++    /* Check link field */
+     size = sizeof(uint16_t) * width;
+     address_space_rw(&s->as, dp8393x_crda(s) + sizeof(uint16_t) * 5 * width,
+         MEMTXATTRS_UNSPECIFIED, (uint8_t *)s->data, size, 0);
+@@ -852,6 +853,8 @@ static ssize_t dp8393x_receive(NetClientState *nc, const uint8_t * buf,
+         dp8393x_put(s, width, 0, 0);
+         address_space_rw(&s->as, address, MEMTXATTRS_UNSPECIFIED,
+                          (uint8_t *)s->data, size, true);
++
++        /* Move to next descriptor */
+         s->regs[SONIC_CRDA] = s->regs[SONIC_LLFA];
+         s->regs[SONIC_ISR] |= SONIC_ISR_PKTRX;
+         s->regs[SONIC_RSC] = (s->regs[SONIC_RSC] & 0xff00) | (((s->regs[SONIC_RSC] & 0x00ff) + 1) & 0x00ff);
+-- 
+2.28.0
+

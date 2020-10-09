@@ -1,0 +1,43 @@
+From 252d614ea2b07134155959b987efd68bd7b7100c Mon Sep 17 00:00:00 2001
+From: Thomas Huth <thuth@redhat.com>
+Date: Mon, 18 May 2020 09:43:52 +0200
+Subject: [PATCH] net: Do not include a newline in the id of -nic devices
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+The '\n' sneaked in by accident here, an "id" string should really
+not contain a newline character at the end.
+
+Fixes: 78cd6f7bf6b ('net: Add a new convenience option "--nic" ...')
+Signed-off-by: Thomas Huth <thuth@redhat.com>
+Reviewed-by: Philippe Mathieu-Daudé <philmd@redhat.com>
+Message-Id: <20200518074352.23125-1-thuth@redhat.com>
+Signed-off-by: Laurent Vivier <laurent@vivier.eu>
+(cherry picked from commit 0561dfac082becdd9e89110249a27b309b62aa9f)
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+
+Origin: upstream, https://git.qemu.org/?p=qemu.git;a=commit;h=252d614ea2
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/1891877
+Last-Update: 2020-08-19
+
+---
+ net/net.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/net/net.c b/net/net.c
+index 84aa6d8d00..58adaafba9 100644
+--- a/net/net.c
++++ b/net/net.c
+@@ -1524,7 +1524,7 @@ static int net_param_nic(void *dummy, QemuOpts *opts, Error **errp)
+     /* Create an ID if the user did not specify one */
+     nd_id = g_strdup(qemu_opts_id(opts));
+     if (!nd_id) {
+-        nd_id = g_strdup_printf("__org.qemu.nic%i\n", idx);
++        nd_id = g_strdup_printf("__org.qemu.nic%i", idx);
+         qemu_opts_set_id(opts, nd_id);
+     }
+ 
+-- 
+2.28.0
+

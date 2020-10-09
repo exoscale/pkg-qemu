@@ -1,0 +1,39 @@
+From 09397e965739bd7da25bf1739a89fe2f245e8446 Mon Sep 17 00:00:00 2001
+From: Vladimir Sementsov-Ogievskiy <vsementsov@virtuozzo.com>
+Date: Tue, 24 Mar 2020 18:36:28 +0300
+Subject: [PATCH] migration/colo: fix use after free of local_err
+
+local_err is used again in secondary_vm_do_failover() after
+replication_stop_all(), so we must zero it. Otherwise try to set
+non-NULL local_err will crash.
+
+Signed-off-by: Vladimir Sementsov-Ogievskiy <vsementsov@virtuozzo.com>
+Message-Id: <20200324153630.11882-5-vsementsov@virtuozzo.com>
+Reviewed-by: Dr. David Alan Gilbert <dgilbert@redhat.com>
+Signed-off-by: Dr. David Alan Gilbert <dgilbert@redhat.com>
+(cherry picked from commit 27d07fcfa70c3afa0664288cbce5334ed9595a3a)
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+
+Origin: upstream, https://git.qemu.org/?p=qemu.git;a=commit;h=09397e9657
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/1891877
+Last-Update: 2020-08-19
+
+---
+ migration/colo.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/migration/colo.c b/migration/colo.c
+index 2c88aa57a2..6d46800aa6 100644
+--- a/migration/colo.c
++++ b/migration/colo.c
+@@ -92,6 +92,7 @@ static void secondary_vm_do_failover(void)
+     replication_stop_all(true, &local_err);
+     if (local_err) {
+         error_report_err(local_err);
++        local_err = NULL;
+     }
+ 
+     /* Notify all filters of all NIC to do checkpoint */
+-- 
+2.28.0
+

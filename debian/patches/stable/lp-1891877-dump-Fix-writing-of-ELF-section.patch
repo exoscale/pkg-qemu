@@ -1,0 +1,51 @@
+From 25fcaed9a366314c21793e14624c89db75224b50 Mon Sep 17 00:00:00 2001
+From: Peter Maydell <peter.maydell@linaro.org>
+Date: Tue, 24 Mar 2020 17:36:30 +0000
+Subject: [PATCH] dump: Fix writing of ELF section
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+In write_elf_section() we set the 'shdr' pointer to point to local
+structures shdr32 or shdr64, which we fill in to be written out to
+the ELF dump.  Unfortunately the address we pass to fd_write_vmcore()
+has a spurious '&' operator, so instead of writing out the section
+header we write out the literal pointer value followed by whatever is
+on the stack after the 'shdr' local variable.
+
+Pass the correct address into fd_write_vmcore().
+
+Spotted by Coverity: CID 1421970.
+
+Cc: qemu-stable@nongnu.org
+Signed-off-by: Peter Maydell <peter.maydell@linaro.org>
+Reviewed-by: Marc-André Lureau <marcandre.lureau@redhat.com>
+Reviewed-by: Philippe Mathieu-Daudé <philmd@redhat.com>
+Message-id: 20200324173630.12221-1-peter.maydell@linaro.org
+(cherry picked from commit 174d2d6856bf435f4f58e9303ba30dd0e1279d3f)
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+
+Origin: upstream, https://git.qemu.org/?p=qemu.git;a=commit;h=25fcaed9a3
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/1891877
+Last-Update: 2020-08-19
+
+---
+ dump/dump.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/dump/dump.c b/dump/dump.c
+index 6fb6e1245a..22ed1d3b0d 100644
+--- a/dump/dump.c
++++ b/dump/dump.c
+@@ -364,7 +364,7 @@ static void write_elf_section(DumpState *s, int type, Error **errp)
+         shdr = &shdr64;
+     }
+ 
+-    ret = fd_write_vmcore(&shdr, shdr_size, s);
++    ret = fd_write_vmcore(shdr, shdr_size, s);
+     if (ret < 0) {
+         error_setg_errno(errp, -ret,
+                          "dump: failed to write section header table");
+-- 
+2.28.0
+

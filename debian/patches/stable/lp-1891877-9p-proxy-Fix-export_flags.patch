@@ -1,0 +1,49 @@
+From 410252fc5b2aaef65b793edd37289284c1a4eb91 Mon Sep 17 00:00:00 2001
+From: Greg Kurz <groug@kaod.org>
+Date: Tue, 10 Mar 2020 16:12:49 +0100
+Subject: [PATCH] 9p/proxy: Fix export_flags
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+The common fsdev options are set by qemu_fsdev_add() before it calls
+the backend specific option parsing code. In the case of "proxy" this
+means "writeout" or "readonly" were simply ignored. This has been
+broken from the beginning.
+
+Reported-by: Stéphane Graber <stgraber@ubuntu.com>
+Signed-off-by: Greg Kurz <groug@kaod.org>
+Reviewed-by: Philippe Mathieu-Daudé <philmd@redhat.com>
+Reviewed-by: Christian Schoenebeck <qemu_oss@crudebyte.com>
+Message-Id: <158349633705.1237488.8895481990204796135.stgit@bahia.lan>
+(cherry picked from commit 659f1953281bcfa5ac217e42877d7d3c32eeea38)
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+
+Origin: upstream, https://git.qemu.org/?p=qemu.git;a=commit;h=410252fc5b
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/1891877
+Last-Update: 2020-08-19
+
+---
+ hw/9pfs/9p-proxy.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/hw/9pfs/9p-proxy.c b/hw/9pfs/9p-proxy.c
+index 97ab9c58a5..3b885b96b5 100644
+--- a/hw/9pfs/9p-proxy.c
++++ b/hw/9pfs/9p-proxy.c
+@@ -1139,10 +1139,10 @@ static int proxy_parse_opts(QemuOpts *opts, FsDriverEntry *fs, Error **errp)
+     }
+     if (socket) {
+         fs->path = g_strdup(socket);
+-        fs->export_flags = V9FS_PROXY_SOCK_NAME;
++        fs->export_flags |= V9FS_PROXY_SOCK_NAME;
+     } else {
+         fs->path = g_strdup(sock_fd);
+-        fs->export_flags = V9FS_PROXY_SOCK_FD;
++        fs->export_flags |= V9FS_PROXY_SOCK_FD;
+     }
+     return 0;
+ }
+-- 
+2.28.0
+

@@ -1,0 +1,55 @@
+From 8d61b1e2c4e2ad8310ca957decf26b0b82d37148 Mon Sep 17 00:00:00 2001
+From: Finn Thain <fthain@telegraphics.com.au>
+Date: Wed, 29 Jan 2020 20:27:49 +1100
+Subject: [PATCH] dp8393x: Clear descriptor in_use field to release packet
+
+When the SONIC receives a packet into the last available descriptor, it
+retains ownership of that descriptor for as long as necessary.
+
+Section 3.4.7 of the datasheet says,
+
+    When the system appends more descriptors, the SONIC releases ownership
+    of the descriptor after writing 0000h to the RXpkt.in_use field.
+
+The packet can now be processed by the host, so raise a PKTRX interrupt,
+just like the normal case.
+
+Signed-off-by: Finn Thain <fthain@telegraphics.com.au>
+Tested-by: Laurent Vivier <laurent@vivier.eu>
+Signed-off-by: Jason Wang <jasowang@redhat.com>
+(cherry picked from commit d9fae13196a31716f45dcddcdd958fbb8e59b35a)
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+
+Origin: upstream, https://git.qemu.org/?p=qemu.git;a=commit;h=8d61b1e2c4
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/1891877
+Last-Update: 2020-08-19
+
+---
+ hw/net/dp8393x.c | 10 ++++++++++
+ 1 file changed, 10 insertions(+)
+
+diff --git a/hw/net/dp8393x.c b/hw/net/dp8393x.c
+index 0e9061d831..4ce2ef818b 100644
+--- a/hw/net/dp8393x.c
++++ b/hw/net/dp8393x.c
+@@ -809,7 +809,17 @@ static ssize_t dp8393x_receive(NetClientState *nc, const uint8_t * buf,
+             return -1;
+         }
+         /* Link has been updated by host */
++
++        /* Clear in_use */
++        size = sizeof(uint16_t) * width;
++        address = dp8393x_crda(s) + sizeof(uint16_t) * 6 * width;
++        dp8393x_put(s, width, 0, 0);
++        address_space_rw(&s->as, address, MEMTXATTRS_UNSPECIFIED,
++                         (uint8_t *)s->data, size, 1);
++
++        /* Move to next descriptor */
+         s->regs[SONIC_CRDA] = s->regs[SONIC_LLFA];
++        s->regs[SONIC_ISR] |= SONIC_ISR_PKTRX;
+     }
+ 
+     /* Save current position */
+-- 
+2.28.0
+
