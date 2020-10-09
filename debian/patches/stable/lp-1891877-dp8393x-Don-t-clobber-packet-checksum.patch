@@ -1,0 +1,45 @@
+From d50aa8acbc6f4bd83d0d0b5958d49ac6baf254a5 Mon Sep 17 00:00:00 2001
+From: Finn Thain <fthain@telegraphics.com.au>
+Date: Wed, 29 Jan 2020 20:27:49 +1100
+Subject: [PATCH] dp8393x: Don't clobber packet checksum
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+A received packet consumes pkt_size bytes in the buffer and the frame
+checksum that's appended to it consumes another 4 bytes. The Receive
+Buffer Address register takes the former quantity into account but
+not the latter. So the next packet written to the buffer overwrites
+the frame checksum. Fix this.
+
+Signed-off-by: Finn Thain <fthain@telegraphics.com.au>
+Reviewed-by: Philippe Mathieu-Daudé <philmd@redhat.com>
+Tested-by: Laurent Vivier <laurent@vivier.eu>
+Signed-off-by: Jason Wang <jasowang@redhat.com>
+(cherry picked from commit bae112b80c9c42cea21ee7623c283668c3451c2e)
+*drop context dep. on 19f70347731
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+
+Origin: upstream, https://git.qemu.org/?p=qemu.git;a=commit;h=d50aa8acbc
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/1891877
+Last-Update: 2020-08-19
+
+---
+ hw/net/dp8393x.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/hw/net/dp8393x.c b/hw/net/dp8393x.c
+index ca8088c839..315b4ad844 100644
+--- a/hw/net/dp8393x.c
++++ b/hw/net/dp8393x.c
+@@ -816,6 +816,7 @@ static ssize_t dp8393x_receive(NetClientState *nc, const uint8_t * buf,
+     address += rx_len;
+     address_space_rw(&s->as, address,
+         MEMTXATTRS_UNSPECIFIED, (uint8_t *)&checksum, 4, 1);
++    address += 4;
+     rx_len += 4;
+     s->regs[SONIC_CRBA1] = address >> 16;
+     s->regs[SONIC_CRBA0] = address & 0xffff;
+-- 
+2.28.0
+

@@ -1,0 +1,59 @@
+From e8ae3a4e2bb72ae636ecbf201b0f74d4bf7d5aeb Mon Sep 17 00:00:00 2001
+From: Simon Veith <sveith@amazon.de>
+Date: Fri, 20 Dec 2019 14:03:00 +0000
+Subject: [PATCH] hw/arm/smmuv3: Apply address mask to linear strtab base
+ address
+
+In the SMMU_STRTAB_BASE register, the stream table base address only
+occupies bits [51:6]. Other bits, such as RA (bit [62]), must be masked
+out to obtain the base address.
+
+The branch for 2-level stream tables correctly applies this mask by way
+of SMMU_BASE_ADDR_MASK, but the one for linear stream tables does not.
+
+Apply the missing mask in that case as well so that the correct stream
+base address is used by guests which configure a linear stream table.
+
+Linux guests are unaffected by this change because they choose a 2-level
+stream table layout for the QEMU SMMUv3, based on the size of its stream
+ID space.
+
+ref. ARM IHI 0070C, section 6.3.23.
+
+Signed-off-by: Simon Veith <sveith@amazon.de>
+Acked-by: Eric Auger <eric.auger@redhat.com>
+Tested-by: Eric Auger <eric.auger@redhat.com>
+Message-id: 1576509312-13083-2-git-send-email-sveith@amazon.de
+Cc: Eric Auger <eric.auger@redhat.com>
+Cc: qemu-devel@nongnu.org
+Cc: qemu-arm@nongnu.org
+Acked-by: Eric Auger <eric.auger@redhat.com>
+Reviewed-by: Peter Maydell <peter.maydell@linaro.org>
+Signed-off-by: Peter Maydell <peter.maydell@linaro.org>
+(cherry picked from commit 3d44c60500785f18bb469c9de0aeba7415c0f28f)
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+
+Origin: upstream, https://git.qemu.org/?p=qemu.git;a=commit;h=e8ae3a4e2b
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/1891877
+Last-Update: 2020-08-19
+
+---
+ hw/arm/smmuv3.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/hw/arm/smmuv3.c b/hw/arm/smmuv3.c
+index e2fbb8357e..eef9a18d70 100644
+--- a/hw/arm/smmuv3.c
++++ b/hw/arm/smmuv3.c
+@@ -429,7 +429,7 @@ static int smmu_find_ste(SMMUv3State *s, uint32_t sid, STE *ste,
+         }
+         addr = l2ptr + l2_ste_offset * sizeof(*ste);
+     } else {
+-        addr = s->strtab_base + sid * sizeof(*ste);
++        addr = (s->strtab_base & SMMU_BASE_ADDR_MASK) + sid * sizeof(*ste);
+     }
+ 
+     if (smmu_get_ste(s, addr, ste, event)) {
+-- 
+2.28.0
+

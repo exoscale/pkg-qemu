@@ -1,0 +1,57 @@
+From 4a0db6ba7d5c524cbbcc684d7448e01e11eacbbd Mon Sep 17 00:00:00 2001
+From: Kevin Wolf <kwolf@redhat.com>
+Date: Thu, 30 Apr 2020 16:27:52 +0200
+Subject: [PATCH] iotests/283: Use consistent size for source and target
+
+The test case forgot to specify the null-co size for the target node.
+When adding a check to backup that both sizes match, this would fail
+because of the size mismatch and not the behaviour that the test really
+wanted to test.
+
+Fixes: a541fcc27c98b96da187c7d4573f3270f3ddd283
+Signed-off-by: Kevin Wolf <kwolf@redhat.com>
+Message-Id: <20200430142755.315494-2-kwolf@redhat.com>
+Reviewed-by: Vladimir Sementsov-Ogievskiy <vsementsov@virtuozzo.com>
+Signed-off-by: Kevin Wolf <kwolf@redhat.com>
+(cherry picked from commit 813cc2545b82409fd504509f0ba2e96fab6edb9e)
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+
+Origin: upstream, https://git.qemu.org/?p=qemu.git;a=commit;h=4a0db6ba7d
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/1891877
+Last-Update: 2020-08-19
+
+---
+ tests/qemu-iotests/283     | 6 +++++-
+ tests/qemu-iotests/283.out | 2 +-
+ 2 files changed, 6 insertions(+), 2 deletions(-)
+
+diff --git a/tests/qemu-iotests/283 b/tests/qemu-iotests/283
+index 293e557bd9..a82e3c8164 100644
+--- a/tests/qemu-iotests/283
++++ b/tests/qemu-iotests/283
+@@ -72,7 +72,11 @@ to check that crash is fixed :)
+ vm = iotests.VM()
+ vm.launch()
+ 
+-vm.qmp_log('blockdev-add', **{'node-name': 'target', 'driver': 'null-co'})
++vm.qmp_log('blockdev-add', **{
++    'node-name': 'target',
++    'driver': 'null-co',
++    'size': size,
++})
+ 
+ vm.qmp_log('blockdev-add', **{
+     'node-name': 'source',
+diff --git a/tests/qemu-iotests/283.out b/tests/qemu-iotests/283.out
+index daaf5828c1..d8cff22cc1 100644
+--- a/tests/qemu-iotests/283.out
++++ b/tests/qemu-iotests/283.out
+@@ -1,4 +1,4 @@
+-{"execute": "blockdev-add", "arguments": {"driver": "null-co", "node-name": "target"}}
++{"execute": "blockdev-add", "arguments": {"driver": "null-co", "node-name": "target", "size": 1048576}}
+ {"return": {}}
+ {"execute": "blockdev-add", "arguments": {"driver": "blkdebug", "image": {"driver": "null-co", "node-name": "base", "size": 1048576}, "node-name": "source"}}
+ {"return": {}}
+-- 
+2.28.0
+

@@ -1,0 +1,71 @@
+From bf3f12ac8c34e4856f48c5f7ee7d23c042097797 Mon Sep 17 00:00:00 2001
+From: Finn Thain <fthain@telegraphics.com.au>
+Date: Wed, 29 Jan 2020 20:27:49 +1100
+Subject: [PATCH] dp8393x: Clean up endianness hacks
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+According to the datasheet, section 3.4.4, "in 32-bit mode ... the SONIC
+always writes long words".
+
+Therefore, use the same technique for the 'in_use' field that is used
+everywhere else, and write the full long word.
+
+Signed-off-by: Finn Thain <fthain@telegraphics.com.au>
+Tested-by: Laurent Vivier <laurent@vivier.eu>
+Reviewed-by: Philippe Mathieu-Daudé <philmd@redhat.com>
+Signed-off-by: Jason Wang <jasowang@redhat.com>
+(cherry picked from commit 46ffee9ad43185cbee4182c208bbd534814086ca)
+ Conflicts:
+	hw/net/dp8393x.c
+*roll in local dependencies on b7cbebf2b9d
+*drop functional dep. on 19f70347731
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+
+Origin: upstream, https://git.qemu.org/?p=qemu.git;a=commit;h=bf3f12ac8c
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/1891877
+Last-Update: 2020-08-19
+
+---
+ hw/net/dp8393x.c | 17 ++++++-----------
+ 1 file changed, 6 insertions(+), 11 deletions(-)
+
+diff --git a/hw/net/dp8393x.c b/hw/net/dp8393x.c
+index 49c304ee20..f89f4c7ba3 100644
+--- a/hw/net/dp8393x.c
++++ b/hw/net/dp8393x.c
+@@ -776,8 +776,6 @@ static ssize_t dp8393x_receive(NetClientState *nc, const uint8_t * buf,
+         return -1;
+     }
+ 
+-    /* XXX: Check byte ordering */
+-
+     /* Check for EOL */
+     if (s->regs[SONIC_LLFA] & SONIC_DESC_EOL) {
+         /* Are we still in resource exhaustion? */
+@@ -847,15 +845,12 @@ static ssize_t dp8393x_receive(NetClientState *nc, const uint8_t * buf,
+         /* EOL detected */
+         s->regs[SONIC_ISR] |= SONIC_ISR_RDE;
+     } else {
+-        /* Clear in_use, but it is always 16bit wide */
+-        int offset = dp8393x_crda(s) + sizeof(uint16_t) * 6 * width;
+-        if (s->big_endian && width == 2) {
+-            /* we need to adjust the offset of the 16bit field */
+-            offset += sizeof(uint16_t);
+-        }
+-        s->data[0] = 0;
+-        address_space_rw(&s->as, offset, MEMTXATTRS_UNSPECIFIED,
+-                         (uint8_t *)s->data, sizeof(uint16_t), 1);
++        /* Clear in_use */
++        size = sizeof(uint16_t) * width;
++        address = dp8393x_crda(s) + sizeof(uint16_t) * 6 * width;
++        dp8393x_put(s, width, 0, 0);
++        address_space_rw(&s->as, address, MEMTXATTRS_UNSPECIFIED,
++                         (uint8_t *)s->data, size, true);
+         s->regs[SONIC_CRDA] = s->regs[SONIC_LLFA];
+         s->regs[SONIC_ISR] |= SONIC_ISR_PKTRX;
+         s->regs[SONIC_RSC] = (s->regs[SONIC_RSC] & 0xff00) | (((s->regs[SONIC_RSC] & 0x00ff) + 1) & 0x00ff);
+-- 
+2.28.0
+
