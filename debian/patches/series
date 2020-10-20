@@ -225,6 +225,10 @@ ubuntu/lp-1883984-target-s390x-Fix-SQXBR.patch
 ubuntu/lp-1890154-s390x-protvirt-allow-to-IPL-secure-guests-with-no-re.patch
 ubuntu/hw-riscv-Allow-64-bit-access-to-SiFive-CLINT.patch
 ubuntu/CVE-2020-14364.patch
+ubuntu/lp-1882774-i386-Add-missing-cpu-feature-bits-in-EPYC-model.patch
+ubuntu/lp-1882774-i386-Add-2nd-Generation-AMD-EPYC-processors.patch
+ubuntu/lp-1896751-exec-rom_reset-Free-rom-data-during-inmigrate-skip.patch
+ubuntu/lp-1849644-io-channel-websock-treat-binary-and-no-sub-protocol-.patch
 
 # Exoscale
 exoscale/pre-bionic-256k-ipxe-efi-roms-2.11.patch
