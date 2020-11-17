@@ -229,6 +229,8 @@ ubuntu/lp-1882774-i386-Add-missing-cpu-feature-bits-in-EPYC-model.patch
 ubuntu/lp-1882774-i386-Add-2nd-Generation-AMD-EPYC-processors.patch
 ubuntu/lp-1896751-exec-rom_reset-Free-rom-data-during-inmigrate-skip.patch
 ubuntu/lp-1849644-io-channel-websock-treat-binary-and-no-sub-protocol-.patch
+ubuntu/lp-1894942-virtio-ccw-fix-virtio_set_ind_atomic.patch
+ubuntu/lp-1894942-s390x-pci-fix-set_ind_atomic.patch
 
 # Exoscale
 exoscale/pre-bionic-256k-ipxe-efi-roms-2.11.patch
