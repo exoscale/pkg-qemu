@@ -97,7 +97,7 @@ Forward-info: downstream decision
 
 --- a/hw/i386/pc_piix.c
 +++ b/hw/i386/pc_piix.c
-@@ -429,7 +429,7 @@ static void pc_i440fx_4_2_machine_option
+@@ -428,7 +428,7 @@ static void pc_i440fx_4_2_machine_option
      PCMachineClass *pcmc = PC_MACHINE_CLASS(m);
      pc_i440fx_machine_options(m);
      m->alias = "pc";
@@ -106,7 +106,7 @@ Forward-info: downstream decision
      pcmc->default_cpu_version = 1;
  }
  
-@@ -1026,3 +1026,175 @@ static void xenfv_machine_options(Machin
+@@ -1025,3 +1025,180 @@ static void xenfv_machine_options(Machin
  DEFINE_PC_MACHINE(xenfv, "xenfv", pc_xen_hvm_init,
                    xenfv_machine_options);
  #endif
@@ -261,15 +261,20 @@ Forward-info: downstream decision
 + * moving between those version references.
 + * This introduces pc_i440fx_wily_machine_options which encapsulates the
 + * old behavior as it was (this is the purpose of machine types).
++ *
++ * Further bug 1902654 identified issues due to the upstream rework of types
++ * that made the wily type change some attributes in >=Eoan.
++ * As we did in Bionic for 1829868 we need to use a 2_4/2_3 hybrid type to
++ * match what was initially shipped.
 + */
 +static void pc_i440fx_wily_machine_options(MachineClass *m)
 +{
 +    PCMachineClass *pcmc = PC_MACHINE_CLASS(m);
-+    pc_i440fx_2_4_machine_options(m);
++    pc_i440fx_2_5_machine_options(m);
 +    m->hw_version = "2.4.0";
 +    pcmc->broken_reserved_end = true;
-+    compat_props_add(m->compat_props, hw_compat_2_3, hw_compat_2_3_len);
-+    compat_props_add(m->compat_props, pc_compat_2_3, pc_compat_2_3_len);
++    compat_props_add(m->compat_props, hw_compat_2_4_wily, hw_compat_2_4_wily_len);
++    compat_props_add(m->compat_props, pc_compat_2_4, pc_compat_2_4_len);
 +}
 +
 +static void pc_wily_machine_options(MachineClass *m)
@@ -630,4 +635,54 @@ Forward-info: downstream decision
 +
  extern GlobalProperty pc_compat_3_1[];
  extern const size_t pc_compat_3_1_len;
+ 
+--- a/hw/core/machine.c
++++ b/hw/core/machine.c
+@@ -136,16 +136,28 @@ GlobalProperty hw_compat_2_5[] = {
+ };
+ const size_t hw_compat_2_5_len = G_N_ELEMENTS(hw_compat_2_5);
+ 
++#define HW_COMPAT_2_4_DEFS \
++    { "virtio-blk-device", "scsi", "true" }, \
++    { "e1000", "extra_mac_registers", "off" }, \
++    { "virtio-pci", "x-disable-pcie", "on" }, \
++    { "virtio-pci", "migrate-extra", "off" }, \
++    { "fw_cfg_mem", "dma_enabled", "off" }, \
++    { "fw_cfg_io", "dma_enabled", "off" },
++
+ GlobalProperty hw_compat_2_4[] = {
+-    { "virtio-blk-device", "scsi", "true" },
+-    { "e1000", "extra_mac_registers", "off" },
+-    { "virtio-pci", "x-disable-pcie", "on" },
+-    { "virtio-pci", "migrate-extra", "off" },
+-    { "fw_cfg_mem", "dma_enabled", "off" },
+-    { "fw_cfg_io", "dma_enabled", "off" }
++    HW_COMPAT_2_4_DEFS
+ };
+ const size_t hw_compat_2_4_len = G_N_ELEMENTS(hw_compat_2_4);
+ 
++// workaround for bug 1902654 / 1829868, see pc_i440fx_wily_machine_options in hw/i386/pc_piix.c
++GlobalProperty hw_compat_2_4_wily[] = {
++    HW_COMPAT_2_4_DEFS
++    { "migration", "send-configuration", "off" },
++    { "migration", "send-section-footer", "off" },
++    { "migration", "store-global-state", "off" },
++};
++const size_t hw_compat_2_4_wily_len = G_N_ELEMENTS(hw_compat_2_4_wily);
++
+ GlobalProperty hw_compat_2_3[] = {
+     { "virtio-blk-pci", "any_layout", "off" },
+     { "virtio-balloon-pci", "any_layout", "off" },
+--- a/include/hw/boards.h
++++ b/include/hw/boards.h
+@@ -368,6 +368,10 @@ extern const size_t hw_compat_2_5_len;
+ extern GlobalProperty hw_compat_2_4[];
+ extern const size_t hw_compat_2_4_len;
+ 
++// workaround for bug 1902654 / 1829868, see pc_i440fx_wily_machine_options in hw/i386/pc_piix.c
++extern GlobalProperty hw_compat_2_4_wily[];
++extern const size_t hw_compat_2_4_wily_len;
++
+ extern GlobalProperty hw_compat_2_3[];
+ extern const size_t hw_compat_2_3_len;
  
