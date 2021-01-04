@@ -1,3 +1,51 @@
+qemu (1:4.2-3ubuntu6.10+exo2) UNRELEASED; urgency=medium
+
+  * Import 1:4.2-3ubuntu6.10
+  * Retain debian/patches/exoscale/pre-bionic-256k-ipxe-efi-roms-2.11.patch
+
+ -- Alessandro Ratti <alessandro@exoscale.com>  Mon, 04 Jan 2021 10:58:39 +0000
+
+qemu (1:4.2-3ubuntu6.10) focal-security; urgency=medium
+
+  * SECURITY UPDATE: heap buffer overflow in sdhci_sdma_transfer_multi_blocks()
+    - debian/patches/ubuntu/CVE-2020-17380.patch: fix DMA Transfer Block
+      Size field in hw/sd/sdhci.c.
+    - CVE-2020-17380
+    - CVE-2020-25085
+  * SECURITY UPDATE: use-after-free via unchecked return value
+    - debian/patches/ubuntu/CVE-2020-25084.patch: check return value of
+      'usb_packet_map' in hw/usb/hcd-xhci.c.
+    - CVE-2020-25084
+  * SECURITY UPDATE: out-of-bound access issue
+    - debian/patches/ubuntu/CVE-2020-25624.patch: check len and
+      frame_number variables in hw/usb/hcd-ohci.c.
+    - CVE-2020-25624
+  * SECURITY UPDATE: infinite loop when a TD list has a loop
+    - debian/patches/ubuntu/CVE-2020-25625.patch: check for processed TD
+      before retire in hw/usb/hcd-ohci.c.
+    - CVE-2020-25625
+  * SECURITY UPDATE: assertion failure through usb_packet_unmap()
+    - debian/patches/ubuntu/CVE-2020-25723.patch: check return value of
+      'usb_packet_map' in hw/usb/hcd-ehci.c.
+    - CVE-2020-25723
+  * SECURITY UPDATE: bounds issue in ati_2d_blt
+    - debian/patches/ubuntu/CVE-2020-27616.patch: check x y display
+      parameter values in hw/display/ati_2d.c.
+    - CVE-2020-27616
+  * SECURITY UPDATE: assertion failure
+    - debian/patches/ubuntu/CVE-2020-27617.patch: remove an assert call in
+      eth_get_gso_type in net/eth.c.
+    - CVE-2020-27617
+
+ -- Marc Deslauriers <marc.deslauriers@ubuntu.com>  Fri, 20 Nov 2020 08:12:00 -0500
+
+qemu (1:4.2-3ubuntu6.9) focal; urgency=medium
+
+  * d/p/ubuntu/define-ubuntu-machine-types.patch: update to fix 15.04 wily
+    machine type to match how it originally was released (LP: #1902654)
+
+ -- Christian Ehrhardt <christian.ehrhardt@canonical.com>  Wed, 04 Nov 2020 15:34:47 +0100
+
 qemu (1:4.2-3ubuntu6.8+exo2) UNRELEASED; urgency=medium
 
   * Import 1:4.2-3ubuntu6.8

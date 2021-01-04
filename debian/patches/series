@@ -231,6 +231,13 @@ ubuntu/lp-1896751-exec-rom_reset-Free-rom-data-during-inmigrate-skip.patch
 ubuntu/lp-1849644-io-channel-websock-treat-binary-and-no-sub-protocol-.patch
 ubuntu/lp-1894942-virtio-ccw-fix-virtio_set_ind_atomic.patch
 ubuntu/lp-1894942-s390x-pci-fix-set_ind_atomic.patch
+ubuntu/CVE-2020-17380.patch
+ubuntu/CVE-2020-25084.patch
+ubuntu/CVE-2020-25624.patch
+ubuntu/CVE-2020-25625.patch
+ubuntu/CVE-2020-25723.patch
+ubuntu/CVE-2020-27616.patch
+ubuntu/CVE-2020-27617.patch
 
 # Exoscale
 exoscale/pre-bionic-256k-ipxe-efi-roms-2.11.patch
