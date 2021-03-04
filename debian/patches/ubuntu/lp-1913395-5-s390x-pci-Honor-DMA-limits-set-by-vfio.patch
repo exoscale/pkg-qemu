@@ -1,0 +1,324 @@
+From ac3bee0a6906719d3ef3cbdaf5f986deb3ab20dc Mon Sep 17 00:00:00 2001
+From: Matthew Rosato <mjrosato@linux.ibm.com>
+Date: Mon, 26 Oct 2020 11:34:35 -0400
+Subject: [PATCH 5/6] s390x/pci: Honor DMA limits set by vfio
+
+When an s390 guest is using lazy unmapping, it can result in a very
+large number of oustanding DMA requests, far beyond the default
+limit configured for vfio.  Let's track DMA usage similar to vfio
+in the host, and trigger the guest to flush their DMA mappings
+before vfio runs out.
+
+Signed-off-by: Matthew Rosato <mjrosato@linux.ibm.com>
+Reviewed-by: Cornelia Huck <cohuck@redhat.com>
+[aw: non-Linux build fixes]
+Signed-off-by: Alex Williamson <alex.williamson@redhat.com>
+[mr: Backport: Adjust for conflicts with missing header reorganization patch]
+Signed-off-by: Matthew Rosato <mjrosato@linux.ibm.com>
+
+Origin: backport, https://git.qemu.org/?p=qemu.git;a=commit;h=37fa32de707340f3a93959ad5a1ebc41ba1520ee
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/1913395
+Last-Update: 2021-01-27
+
+---
+ hw/s390x/s390-pci-bus.c          | 16 +++++++++-----
+ hw/s390x/s390-pci-bus.h          |  9 ++++++++
+ hw/s390x/s390-pci-inst.c         | 45 ++++++++++++++++++++++++++++++++++------
+ hw/s390x/s390-pci-inst.h         |  3 +++
+ hw/s390x/s390-pci-vfio.c         | 43 ++++++++++++++++++++++++++++++++++++++
+ include/hw/s390x/s390-pci-vfio.h | 12 +++++++++++
+ 6 files changed, 117 insertions(+), 11 deletions(-)
+
+--- a/hw/s390x/s390-pci-bus.c
++++ b/hw/s390x/s390-pci-bus.c
+@@ -17,6 +17,7 @@
+ #include "cpu.h"
+ #include "s390-pci-bus.h"
+ #include "s390-pci-inst.h"
++#include "hw/s390x/s390-pci-vfio.h"
+ #include "hw/pci/pci_bus.h"
+ #include "hw/qdev-properties.h"
+ #include "hw/pci/pci_bridge.h"
+@@ -773,6 +774,7 @@ static void s390_pcihost_realize(DeviceS
+     s->bus_no = 0;
+     QTAILQ_INIT(&s->pending_sei);
+     QTAILQ_INIT(&s->zpci_devs);
++    QTAILQ_INIT(&s->zpci_dma_limit);
+ 
+     css_register_io_adapters(CSS_IO_ADAPTER_PCI, true, false,
+                              S390_ADAPTER_SUPPRESSIBLE, &local_err);
+@@ -953,17 +955,18 @@ static void s390_pcihost_plug(HotplugHan
+             }
+         }
+ 
++        pbdev->pdev = pdev;
++        pbdev->iommu = s390_pci_get_iommu(s, pci_get_bus(pdev), pdev->devfn);
++        pbdev->iommu->pbdev = pbdev;
++        pbdev->state = ZPCI_FS_DISABLED;
++
+         if (object_dynamic_cast(OBJECT(dev), "vfio-pci")) {
+             pbdev->fh |= FH_SHM_VFIO;
++            pbdev->iommu->dma_limit = s390_pci_start_dma_count(s, pbdev);
+         } else {
+             pbdev->fh |= FH_SHM_EMUL;
+         }
+ 
+-        pbdev->pdev = pdev;
+-        pbdev->iommu = s390_pci_get_iommu(s, pci_get_bus(pdev), pdev->devfn);
+-        pbdev->iommu->pbdev = pbdev;
+-        pbdev->state = ZPCI_FS_DISABLED;
+-
+         if (s390_pci_msix_init(pbdev)) {
+             error_setg(errp, "MSI-X support is mandatory "
+                        "in the S390 architecture");
+@@ -1016,6 +1019,9 @@ static void s390_pcihost_unplug(HotplugH
+         pbdev->fid = 0;
+         QTAILQ_REMOVE(&s->zpci_devs, pbdev, link);
+         g_hash_table_remove(s->zpci_table, &pbdev->idx);
++        if (pbdev->iommu->dma_limit) {
++            s390_pci_end_dma_count(s, pbdev->iommu->dma_limit);
++        }
+         object_property_set_bool(OBJECT(dev), false, "realized", NULL);
+     }
+ }
+--- a/hw/s390x/s390-pci-bus.h
++++ b/hw/s390x/s390-pci-bus.h
+@@ -265,6 +265,13 @@ typedef struct S390IOTLBEntry {
+     uint64_t perm;
+ } S390IOTLBEntry;
+ 
++typedef struct S390PCIDMACount {
++    int id;
++    int users;
++    uint32_t avail;
++    QTAILQ_ENTRY(S390PCIDMACount) link;
++} S390PCIDMACount;
++
+ typedef struct S390PCIBusDevice S390PCIBusDevice;
+ typedef struct S390PCIIOMMU {
+     Object parent_obj;
+@@ -277,6 +284,7 @@ typedef struct S390PCIIOMMU {
+     uint64_t pba;
+     uint64_t pal;
+     GHashTable *iotlb;
++    S390PCIDMACount *dma_limit;
+ } S390PCIIOMMU;
+ 
+ typedef struct S390PCIIOMMUTable {
+@@ -352,6 +360,7 @@ typedef struct S390pciState {
+     GHashTable *zpci_table;
+     QTAILQ_HEAD(, SeiContainer) pending_sei;
+     QTAILQ_HEAD(, S390PCIBusDevice) zpci_devs;
++    QTAILQ_HEAD(, S390PCIDMACount) zpci_dma_limit;
+ } S390pciState;
+ 
+ S390pciState *s390_get_phb(void);
+--- a/hw/s390x/s390-pci-inst.c
++++ b/hw/s390x/s390-pci-inst.c
+@@ -32,6 +32,20 @@
+         }                                                          \
+     } while (0)
+ 
++static inline void inc_dma_avail(S390PCIIOMMU *iommu)
++{
++    if (iommu->dma_limit) {
++        iommu->dma_limit->avail++;
++    }
++}
++
++static inline void dec_dma_avail(S390PCIIOMMU *iommu)
++{
++    if (iommu->dma_limit) {
++        iommu->dma_limit->avail--;
++    }
++}
++
+ static void s390_set_status_code(CPUS390XState *env,
+                                  uint8_t r, uint64_t status_code)
+ {
+@@ -572,7 +586,8 @@ int pcistg_service_call(S390CPU *cpu, ui
+     return 0;
+ }
+ 
+-static void s390_pci_update_iotlb(S390PCIIOMMU *iommu, S390IOTLBEntry *entry)
++static uint32_t s390_pci_update_iotlb(S390PCIIOMMU *iommu,
++                                      S390IOTLBEntry *entry)
+ {
+     S390IOTLBEntry *cache = g_hash_table_lookup(iommu->iotlb, &entry->iova);
+     IOMMUTLBEntry notify = {
+@@ -585,14 +600,15 @@ static void s390_pci_update_iotlb(S390PC
+ 
+     if (entry->perm == IOMMU_NONE) {
+         if (!cache) {
+-            return;
++            goto out;
+         }
+         g_hash_table_remove(iommu->iotlb, &entry->iova);
++        inc_dma_avail(iommu);
+     } else {
+         if (cache) {
+             if (cache->perm == entry->perm &&
+                 cache->translated_addr == entry->translated_addr) {
+-                return;
++                goto out;
+             }
+ 
+             notify.perm = IOMMU_NONE;
+@@ -606,9 +622,13 @@ static void s390_pci_update_iotlb(S390PC
+         cache->len = PAGE_SIZE;
+         cache->perm = entry->perm;
+         g_hash_table_replace(iommu->iotlb, &cache->iova, cache);
++        dec_dma_avail(iommu);
+     }
+ 
+     memory_region_notify_iommu(&iommu->iommu_mr, 0, notify);
++
++out:
++    return iommu->dma_limit ? iommu->dma_limit->avail : 1;
+ }
+ 
+ int rpcit_service_call(S390CPU *cpu, uint8_t r1, uint8_t r2, uintptr_t ra)
+@@ -620,6 +640,7 @@ int rpcit_service_call(S390CPU *cpu, uin
+     S390PCIIOMMU *iommu;
+     S390IOTLBEntry entry;
+     hwaddr start, end;
++    uint32_t dma_avail;
+ 
+     if (env->psw.mask & PSW_MASK_PSTATE) {
+         s390_program_interrupt(env, PGM_PRIVILEGED, ra);
+@@ -658,6 +679,11 @@ int rpcit_service_call(S390CPU *cpu, uin
+     }
+ 
+     iommu = pbdev->iommu;
++    if (iommu->dma_limit) {
++        dma_avail = iommu->dma_limit->avail;
++    } else {
++        dma_avail = 1;
++    }
+     if (!iommu->g_iota) {
+         error = ERR_EVENT_INVALAS;
+         goto err;
+@@ -675,8 +701,9 @@ int rpcit_service_call(S390CPU *cpu, uin
+         }
+ 
+         start += entry.len;
+-        while (entry.iova < start && entry.iova < end) {
+-            s390_pci_update_iotlb(iommu, &entry);
++        while (entry.iova < start && entry.iova < end &&
++               (dma_avail > 0 || entry.perm == IOMMU_NONE)) {
++            dma_avail = s390_pci_update_iotlb(iommu, &entry);
+             entry.iova += PAGE_SIZE;
+             entry.translated_addr += PAGE_SIZE;
+         }
+@@ -689,7 +716,13 @@ err:
+         s390_pci_generate_error_event(error, pbdev->fh, pbdev->fid, start, 0);
+     } else {
+         pbdev->fmb.counter[ZPCI_FMB_CNT_RPCIT]++;
+-        setcc(cpu, ZPCI_PCI_LS_OK);
++        if (dma_avail > 0) {
++            setcc(cpu, ZPCI_PCI_LS_OK);
++        } else {
++            /* vfio DMA mappings are exhausted, trigger a RPCIT */
++            setcc(cpu, ZPCI_PCI_LS_ERR);
++            s390_set_status_code(env, r1, ZPCI_RPCIT_ST_INSUFF_RES);
++        }
+     }
+     return 0;
+ }
+--- a/hw/s390x/s390-pci-inst.h
++++ b/hw/s390x/s390-pci-inst.h
+@@ -254,6 +254,9 @@ typedef struct ClpReqRspQueryPciGrp {
+ #define ZPCI_STPCIFC_ST_INVAL_DMAAS   28
+ #define ZPCI_STPCIFC_ST_ERROR_RECOVER 40
+ 
++/* Refresh PCI Translations status codes */
++#define ZPCI_RPCIT_ST_INSUFF_RES      16
++
+ /* FIB function controls */
+ #define ZPCI_FIB_FC_ENABLED     0x80
+ #define ZPCI_FIB_FC_ERROR       0x40
+--- a/hw/s390x/s390-pci-vfio.c
++++ b/hw/s390x/s390-pci-vfio.c
+@@ -13,7 +13,9 @@
+ 
+ #include <sys/ioctl.h>
+ 
++#include "s390-pci-bus.h"
+ #include "hw/s390x/s390-pci-vfio.h"
++#include "hw/vfio/pci.h"
+ #include "hw/vfio/vfio-common.h"
+ 
+ /*
+@@ -52,3 +54,44 @@ retry:
+     /* If the capability exists, update with the current value */
+     return vfio_get_info_dma_avail(info, avail);
+ }
++
++S390PCIDMACount *s390_pci_start_dma_count(S390pciState *s,
++                                          S390PCIBusDevice *pbdev)
++{
++    S390PCIDMACount *cnt;
++    uint32_t avail;
++    VFIOPCIDevice *vpdev = container_of(pbdev->pdev, VFIOPCIDevice, pdev);
++    int id;
++
++    assert(vpdev);
++
++    id = vpdev->vbasedev.group->container->fd;
++
++    if (!s390_pci_update_dma_avail(id, &avail)) {
++        return NULL;
++    }
++
++    QTAILQ_FOREACH(cnt, &s->zpci_dma_limit, link) {
++        if (cnt->id  == id) {
++            cnt->users++;
++            return cnt;
++        }
++    }
++
++    cnt = g_new0(S390PCIDMACount, 1);
++    cnt->id = id;
++    cnt->users = 1;
++    cnt->avail = avail;
++    QTAILQ_INSERT_TAIL(&s->zpci_dma_limit, cnt, link);
++    return cnt;
++}
++
++void s390_pci_end_dma_count(S390pciState *s, S390PCIDMACount *cnt)
++{
++    assert(cnt);
++
++    cnt->users--;
++    if (cnt->users == 0) {
++        QTAILQ_REMOVE(&s->zpci_dma_limit, cnt, link);
++    }
++}
+--- a/include/hw/s390x/s390-pci-vfio.h
++++ b/include/hw/s390x/s390-pci-vfio.h
+@@ -12,13 +12,25 @@
+ #ifndef HW_S390_PCI_VFIO_H
+ #define HW_S390_PCI_VFIO_H
+ 
++#include "../../../hw/s390x/s390-pci-bus.h"
++
+ #ifdef CONFIG_LINUX
+ bool s390_pci_update_dma_avail(int fd, unsigned int *avail);
++S390PCIDMACount *s390_pci_start_dma_count(S390pciState *s,
++                                          S390PCIBusDevice *pbdev);
++void s390_pci_end_dma_count(S390pciState *s, S390PCIDMACount *cnt);
+ #else
+ static inline bool s390_pci_update_dma_avail(int fd, unsigned int *avail)
+ {
+     return false;
+ }
++static inline S390PCIDMACount *s390_pci_start_dma_count(S390pciState *s,
++                                                        S390PCIBusDevice *pbdev)
++{
++    return NULL;
++}
++static inline void s390_pci_end_dma_count(S390pciState *s,
++                                          S390PCIDMACount *cnt) { }
+ #endif
+ 
+ #endif
