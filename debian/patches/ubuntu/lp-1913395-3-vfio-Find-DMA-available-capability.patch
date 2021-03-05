@@ -1,0 +1,75 @@
+From 7486a62845b1e12011dd99973e4739f69d57cd38 Mon Sep 17 00:00:00 2001
+From: Matthew Rosato <mjrosato@linux.ibm.com>
+Date: Mon, 26 Oct 2020 11:34:33 -0400
+Subject: [PATCH] vfio: Find DMA available capability
+
+The underlying host may be limiting the number of outstanding DMA
+requests for type 1 IOMMU.  Add helper functions to check for the
+DMA available capability and retrieve the current number of DMA
+mappings allowed.
+
+Signed-off-by: Matthew Rosato <mjrosato@linux.ibm.com>
+Reviewed-by: Cornelia Huck <cohuck@redhat.com>
+[aw: vfio_get_info_dma_avail moved inside CONFIG_LINUX]
+Signed-off-by: Alex Williamson <alex.williamson@redhat.com>
+
+Origin: upstream, https://git.qemu.org/?p=qemu.git;a=commit;h=7486a62845b1
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/1913395
+Last-Update: 2021-01-27
+
+---
+ hw/vfio/common.c              | 31 +++++++++++++++++++++++++++++++
+ include/hw/vfio/vfio-common.h |  2 ++
+ 2 files changed, 33 insertions(+)
+
+--- a/hw/vfio/common.c
++++ b/hw/vfio/common.c
+@@ -850,6 +850,37 @@ vfio_get_region_info_cap(struct vfio_reg
+     return vfio_get_cap((void *)info, info->cap_offset, id);
+ }
+ 
++static struct vfio_info_cap_header *
++vfio_get_iommu_type1_info_cap(struct vfio_iommu_type1_info *info, uint16_t id)
++{
++    if (!(info->flags & VFIO_IOMMU_INFO_CAPS)) {
++        return NULL;
++    }
++
++    return vfio_get_cap((void *)info, info->cap_offset, id);
++}
++
++bool vfio_get_info_dma_avail(struct vfio_iommu_type1_info *info,
++                             unsigned int *avail)
++{
++    struct vfio_info_cap_header *hdr;
++    struct vfio_iommu_type1_info_dma_avail *cap;
++
++    /* If the capability cannot be found, assume no DMA limiting */
++    hdr = vfio_get_iommu_type1_info_cap(info,
++                                        VFIO_IOMMU_TYPE1_INFO_DMA_AVAIL);
++    if (hdr == NULL) {
++        return false;
++    }
++
++    if (avail != NULL) {
++        cap = (void *) hdr;
++        *avail = cap->avail;
++    }
++
++    return true;
++}
++
+ static int vfio_setup_region_sparse_mmaps(VFIORegion *region,
+                                           struct vfio_region_info *info)
+ {
+--- a/include/hw/vfio/vfio-common.h
++++ b/include/hw/vfio/vfio-common.h
+@@ -191,6 +191,8 @@ int vfio_get_dev_region_info(VFIODevice
+ bool vfio_has_region_cap(VFIODevice *vbasedev, int region, uint16_t cap_type);
+ struct vfio_info_cap_header *
+ vfio_get_region_info_cap(struct vfio_region_info *info, uint16_t id);
++bool vfio_get_info_dma_avail(struct vfio_iommu_type1_info *info,
++                             unsigned int *avail);
+ #endif
+ extern const MemoryListener vfio_prereg_listener;
+ 

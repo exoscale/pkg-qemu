@@ -1,0 +1,120 @@
+From eaf387f141a6fc08cab59752b75e2a9c731754df Mon Sep 17 00:00:00 2001
+From: Matthew Rosato <mjrosato@linux.ibm.com>
+Date: Mon, 26 Oct 2020 11:34:34 -0400
+Subject: [PATCH 4/6] s390x/pci: Add routine to get the vfio dma available
+ count
+
+Create new files for separating out vfio-specific work for s390
+pci. Add the first such routine, which issues VFIO_IOMMU_GET_INFO
+ioctl to collect the current dma available count.
+
+Signed-off-by: Matthew Rosato <mjrosato@linux.ibm.com>
+Reviewed-by: Cornelia Huck <cohuck@redhat.com>
+[aw: Fix non-Linux build with CONFIG_LINUX]
+Signed-off-by: Alex Williamson <alex.williamson@redhat.com>
+[mr: Backport: Replace meson changes with Makefile changes]
+Signed-off-by: Matthew Rosato <mjrosato@linux.ibm.com>
+
+Origin: backport, https://git.qemu.org/?p=qemu.git;a=commit;h=cd7498d07fbb20fa04790ff7ee168a8a8d01cb30
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/1913395
+Last-Update: 2021-01-27
+
+---
+ hw/s390x/Makefile.objs           |  1 +
+ hw/s390x/s390-pci-vfio.c         | 54 ++++++++++++++++++++++++++++++++++++++++
+ include/hw/s390x/s390-pci-vfio.h | 24 ++++++++++++++++++
+ 3 files changed, 79 insertions(+)
+ create mode 100644 hw/s390x/s390-pci-vfio.c
+ create mode 100644 include/hw/s390x/s390-pci-vfio.h
+
+--- a/hw/s390x/Makefile.objs
++++ b/hw/s390x/Makefile.objs
+@@ -35,3 +35,4 @@ obj-$(CONFIG_KVM) += pv.o
+ obj-y += s390-ccw.o
+ obj-y += ap-device.o
+ obj-y += ap-bridge.o
++obj-$(CONFIG_LINUX) += s390-pci-vfio.o
+--- /dev/null
++++ b/hw/s390x/s390-pci-vfio.c
+@@ -0,0 +1,54 @@
++/*
++ * s390 vfio-pci interfaces
++ *
++ * Copyright 2020 IBM Corp.
++ * Author(s): Matthew Rosato <mjrosato@linux.ibm.com>
++ *
++ * This work is licensed under the terms of the GNU GPL, version 2 or (at
++ * your option) any later version. See the COPYING file in the top-level
++ * directory.
++ */
++
++#include "qemu/osdep.h"
++
++#include <sys/ioctl.h>
++
++#include "hw/s390x/s390-pci-vfio.h"
++#include "hw/vfio/vfio-common.h"
++
++/*
++ * Get the current DMA available count from vfio.  Returns true if vfio is
++ * limiting DMA requests, false otherwise.  The current available count read
++ * from vfio is returned in avail.
++ */
++bool s390_pci_update_dma_avail(int fd, unsigned int *avail)
++{
++    g_autofree struct vfio_iommu_type1_info *info;
++    uint32_t argsz;
++
++    assert(avail);
++
++    argsz = sizeof(struct vfio_iommu_type1_info);
++    info = g_malloc0(argsz);
++
++    /*
++     * If the specified argsz is not large enough to contain all capabilities
++     * it will be updated upon return from the ioctl.  Retry until we have
++     * a big enough buffer to hold the entire capability chain.
++     */
++retry:
++    info->argsz = argsz;
++
++    if (ioctl(fd, VFIO_IOMMU_GET_INFO, info)) {
++        return false;
++    }
++
++    if (info->argsz > argsz) {
++        argsz = info->argsz;
++        info = g_realloc(info, argsz);
++        goto retry;
++    }
++
++    /* If the capability exists, update with the current value */
++    return vfio_get_info_dma_avail(info, avail);
++}
+--- /dev/null
++++ b/include/hw/s390x/s390-pci-vfio.h
+@@ -0,0 +1,24 @@
++/*
++ * s390 vfio-pci interfaces
++ *
++ * Copyright 2020 IBM Corp.
++ * Author(s): Matthew Rosato <mjrosato@linux.ibm.com>
++ *
++ * This work is licensed under the terms of the GNU GPL, version 2 or (at
++ * your option) any later version. See the COPYING file in the top-level
++ * directory.
++ */
++
++#ifndef HW_S390_PCI_VFIO_H
++#define HW_S390_PCI_VFIO_H
++
++#ifdef CONFIG_LINUX
++bool s390_pci_update_dma_avail(int fd, unsigned int *avail);
++#else
++static inline bool s390_pci_update_dma_avail(int fd, unsigned int *avail)
++{
++    return false;
++}
++#endif
++
++#endif

@@ -238,6 +238,26 @@ ubuntu/CVE-2020-25625.patch
 ubuntu/CVE-2020-25723.patch
 ubuntu/CVE-2020-27616.patch
 ubuntu/CVE-2020-27617.patch
+ubuntu/lp-1907656-s390x-s390-virtio-ccw-Reset-PCI-devices-during-subsy.patch
+ubuntu/CVE-2020-11947.patch
+ubuntu/CVE-2020-15859.patch
+ubuntu/CVE-2020-27821.patch
+ubuntu/CVE-2020-28916.patch
+ubuntu/CVE-2020-29443-1.patch
+ubuntu/CVE-2020-29443-2.patch
+ubuntu/CVE-2021-20181.patch
+ubuntu/lp-1903864-tpm_emulator-Report-an-error-if-chardev-is-missing.patch
+ubuntu/lp-1913395-1-linux-headers-update-against-5.10-rc1.patch
+ubuntu/lp-1913395-2-vfio-Create-shared-routine-for-scanning-info-capabil.patch
+ubuntu/lp-1913395-3-vfio-Find-DMA-available-capability.patch
+ubuntu/lp-1913395-4-0004-s390x-pci-Add-routine-to-get-the-vfio-dma-available.patch
+ubuntu/lp-1913395-5-s390x-pci-Honor-DMA-limits-set-by-vfio.patch
+ubuntu/lp-1913395-6-s390x-fix-build-for-without-default-devices.patch
+ubuntu/CVE-2020-13754-3.patch
+ubuntu/CVE-2020-13754-4.patch
+ubuntu/CVE-2020-13754-5.patch
+ubuntu/CVE-2020-13754-6.patch
+ubuntu/CVE-2020-13754-9.patch
 
 # Exoscale
 exoscale/pre-bionic-256k-ipxe-efi-roms-2.11.patch

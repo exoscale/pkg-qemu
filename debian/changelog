@@ -1,3 +1,74 @@
+qemu (1:4.2-3ubuntu6.14+exo2) UNRELEASED; urgency=medium
+
+  * Import 1:4.2-3ubuntu6.14
+  * Retain debian/patches/exoscale/pre-bionic-256k-ipxe-efi-roms-2.11.patch
+
+ -- Alessandro Ratti <alessandro@exoscale.com>  Thu, 04 Mar 2021 15:38:21 +0000
+
+qemu (1:4.2-3ubuntu6.14) focal-security; urgency=medium
+
+  * SECURITY REGRESSION: fix multiple regressions caused by CVE-2020-13754
+    security update (LP: #1914883)
+    - debian/patches/ubuntu/CVE-2020-13754-3.patch: log invalid memory
+      accesses in memory.c.
+    - debian/patches/ubuntu/CVE-2020-13754-4.patch: allow 16-bit writes to
+      memory region in hw/riscv/sifive_test.c.
+    - debian/patches/ubuntu/CVE-2020-13754-5.patch: allow 64-bit accesses
+      in hw/timer/slavio_timer.c.
+    - debian/patches/ubuntu/CVE-2020-13754-6.patch: allow less than 32-bit
+      accesses in hw/char/bcm2835_aux.c.
+    - debian/patches/ubuntu/CVE-2020-13754-9.patch: fix
+      valid.max_access_size to access address registers in
+      hw/usb/hcd-xhci.c.
+
+ -- Marc Deslauriers <marc.deslauriers@ubuntu.com>  Wed, 10 Feb 2021 08:17:08 -0500
+
+qemu (1:4.2-3ubuntu6.13) focal; urgency=medium
+
+  * d/p/u/lp-1903864-tpm_emulator-Report-an-error-if-chardev-is-missing.patch:
+    fix tpm-emulator: parameter 'chardev' is missing (LP: #1903864)
+  * d/p/u/lp-1913395-*: qemu s390x/pci: Honor vfio DMA limiting (LP: #1913395)
+
+ -- Christian Ehrhardt <christian.ehrhardt@canonical.com>  Thu, 28 Jan 2021 09:20:37 +0100
+
+qemu (1:4.2-3ubuntu6.12) focal-security; urgency=medium
+
+  * SECURITY UPDATE: heap overread in iscsi_aio_ioctl_cb
+    - debian/patches/ubuntu/CVE-2020-11947.patch: fix heap-buffer-overflow
+      in block/iscsi.c.
+    - CVE-2020-11947
+  * SECURITY UPDATE: use-after-free in e1000e
+    - debian/patches/ubuntu/CVE-2020-15859.patch: forbid the reentrant RX
+      in net/queue.c.
+    - CVE-2020-15859
+  * SECURITY UPDATE: OOB write to MSI-X table
+    - debian/patches/ubuntu/CVE-2020-27821.patch: clamp cached translation
+      in case it points to an MMIO region in exec.c.
+    - CVE-2020-27821
+  * SECURITY UPDATE: infinite loop in e1000e
+    - debian/patches/ubuntu/CVE-2020-28916.patch: advance desc_offset in
+      case of null descriptor in hw/net/e1000e_core.c.
+    - CVE-2020-28916
+  * SECURITY UPDATE: out of bounds read in atapi
+    - debian/patches/ubuntu/CVE-2020-29443-1.patch: assert that the buffer
+      pointer is in range in hw/ide/atapi.c.
+    - debian/patches/ubuntu/CVE-2020-29443-2.patch: check logical block
+      address and read size in hw/ide/atapi.c.
+    - CVE-2020-29443
+  * SECURITY UPDATE: use after free in 9p
+    - debian/patches/ubuntu/CVE-2021-20181.patch: fully restart unreclaim
+      loop in hw/9pfs/9p.c.
+    - CVE-2021-20181
+
+ -- Marc Deslauriers <marc.deslauriers@ubuntu.com>  Wed, 03 Feb 2021 10:56:08 -0500
+
+qemu (1:4.2-3ubuntu6.11) focal; urgency=medium
+
+  * d/p/ubuntu/lp-1907656-s390x-s390-virtio-ccw-Reset-PCI-devices-during-subsy:
+    avoid PCI devices to become unavailable on reset (LP: #1907656)
+
+ -- Christian Ehrhardt <christian.ehrhardt@canonical.com>  Tue, 05 Jan 2021 15:52:00 +0100
+
 qemu (1:4.2-3ubuntu6.10+exo2) UNRELEASED; urgency=medium
 
   * Import 1:4.2-3ubuntu6.10
