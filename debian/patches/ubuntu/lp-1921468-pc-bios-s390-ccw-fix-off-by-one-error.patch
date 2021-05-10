@@ -1,0 +1,41 @@
+From 5f97ba0c74ccace0a4014460de9751ff3c6f454a Mon Sep 17 00:00:00 2001
+From: Marc Hartmayer <mhartmay@linux.ibm.com>
+Date: Thu, 24 Sep 2020 10:59:24 +0200
+Subject: [PATCH] pc-bios/s390-ccw: fix off-by-one error
+
+This error takes effect when the magic value "zIPL" is located at the
+end of a block. For example if s2_cur_blk = 0x7fe18000 and the magic
+value "zIPL" is located at 0x7fe18ffc - 0x7fe18fff.
+
+Fixes: ba831b25262a ("s390-ccw: read stage2 boot loader data to find menu")
+Reviewed-by: Collin Walling <walling@linux.ibm.com>
+Signed-off-by: Marc Hartmayer <mhartmay@linux.ibm.com>
+Message-Id: <20200924085926.21709-2-mhartmay@linux.ibm.com>
+Reviewed-by: Thomas Huth <thuth@redhat.com>
+[thuth: Use "<= ... - 4" instead of "< ... - 3"]
+Signed-off-by: Thomas Huth <thuth@redhat.com>
+
+Origin: upstream, https://git.qemu.org/?p=qemu.git;a=commit;h=5f97ba0c74cc
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/1921468
+Last-Update: 2021-03-26
+
+---
+ pc-bios/s390-ccw/bootmap.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/pc-bios/s390-ccw/bootmap.c b/pc-bios/s390-ccw/bootmap.c
+index 0ef6b851f3..767bb612db 100644
+--- a/pc-bios/s390-ccw/bootmap.c
++++ b/pc-bios/s390-ccw/bootmap.c
+@@ -163,7 +163,7 @@ static bool find_zipl_boot_menu_banner(int *offset)
+     int i;
+ 
+     /* Menu banner starts with "zIPL" */
+-    for (i = 0; i < virtio_get_block_size() - 4; i++) {
++    for (i = 0; i <= virtio_get_block_size() - 4; i++) {
+         if (magic_match(s2_cur_blk + i, ZIPL_MAGIC_EBCDIC)) {
+             *offset = i;
+             return true;
+-- 
+2.30.0
+

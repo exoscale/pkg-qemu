@@ -1,3 +1,34 @@
+qemu (1:4.2-3ubuntu6.16+exo2) UNRELEASED; urgency=medium
+
+  * Import 1:4.2-3ubuntu6.16
+  * Retain debian/patches/exoscale/pre-bionic-256k-ipxe-efi-roms-2.11.patch
+
+ -- Alessandro Ratti <alessandro@exoscale.com>  Mon, 10 May 2021 13:12:28 +0000
+
+qemu (1:4.2-3ubuntu6.16) focal; urgency=medium
+
+  * d/p/u/lp-1921754*: add EPYC-Rome-v2 as v1 missed IBRS and thereby fails
+    on some HW/Guest combinations e.g. Windows 10 on Threadripper chips
+    (LP: #1921754)
+  * d/p/u/lp-1921880*: add EPYC-Milan features and named cpu type support
+    (LP: #1921880)
+
+ -- Christian Ehrhardt <christian.ehrhardt@canonical.com>  Wed, 07 Apr 2021 11:58:29 +0200
+
+qemu (1:4.2-3ubuntu6.15) focal; urgency=medium
+
+  * d/p/u/lp-1921468-*: fix issues handling boot menu index on s390x
+    (LP: #1921468)
+  * d/p/u/lp-1887535-configure-replace-enable-disable-git-update-with-wit.patch,
+    d/rules: Backport --with-git-submodules param so building from git repo
+    doesn't fail (LP: #1887535)
+  * Fix byte aligned writes when writing to image stored on NFS
+    server, as they aren't required to be 4kib aligned. (LP: #1921665)
+    - d/p/u/lp-1921665-1-block-Require-aligned-image-size-to-avoid-assert.patch
+    - d/p/u/lp-1921665-2-file-posix-Allow-byte-aligned-O_DIRECT-with-NFS.patch
+
+ -- Christian Ehrhardt <christian.ehrhardt@canonical.com>  Fri, 26 Mar 2021 10:38:47 +0100
+
 qemu (1:4.2-3ubuntu6.14+exo2) UNRELEASED; urgency=medium
 
   * Import 1:4.2-3ubuntu6.14

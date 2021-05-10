@@ -1,0 +1,64 @@
+From 9c60a5d1978e6dcf85c0e01b50e6f7f54ca09104 Mon Sep 17 00:00:00 2001
+From: Kevin Wolf <kwolf@redhat.com>
+Date: Thu, 16 Jul 2020 16:26:00 +0200
+Subject: [PATCH] block: Require aligned image size to avoid assertion failure
+
+Unaligned requests will automatically be aligned to bl.request_alignment
+and we can't extend write requests to access space beyond the end of the
+image without resizing the image, so if we have the WRITE permission,
+but not the RESIZE one, it's required that the image size is aligned.
+
+Failing to meet this requirement could cause assertion failures like
+this if RESIZE permissions weren't requested:
+
+qemu-img: block/io.c:1910: bdrv_co_write_req_prepare: Assertion `end_sector <= bs->total_sectors || child->perm & BLK_PERM_RESIZE' failed.
+
+This was e.g. triggered by qemu-img converting to a target image with 4k
+request alignment when the image was only aligned to 512 bytes, but not
+to 4k.
+
+Turn this into a graceful error in bdrv_check_perm() so that WRITE
+without RESIZE can only be taken if the image size is aligned. If a user
+holds both permissions and drops only RESIZE, the function will return
+an error, but bdrv_child_try_set_perm() will ignore the failure silently
+if permissions are only requested to be relaxed and just keep both
+permissions while returning success.
+
+Signed-off-by: Kevin Wolf <kwolf@redhat.com>
+Message-Id: <20200716142601.111237-2-kwolf@redhat.com>
+Reviewed-by: Max Reitz <mreitz@redhat.com>
+Signed-off-by: Kevin Wolf <kwolf@redhat.com>
+
+Origin: backport, https://git.qemu.org/?p=qemu.git;a=commit;h=9c60a5d1978e6dcf85c0e01b50e6f7f54ca09104
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/1921665
+Last-Update: 2021-03-29
+
+---
+ block.c | 16 ++++++++++++++++
+ 1 file changed, 16 insertions(+)
+
+--- a/block.c
++++ b/block.c
+@@ -1842,6 +1842,22 @@ static int bdrv_check_perm(BlockDriverSt
+         return -EPERM;
+     }
+ 
++    /*
++     * Unaligned requests will automatically be aligned to bl.request_alignment
++     * and without RESIZE we can't extend requests to write to space beyond the
++     * end of the image, so it's required that the image size is aligned.
++     */
++    if ((cumulative_perms & (BLK_PERM_WRITE | BLK_PERM_WRITE_UNCHANGED)) &&
++        !(cumulative_perms & BLK_PERM_RESIZE))
++    {
++        if ((bs->total_sectors * BDRV_SECTOR_SIZE) % bs->bl.request_alignment) {
++            error_setg(errp, "Cannot get 'write' permission without 'resize': "
++                             "Image size is not a multiple of request "
++                             "alignment");
++            return -EPERM;
++        }
++    }
++
+     /* Check this node */
+     if (!drv) {
+         return 0;

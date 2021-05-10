@@ -258,6 +258,15 @@ ubuntu/CVE-2020-13754-4.patch
 ubuntu/CVE-2020-13754-5.patch
 ubuntu/CVE-2020-13754-6.patch
 ubuntu/CVE-2020-13754-9.patch
+ubuntu/lp-1921468-pc-bios-s390-ccw-fix-off-by-one-error.patch
+ubuntu/lp-1921468-pc-bios-s390-ccw-break-loop-if-a-null-block-number-i.patch
+ubuntu/lp-1887535-configure-replace-enable-disable-git-update-with-wit.patch
+ubuntu/lp-1921665-1-block-Require-aligned-image-size-to-avoid-assert.patch
+ubuntu/lp-1921665-2-file-posix-Allow-byte-aligned-O_DIRECT-with-NFS.patch
+ubuntu/lp-1921880-target-i386-add-fast-short-REP-MOV-support.patch
+ubuntu/lp-1921880-x86-cpu-Populate-SVM-CPUID-feature-bits.patch
+ubuntu/lp-1921880-i386-Add-the-support-for-AMD-EPYC-3rd-generation-pro.patch
+ubuntu/lp-1921754-Add-missing-cpu-feature-bits-in-EPYC-Rome-model.patch
 
 # Exoscale
 exoscale/pre-bionic-256k-ipxe-efi-roms-2.11.patch
