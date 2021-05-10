@@ -1,0 +1,84 @@
+From 5edc85571e7b7269dce408735eba7507f18ac666 Mon Sep 17 00:00:00 2001
+From: Kevin Wolf <kwolf@redhat.com>
+Date: Thu, 16 Jul 2020 16:26:01 +0200
+Subject: [PATCH] file-posix: Allow byte-aligned O_DIRECT with NFS
+
+Since commit a6b257a08e3 ('file-posix: Handle undetectable alignment'),
+we assume that if we open a file with O_DIRECT and alignment probing
+returns 1, we just couldn't find out the real alignment requirement
+because some filesystems make the requirement only for allocated blocks.
+In this case, a safe default of 4k is used.
+
+This is too strict for NFS, which does actually allow byte-aligned
+requests even with O_DIRECT. Because we can't distinguish both cases
+with generic code, let's just look at the file system magic and disable
+s->needs_alignment for NFS. This way, O_DIRECT can still be used on NFS
+for images that are not aligned to 4k.
+
+Signed-off-by: Kevin Wolf <kwolf@redhat.com>
+Reviewed-by: Eric Blake <eblake@redhat.com>
+Message-Id: <20200716142601.111237-3-kwolf@redhat.com>
+Reviewed-by: Max Reitz <mreitz@redhat.com>
+Signed-off-by: Kevin Wolf <kwolf@redhat.com>
+
+Origin: backport, https://git.qemu.org/?p=qemu.git;a=commit;h=5edc85571e7b7269dce408735eba7507f18ac666
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/1921665
+Last-Update: 2021-03-29
+
+---
+ block/file-posix.c | 26 +++++++++++++++++++++++++-
+ 1 file changed, 25 insertions(+), 1 deletion(-)
+
+--- a/block/file-posix.c
++++ b/block/file-posix.c
+@@ -61,10 +61,12 @@
+ #include <sys/ioctl.h>
+ #include <sys/param.h>
+ #include <sys/syscall.h>
++#include <sys/vfs.h>
+ #include <linux/cdrom.h>
+ #include <linux/fd.h>
+ #include <linux/fs.h>
+ #include <linux/hdreg.h>
++#include <linux/magic.h>
+ #include <scsi/sg.h>
+ #ifdef __s390__
+ #include <asm/dasd.h>
+@@ -298,6 +300,28 @@ static int probe_physical_blocksize(int
+ #endif
+ }
+ 
++/*
++ * Returns true if no alignment restrictions are necessary even for files
++ * opened with O_DIRECT.
++ *
++ * raw_probe_alignment() probes the required alignment and assume that 1 means
++ * the probing failed, so it falls back to a safe default of 4k. This can be
++ * avoided if we know that byte alignment is okay for the file.
++ */
++static bool dio_byte_aligned(int fd)
++{
++#ifdef __linux__
++    struct statfs buf;
++    int ret;
++
++    ret = fstatfs(fd, &buf);
++    if (ret == 0 && buf.f_type == NFS_SUPER_MAGIC) {
++        return true;
++    }
++#endif
++    return false;
++}
++
+ /* Check if read is allowed with given memory buffer and length.
+  *
+  * This function is used to check O_DIRECT memory buffer and request alignment.
+@@ -602,7 +626,7 @@ static int raw_open_common(BlockDriverSt
+ 
+     s->has_discard = true;
+     s->has_write_zeroes = true;
+-    if ((bs->open_flags & BDRV_O_NOCACHE) != 0) {
++    if ((bs->open_flags & BDRV_O_NOCACHE) != 0 && !dio_byte_aligned(s->fd)) {
+         s->needs_alignment = true;
+     }
+ 
