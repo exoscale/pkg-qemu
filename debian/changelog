@@ -1,3 +1,126 @@
+qemu (1:4.2-3ubuntu6.17+exo2) UNRELEASED; urgency=medium
+
+  * Import 1:4.2-3ubuntu6.17
+  * Retain debian/patches/exoscale/pre-bionic-256k-ipxe-efi-roms-2.11.patch
+
+ -- Alessandro Ratti <alessandro@exoscale.com>  Fri, 16 Jul 2021 07:53:27 +0000
+
+qemu (1:4.2-3ubuntu6.17) focal-security; urgency=medium
+
+  * SECURITY UPDATE: NULL pointer dereference in MemoryRegionOps object
+    - debian/patches/CVE-2020-15469-1.patch: add pci-intack write method in
+      hw/pci-host/prep.c.
+    - debian/patches/CVE-2020-15469-2.patch: add pcie-msi read method in
+      hw/pci-host/designware.c.
+    - debian/patches/CVE-2020-15469-3.patch: add quirk device write method
+      in hw/vfio/pci-quirks.c.
+    - debian/patches/CVE-2020-15469-4.patch: add ppc-parity write method in
+      hw/ppc/prep_systemio.c.
+    - debian/patches/CVE-2020-15469-5.patch: add nrf51_soc flash read
+      method in hw/nvram/nrf51_nvm.c.
+    - debian/patches/CVE-2020-15469-6.patch: add spapr msi read method in
+      hw/ppc/spapr_pci.c.
+    - debian/patches/CVE-2020-15469-7.patch: add dummy read/write methods
+      in hw/misc/tz-ppc.c.
+    - debian/patches/CVE-2020-15469-8.patch: add digprog mmio write method
+      in hw/misc/imx7_ccm.c.
+    - CVE-2020-15469
+  * SECURITY UPDATE: NULL pointer dereference flaw in SCSI emulation
+    - debian/patches/CVE-2020-35504.patch: always check current_req is not
+      NULL before use in DMA callbacks in hw/scsi/esp.c.
+    - CVE-2020-35504
+  * SECURITY UPDATE: NULL pointer dereference flaw in am53c974 SCSI
+    - debian/patches/CVE-2020-35505.patch: ensure cmdfifo is not empty and
+      current_dev is non-NULL in hw/scsi/esp.c.
+    - CVE-2020-35505
+  * SECURITY UPDATE: use-after-free flaw was found in the MegaRAID emulator
+    - debian/patches/CVE-2021-3392.patch: Remove unused MPTSASState pending
+      field in hw/scsi/mptsas.c, hw/scsi/mptsas.h.
+    - CVE-2021-3392
+  * SECURITY UPDATE: out-of-bounds read/write in SDHCI controller emulation
+    - debian/patches/CVE-2021-3409-1.patch: don't transfer any data when
+      command time out in hw/sd/sdhci.c.
+    - debian/patches/CVE-2021-3409-2.patch: don't write to SDHC_SYSAD
+      register when transfer is in progress in hw/sd/sdhci.c.
+    - debian/patches/CVE-2021-3409-3.patch: correctly set the controller
+      status for ADMA in hw/sd/sdhci.c.
+    - debian/patches/CVE-2021-3409-4.patch: limit block size only when
+      SDHC_BLKSIZE register is writable in hw/sd/sdhci.c.
+    - debian/patches/CVE-2021-3409-5.patch: reset the data pointer of
+      s->fifo_buffer[] when a different block size is programmed in
+      hw/sd/sdhci.c.
+    - CVE-2021-3409
+  * SECURITY UPDATE: stack overflow via infinite loop issue in various NIC
+    - debian/patches/CVE-2021-3416-1.patch: introduce qemu_receive_packet()
+      in include/net/net.h, include/net/queue.h, net/net.c, net/queue.c.
+    - debian/patches/CVE-2021-3416-2.patch: switch to use
+      qemu_receive_packet() for loopback in hw/net/e1000.c.
+    - debian/patches/CVE-2021-3416-3.patch: switch to use
+      qemu_receive_packet() for loopback packet in hw/net/dp8393x.c.
+    - debian/patches/CVE-2021-3416-5.patch: switch to use
+      qemu_receive_packet() for loopback in hw/net/sungem.c.
+    - debian/patches/CVE-2021-3416-6.patch: switch to use
+      qemu_receive_packet_iov() for loopback in hw/net/net_tx_pkt.c.
+    - debian/patches/CVE-2021-3416-7.patch: switch to use
+      qemu_receive_packet() for loopback in hw/net/rtl8139.c.
+    - debian/patches/CVE-2021-3416-8.patch: switch to use
+      qemu_receive_packet() for loopback in hw/net/pcnet.c.
+    - debian/patches/CVE-2021-3416-9.patch: switch to use
+      qemu_receive_packet() for loopback in hw/net/cadence_gem.c.
+    - debian/patches/CVE-2021-3416-10.patch: switch to use
+      qemu_receive_packet() for loopback in hw/net/lan9118.c.
+    - CVE-2021-3416
+  * SECURITY UPDATE: DoS in USB redirector device
+    - debian/patches/CVE-2021-3527-1.patch: avoid dynamic stack allocation
+      in hw/usb/redirect.c.
+    - debian/patches/CVE-2021-3527-2.patch: limit combined packets to 1 MiB
+      in hw/usb/combined-packet.c.
+    - CVE-2021-3527
+  * SECURITY UPDATE: multiple issues in virtio vhost-user GPU device
+    - debian/patches/CVE-2021-3544-1.patch: fix memory disclosure in
+      contrib/vhost-user-gpu/virgl.c.
+    - debian/patches/CVE-2021-3544-2.patch: fix resource leak in
+      contrib/vhost-user-gpu/vhost-user-gpu.c.
+    - debian/patches/CVE-2021-3544-3.patch: fix memory leak in
+      contrib/vhost-user-gpu/vhost-user-gpu.c.
+    - debian/patches/CVE-2021-3544-4.patch: fix memory leak in
+      contrib/vhost-user-gpu/vhost-user-gpu.c.
+    - debian/patches/CVE-2021-3544-5.patch: fix memory leak in
+      contrib/vhost-user-gpu/virgl.c.
+    - debian/patches/CVE-2021-3544-6.patch: fix memory leak in
+      contrib/vhost-user-gpu/virgl.c.
+    - debian/patches/CVE-2021-3544-7.patch: fix OOB write in
+      contrib/vhost-user-gpu/virgl.c.
+    - debian/patches/CVE-2021-3544-8.patch: abstract vg_cleanup_mapping_iov
+      in contrib/vhost-user-gpu/vhost-user-gpu.c,
+      contrib/vhost-user-gpu/virgl.c, contrib/vhost-user-gpu/vugpu.h.
+    - CVE-2021-3544
+    - CVE-2021-3545
+    - CVE-2021-3546
+  * SECURITY UPDATE: mremap overflow in the pvrdma device
+    - debian/patches/CVE-2021-3582.patch: check lengths in
+      hw/rdma/vmw/pvrdma_cmd.c.
+    - CVE-2021-3582
+  * SECURITY UPDATE: integer overflow in pvrdma device
+    - debian/patches/CVE-2021-3607.patch: ensure correct input on ring init
+      in hw/rdma/vmw/pvrdma_main.c.
+    - CVE-2021-3607
+  * SECURITY UPDATE: uninitialized memory unmap in pvrdma device
+    - debian/patches/CVE-2021-3608.patch: fix the ring init error flow in
+      hw/rdma/vmw/pvrdma_dev_ring.c.
+    - CVE-2021-3608
+  * SECURITY UPDATE: out-of-bounds access issue in ARM Generic Interrupt
+    Controller
+    - debian/patches/CVE-2021-20221.patch: fix interrupt ID in GICD_SGIR
+      register in hw/intc/arm_gic.c.
+    - CVE-2021-20221
+  * SECURITY UPDATE: infinite loop while processing transmit descriptors
+    - debian/patches/CVE-2021-20257.patch: fail early for evil descriptor
+      in hw/net/e1000.c.
+    - CVE-2021-20257
+
+ -- Marc Deslauriers <marc.deslauriers@ubuntu.com>  Mon, 12 Jul 2021 11:03:37 -0400
+
 qemu (1:4.2-3ubuntu6.16+exo2) UNRELEASED; urgency=medium
 
   * Import 1:4.2-3ubuntu6.16
