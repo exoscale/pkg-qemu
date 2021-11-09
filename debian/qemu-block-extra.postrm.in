@@ -20,10 +20,15 @@ set -e
 
 
 case "$1" in
-    purge|remove)
+    remove)
         # remove .so files for still running qemu instances in /var/run
         # for details see bug LP: #1847361
         rm -f /var/run/qemu/@PKGVERSION@/block-*.so
+    ;;
+
+    purge)
+        umount --quiet /var/run/qemu 1>/dev/null 2>&1 || true
+        rm -rf "/var/run/qemu" 1>/dev/null 2>&1 || true
     ;;
 
     upgrade|failed-upgrade|abort-install|abort-upgrade|disappear)
