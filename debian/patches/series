@@ -307,6 +307,8 @@ CVE-2021-3607.patch
 CVE-2021-3608.patch
 CVE-2021-20221.patch
 CVE-2021-20257.patch
+ubuntu/lp-1749393-linux-user-Reserve-space-for-brk.patch
+ubuntu/lp-1929926-target-s390x-Fix-translation-exception-on-illegal-in.patch
 
 # Exoscale
 exoscale/pre-bionic-256k-ipxe-efi-roms-2.11.patch

@@ -1,3 +1,19 @@
+qemu (1:4.2-3ubuntu6.19+exo2) UNRELEASED; urgency=medium
+
+  * Import 1:4.2-3ubuntu6.19
+  * Retain debian/patches/exoscale/pre-bionic-256k-ipxe-efi-roms-2.11.patch 
+
+ -- Alessandro Ratti <alessandro@exoscale.com>  Tue, 01 Feb 2022 16:21:17 +0000
+
+qemu (1:4.2-3ubuntu6.19) focal; urgency=medium
+
+  * d/p/u/lp-1749393-linux-user-Reserve-space-for-brk.patch: fix static
+    use cases needing a lot of brk space (LP: #1749393)
+  * d/p/u/lp-1929926-target-s390x-Fix-translation-exception-on-illegal-in.patch:
+    fix uretprobe in s390x TCG (LP: #1929926)
+
+ -- Christian Ehrhardt <christian.ehrhardt@canonical.com>  Mon, 26 Apr 2021 11:11:19 +0200
+
 qemu (1:4.2-3ubuntu6.18+exo2) UNRELEASED; urgency=medium
 
   * Import 1:4.2-3ubuntu6.18
