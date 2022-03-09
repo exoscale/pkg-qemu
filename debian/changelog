@@ -1,3 +1,17 @@
+qemu (1:4.2-3ubuntu6.20+exo2) UNRELEASED; urgency=medium
+
+  * Import 1:4.2-3ubuntu6.20
+  * Retain debian/patches/exoscale/pre-bionic-256k-ipxe-efi-roms-2.11.patch
+
+ -- Alessandro Ratti <alessandro@exoscale.com>  Wed, 09 Mar 2022 14:16:01 +0000
+
+qemu (1:4.2-3ubuntu6.20) focal; urgency=medium
+
+  * d/p/u/lp1953338-*: KVM hardware diagnose 318 data improvements
+    (LP: #1953338)
+
+ -- Christian Ehrhardt <christian.ehrhardt@canonical.com>  Mon, 24 Jan 2022 11:37:27 +0100
+
 qemu (1:4.2-3ubuntu6.19+exo2) UNRELEASED; urgency=medium
 
   * Import 1:4.2-3ubuntu6.19

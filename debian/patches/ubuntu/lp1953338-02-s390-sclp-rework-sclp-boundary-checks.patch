@@ -1,0 +1,70 @@
+From e17df6f1203134de3fc75e8cd1c4e767de8a97d4 Mon Sep 17 00:00:00 2001
+From: Collin Walling <walling@linux.ibm.com>
+Date: Tue, 15 Sep 2020 15:44:10 -0400
+Subject: [PATCH 2/9] s390/sclp: rework sclp boundary checks
+
+Rework the SCLP boundary check to account for different SCLP commands
+(eventually) allowing different boundary sizes.
+
+Signed-off-by: Collin Walling <walling@linux.ibm.com>
+Reviewed-by: Cornelia Huck <cohuck@redhat.com>
+Reviewed-by: Thomas Huth <thuth@redhat.com>
+Acked-by: Janosch Frank <frankja@linux.ibm.com>
+Reviewed-by: Claudio Imbrenda <imbrenda@linux.ibm.com>
+Message-Id: <20200915194416.107460-3-walling@linux.ibm.com>
+Signed-off-by: Cornelia Huck <cohuck@redhat.com>
+
+Origin: upstream, https://git.qemu.org/?p=qemu.git;a=commit;h=db13387ca01a69d870cc16dd232375c2603596f2
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/1953338
+Last-Update: 2022-01-24
+---
+ hw/s390x/sclp.c | 19 ++++++++++++++++++-
+ 1 file changed, 18 insertions(+), 1 deletion(-)
+
+diff --git a/hw/s390x/sclp.c b/hw/s390x/sclp.c
+index be40e3534c..ff2734920a 100644
+--- a/hw/s390x/sclp.c
++++ b/hw/s390x/sclp.c
+@@ -49,6 +49,18 @@ static inline bool sclp_command_code_valid(uint32_t code)
+     return false;
+ }
+ 
++static bool sccb_verify_boundary(uint64_t sccb_addr, uint16_t sccb_len)
++{
++    uint64_t sccb_max_addr = sccb_addr + sccb_len - 1;
++    uint64_t sccb_boundary = (sccb_addr & PAGE_MASK) + PAGE_SIZE;
++
++    if (sccb_max_addr < sccb_boundary) {
++        return true;
++    }
++
++    return false;
++}
++
+ static void prepare_cpu_entries(MachineState *ms, CPUEntry *entry, int *count)
+ {
+     uint8_t features[SCCB_CPU_FEATURE_LEN] = { 0 };
+@@ -229,6 +241,11 @@ int sclp_service_call_protected(CPUS390XState *env, uint64_t sccb,
+         goto out_write;
+     }
+ 
++    if (!sccb_verify_boundary(sccb, be16_to_cpu(work_sccb.h.length))) {
++        work_sccb.h.response_code = cpu_to_be16(SCLP_RC_SCCB_BOUNDARY_VIOLATION);
++        goto out_write;
++    }
++
+     sclp_c->execute(sclp, &work_sccb, code);
+ out_write:
+     s390_cpu_pv_mem_write(env_archcpu(env), 0, &work_sccb,
+@@ -279,7 +296,7 @@ int sclp_service_call(CPUS390XState *env, uint64_t sccb, uint32_t code)
+         goto out_write;
+     }
+ 
+-    if ((sccb + be16_to_cpu(work_sccb.h.length)) > ((sccb & PAGE_MASK) + PAGE_SIZE)) {
++    if (!sccb_verify_boundary(sccb, be16_to_cpu(work_sccb.h.length))) {
+         work_sccb.h.response_code = cpu_to_be16(SCLP_RC_SCCB_BOUNDARY_VIOLATION);
+         goto out_write;
+     }
+-- 
+2.31.1
+

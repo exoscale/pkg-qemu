@@ -1,0 +1,65 @@
+From 29e86d94fd1745269523b42f81e4c6c1cae9b336 Mon Sep 17 00:00:00 2001
+From: Collin Walling <walling@linux.ibm.com>
+Date: Tue, 15 Sep 2020 15:44:09 -0400
+Subject: [PATCH 1/9] s390/sclp: get machine once during read scp/cpu info
+
+Functions within read scp/cpu info will need access to the machine
+state. Let's make a call to retrieve the machine state once and
+pass the appropriate data to the respective functions.
+
+Signed-off-by: Collin Walling <walling@linux.ibm.com>
+Reviewed-by: David Hildenbrand <david@redhat.com>
+Reviewed-by: Thomas Huth <thuth@redhat.com>
+Reviewed-by: Janosch Frank <frankja@linux.ibm.com>
+Reviewed-by: Cornelia Huck <cohuck@redhat.com>
+Reviewed-by: Claudio Imbrenda <imbrenda@linux.ibm.com>
+Message-Id: <20200915194416.107460-2-walling@linux.ibm.com>
+Signed-off-by: Cornelia Huck <cohuck@redhat.com>
+
+Origin: upstream, https://git.qemu.org/?p=qemu.git;a=commit;h=912d70d2755cb9b3144eeed4014580ebc5485ce6
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/1953338
+Last-Update: 2022-01-24
+---
+ hw/s390x/sclp.c | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/hw/s390x/sclp.c b/hw/s390x/sclp.c
+index 1c380a49cc..be40e3534c 100644
+--- a/hw/s390x/sclp.c
++++ b/hw/s390x/sclp.c
+@@ -49,9 +49,8 @@ static inline bool sclp_command_code_valid(uint32_t code)
+     return false;
+ }
+ 
+-static void prepare_cpu_entries(SCLPDevice *sclp, CPUEntry *entry, int *count)
++static void prepare_cpu_entries(MachineState *ms, CPUEntry *entry, int *count)
+ {
+-    MachineState *ms = MACHINE(qdev_get_machine());
+     uint8_t features[SCCB_CPU_FEATURE_LEN] = { 0 };
+     int i;
+ 
+@@ -77,7 +76,7 @@ static void read_SCP_info(SCLPDevice *sclp, SCCB *sccb)
+     IplParameterBlock *ipib = s390_ipl_get_iplb();
+ 
+     /* CPU information */
+-    prepare_cpu_entries(sclp, read_info->entries, &cpu_count);
++    prepare_cpu_entries(machine, read_info->entries, &cpu_count);
+     read_info->entries_cpu = cpu_to_be16(cpu_count);
+     read_info->offset_cpu = cpu_to_be16(offsetof(ReadInfo, entries));
+     read_info->highest_cpu = cpu_to_be16(machine->smp.max_cpus - 1);
+@@ -132,10 +131,11 @@ static void read_SCP_info(SCLPDevice *sclp, SCCB *sccb)
+ /* Provide information about the CPU */
+ static void sclp_read_cpu_info(SCLPDevice *sclp, SCCB *sccb)
+ {
++    MachineState *machine = MACHINE(qdev_get_machine());
+     ReadCpuInfo *cpu_info = (ReadCpuInfo *) sccb;
+     int cpu_count;
+ 
+-    prepare_cpu_entries(sclp, cpu_info->entries, &cpu_count);
++    prepare_cpu_entries(machine, cpu_info->entries, &cpu_count);
+     cpu_info->nr_configured = cpu_to_be16(cpu_count);
+     cpu_info->offset_configured = cpu_to_be16(offsetof(ReadCpuInfo, entries));
+     cpu_info->nr_standby = cpu_to_be16(0);
+-- 
+2.31.1
+
