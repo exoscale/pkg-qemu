@@ -1,0 +1,57 @@
+From ad8b922ab3ce8e1c430be7764df96c866b1b42ad Mon Sep 17 00:00:00 2001
+From: Collin Walling <walling@linux.ibm.com>
+Date: Tue, 15 Sep 2020 15:44:13 -0400
+Subject: [PATCH 5/9] s390/sclp: use cpu offset to locate cpu entries
+
+The start of the CPU entry region in the Read SCP Info response data is
+denoted by the offset_cpu field. As such, QEMU needs to begin creating
+entries at this address.
+
+This is in preparation for when Read SCP Info inevitably introduces new
+bytes that push the start of the CPUEntry field further away.
+
+Read CPU Info is unlikely to ever change, so let's not bother
+accounting for the offset there.
+
+Signed-off-by: Collin Walling <walling@linux.ibm.com>
+Reviewed-by: Thomas Huth <thuth@redhat.com>
+Reviewed-by: Cornelia Huck <cohuck@redhat.com>
+Reviewed-by: Claudio Imbrenda <imbrenda@linux.ibm.com>
+Message-Id: <20200915194416.107460-6-walling@linux.ibm.com>
+Signed-off-by: Cornelia Huck <cohuck@redhat.com>
+
+Origin: upstream, https://git.qemu.org/?p=qemu.git;a=commit;h=1a7a568859473b1cda39a015493c5c82bb200281
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/1953338
+Last-Update: 2022-01-24
+---
+ hw/s390x/sclp.c | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/hw/s390x/sclp.c b/hw/s390x/sclp.c
+index 0cb9c72313..6745bfdf1e 100644
+--- a/hw/s390x/sclp.c
++++ b/hw/s390x/sclp.c
+@@ -89,6 +89,8 @@ static void read_SCP_info(SCLPDevice *sclp, SCCB *sccb)
+     int rnsize, rnmax;
+     IplParameterBlock *ipib = s390_ipl_get_iplb();
+     int required_len = SCCB_REQ_LEN(ReadInfo, machine->possible_cpus->len);
++    int offset_cpu = offsetof(ReadInfo, entries);
++    CPUEntry *entries_start = (void *)sccb + offset_cpu;
+ 
+     if (be16_to_cpu(sccb->h.length) < required_len) {
+         sccb->h.response_code = cpu_to_be16(SCLP_RC_INSUFFICIENT_SCCB_LENGTH);
+@@ -96,9 +98,9 @@ static void read_SCP_info(SCLPDevice *sclp, SCCB *sccb)
+     }
+ 
+     /* CPU information */
+-    prepare_cpu_entries(machine, read_info->entries, &cpu_count);
++    prepare_cpu_entries(machine, entries_start, &cpu_count);
+     read_info->entries_cpu = cpu_to_be16(cpu_count);
+-    read_info->offset_cpu = cpu_to_be16(offsetof(ReadInfo, entries));
++    read_info->offset_cpu = cpu_to_be16(offset_cpu);
+     read_info->highest_cpu = cpu_to_be16(machine->smp.max_cpus - 1);
+ 
+     read_info->ibc_val = cpu_to_be32(s390_get_ibc_val());
+-- 
+2.31.1
+

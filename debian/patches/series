@@ -309,6 +309,15 @@ CVE-2021-20221.patch
 CVE-2021-20257.patch
 ubuntu/lp-1749393-linux-user-Reserve-space-for-brk.patch
 ubuntu/lp-1929926-target-s390x-Fix-translation-exception-on-illegal-in.patch
+ubuntu/lp1953338-01-s390-sclp-get-machine-once-during-read-scp-cpu-info.patch
+ubuntu/lp1953338-02-s390-sclp-rework-sclp-boundary-checks.patch
+ubuntu/lp1953338-03-s390-sclp-read-sccb-from-mem-based-on-provided-lengt.patch
+ubuntu/lp1953338-04-s390-sclp-check-sccb-len-before-filling-in-data.patch
+ubuntu/lp1953338-05-s390-sclp-use-cpu-offset-to-locate-cpu-entries.patch
+ubuntu/lp1953338-06-s390-sclp-add-extended-length-sccb-support-for-kvm-g.patch
+ubuntu/lp1953338-07-s390-guest-support-for-diagnose-0x318.patch
+ubuntu/lp1953338-08-s390x-pv-Remove-sclp-boundary-checks.patch
+ubuntu/lp1953338-09-s390x-pv-Fix-diag318-PV-fencing.patch
 
 # Exoscale
 exoscale/pre-bionic-256k-ipxe-efi-roms-2.11.patch
