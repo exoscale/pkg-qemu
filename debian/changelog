@@ -1,3 +1,37 @@
+qemu (1:4.2-3ubuntu6.21+exo2) UNRELEASED; urgency=medium
+
+  * Import 1:4.2-3ubuntu6.21
+  * Retain debian/patches/exoscale/pre-bionic-256k-ipxe-efi-roms-2.11.patch
+
+ -- Alessandro Ratti <alessandro@exoscale.com>  Wed, 09 Mar 2022 15:35:50 +0000
+
+qemu (1:4.2-3ubuntu6.21) focal-security; urgency=medium
+
+  * SECURITY UPDATE: crash or code exec in USB redirector device emulation
+    - debian/patches/CVE-2021-3682.patch: fix free call in
+      hw/usb/redirect.c.
+    - CVE-2021-3682
+  * SECURITY UPDATE: heap use-after-free in virtio_net_receive_rcu
+    - debian/patches/CVE-2021-3748.patch: fix use after unmap/free for sg
+      in hw/net/virtio-net.c.
+    - CVE-2021-3748
+  * SECURITY UPDATE: off-by-one error in mode_sense_page()
+    - debian/patches/CVE-2021-3930.patch: MODE_PAGE_ALLS not allowed in
+      MODE SELECT commands in hw/scsi/scsi-disk.c.
+    - CVE-2021-3930
+  * SECURITY UPDATE: NULL dereference in floppy disk emulator
+    - debian/patches/CVE-2021-20196-1.patch: Extract
+      blk_create_empty_drive() in hw/block/fdc.c.
+    - debian/patches/CVE-2021-20196-2.patch: kludge missing floppy drive in
+      hw/block/fdc.c.
+    - CVE-2021-20196
+  * SECURITY UPDATE: integer overflow in vmxnet3 NIC emulator
+    - debian/patches/CVE-2021-20203.patch: validate configuration values
+      during activate in hw/net/vmxnet3.c.
+    - CVE-2021-20203
+
+ -- Marc Deslauriers <marc.deslauriers@ubuntu.com>  Tue, 22 Feb 2022 12:44:44 -0500
+
 qemu (1:4.2-3ubuntu6.20+exo2) UNRELEASED; urgency=medium
 
   * Import 1:4.2-3ubuntu6.20

@@ -318,6 +318,12 @@ ubuntu/lp1953338-06-s390-sclp-add-extended-length-sccb-support-for-kvm-g.patch
 ubuntu/lp1953338-07-s390-guest-support-for-diagnose-0x318.patch
 ubuntu/lp1953338-08-s390x-pv-Remove-sclp-boundary-checks.patch
 ubuntu/lp1953338-09-s390x-pv-Fix-diag318-PV-fencing.patch
+CVE-2021-3682.patch
+CVE-2021-3748.patch
+CVE-2021-3930.patch
+CVE-2021-20196-1.patch
+CVE-2021-20196-2.patch
+CVE-2021-20203.patch
 
 # Exoscale
 exoscale/pre-bionic-256k-ipxe-efi-roms-2.11.patch
