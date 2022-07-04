@@ -1,0 +1,172 @@
+From d7a84021db8eeddcd5d24ab591a1434763caff6c Mon Sep 17 00:00:00 2001
+From: Paolo Bonzini <pbonzini@redhat.com>
+Date: Wed, 24 Feb 2021 16:30:09 +0100
+Subject: [PATCH] scsi: introduce scsi_sense_from_errno()
+
+The new function is an extension of the switch statement in scsi-disk.c
+which also includes the errno cases only found in sg_io_sense_from_errno.
+This allows us to consolidate the errno handling.
+
+Extracted from a patch by Hannes Reinecke <hare@suse.de>.
+
+Signed-off-by: Paolo Bonzini <pbonzini@redhat.com>
+
+Origin: upstream, https://git.qemu.org/?p=qemu.git;a=commit;h=d7a84021db8eeddcd5d24ab591a1434763caff6c
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/1967814
+Last-Update: 2022-04-06
+
+---
+ hw/scsi/scsi-disk.c  | 45 +++++++-------------------------------
+ include/scsi/utils.h |  2 ++
+ scsi/utils.c         | 51 +++++++++++++++++++++++++++++++++++---------
+ 3 files changed, 51 insertions(+), 47 deletions(-)
+
+diff --git a/hw/scsi/scsi-disk.c b/hw/scsi/scsi-disk.c
+index 36aa872445..9c6099ffc4 100644
+--- a/hw/scsi/scsi-disk.c
++++ b/hw/scsi/scsi-disk.c
+@@ -194,13 +194,13 @@ static bool scsi_handle_rw_error(SCSIDiskReq *r, int error, bool acct_failed)
+     SCSIDiskClass *sdc = (SCSIDiskClass *) object_get_class(OBJECT(s));
+     BlockErrorAction action = blk_get_error_action(s->qdev.conf.blk,
+                                                    is_read, error);
++    SCSISense sense;
+ 
+     if (action == BLOCK_ERROR_ACTION_REPORT) {
+         if (acct_failed) {
+             block_acct_failed(blk_get_stats(s->qdev.conf.blk), &r->acct);
+         }
+-        switch (error) {
+-        case 0:
++        if (error == 0) {
+             /* A passthrough command has run and has produced sense data; check
+              * whether the error has to be handled by the guest or should rather
+              * pause the host.
+@@ -213,41 +213,12 @@ static bool scsi_handle_rw_error(SCSIDiskReq *r, int error, bool acct_failed)
+                 return true;
+             }
+             error = scsi_sense_buf_to_errno(r->req.sense, sizeof(r->req.sense));
+-            break;
+-#ifdef CONFIG_LINUX
+-            /* These errno mapping are specific to Linux.  For more information:
+-             * - scsi_decide_disposition in drivers/scsi/scsi_error.c
+-             * - scsi_result_to_blk_status in drivers/scsi/scsi_lib.c
+-             * - blk_errors[] in block/blk-core.c
+-             */
+-        case EBADE:
+-            /* DID_NEXUS_FAILURE -> BLK_STS_NEXUS.  */
+-            scsi_req_complete(&r->req, RESERVATION_CONFLICT);
+-            break;
+-        case ENODATA:
+-            /* DID_MEDIUM_ERROR -> BLK_STS_MEDIUM.  */
+-            scsi_check_condition(r, SENSE_CODE(READ_ERROR));
+-            break;
+-        case EREMOTEIO:
+-            /* DID_TARGET_FAILURE -> BLK_STS_TARGET.  */
+-            scsi_req_complete(&r->req, HARDWARE_ERROR);
+-            break;
+-#endif
+-        case ENOMEDIUM:
+-            scsi_check_condition(r, SENSE_CODE(NO_MEDIUM));
+-            break;
+-        case ENOMEM:
+-            scsi_check_condition(r, SENSE_CODE(TARGET_FAILURE));
+-            break;
+-        case EINVAL:
+-            scsi_check_condition(r, SENSE_CODE(INVALID_FIELD));
+-            break;
+-        case ENOSPC:
+-            scsi_check_condition(r, SENSE_CODE(SPACE_ALLOC_FAILED));
+-            break;
+-        default:
+-            scsi_check_condition(r, SENSE_CODE(IO_ERROR));
+-            break;
++        } else {
++            int status = scsi_sense_from_errno(error, &sense);
++            if (status == CHECK_CONDITION) {
++                scsi_req_build_sense(&r->req, sense);
++            }
++            scsi_req_complete(&r->req, status);
+         }
+     }
+ 
+diff --git a/include/scsi/utils.h b/include/scsi/utils.h
+index 096489c6cd..ff7c7091b6 100644
+--- a/include/scsi/utils.h
++++ b/include/scsi/utils.h
+@@ -135,4 +135,6 @@ int sg_io_sense_from_errno(int errno_value, struct sg_io_hdr *io_hdr,
+                            SCSISense *sense);
+ #endif
+ 
++int scsi_sense_from_errno(int errno_value, SCSISense *sense);
++
+ #endif
+diff --git a/scsi/utils.c b/scsi/utils.c
+index 793c3a6b9c..6b56e01002 100644
+--- a/scsi/utils.c
++++ b/scsi/utils.c
+@@ -565,21 +565,52 @@ const char *scsi_command_name(uint8_t cmd)
+     return names[cmd];
+ }
+ 
++int scsi_sense_from_errno(int errno_value, SCSISense *sense)
++{
++    switch (errno_value) {
++    case 0:
++        return GOOD;
++    case EDOM:
++        return TASK_SET_FULL;
++#ifdef CONFIG_LINUX
++        /* These errno mapping are specific to Linux.  For more information:
++         * - scsi_decide_disposition in drivers/scsi/scsi_error.c
++         * - scsi_result_to_blk_status in drivers/scsi/scsi_lib.c
++         * - blk_errors[] in block/blk-core.c
++         */
++    case EBADE:
++        return RESERVATION_CONFLICT;
++    case ENODATA:
++        *sense = SENSE_CODE(READ_ERROR);
++        return CHECK_CONDITION;
++    case EREMOTEIO:
++        *sense = SENSE_CODE(LUN_COMM_FAILURE);
++        return CHECK_CONDITION;
++#endif
++    case ENOMEDIUM:
++        *sense = SENSE_CODE(NO_MEDIUM);
++        return CHECK_CONDITION;
++    case ENOMEM:
++        *sense = SENSE_CODE(TARGET_FAILURE);
++        return CHECK_CONDITION;
++    case EINVAL:
++        *sense = SENSE_CODE(INVALID_FIELD);
++        return CHECK_CONDITION;
++    case ENOSPC:
++        *sense = SENSE_CODE(SPACE_ALLOC_FAILED);
++        return CHECK_CONDITION;
++    default:
++        *sense = SENSE_CODE(IO_ERROR);
++        return CHECK_CONDITION;
++    }
++}
++
+ #ifdef CONFIG_LINUX
+ int sg_io_sense_from_errno(int errno_value, struct sg_io_hdr *io_hdr,
+                            SCSISense *sense)
+ {
+     if (errno_value != 0) {
+-        switch (errno_value) {
+-        case EDOM:
+-            return TASK_SET_FULL;
+-        case ENOMEM:
+-            *sense = SENSE_CODE(TARGET_FAILURE);
+-            return CHECK_CONDITION;
+-        default:
+-            *sense = SENSE_CODE(IO_ERROR);
+-            return CHECK_CONDITION;
+-        }
++        return scsi_sense_from_errno(errno_value, sense);
+     } else {
+         if (io_hdr->host_status == SG_ERR_DID_NO_CONNECT ||
+             io_hdr->host_status == SG_ERR_DID_BUS_BUSY ||
+-- 
+2.35.1
+

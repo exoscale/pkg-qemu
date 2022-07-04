@@ -324,6 +324,19 @@ CVE-2021-3930.patch
 CVE-2021-20196-1.patch
 CVE-2021-20196-2.patch
 CVE-2021-20203.patch
+ubuntu/lp-1967814-scsi-disk-convert-more-errno-values-back-to-SCSI-sta.patch
+ubuntu/lp-1967814-scsi-disk-move-scsi_handle_rw_error-earlier.patch
+ubuntu/lp-1967814-scsi-introduce-scsi_sense_from_errno.patch
+ubuntu/lp-1967814-scsi-disk-pass-SCSI-status-to-scsi_handle_rw_error.patch
+ubuntu/lp-1967814-scsi-Rename-linux-specific-SG_ERR-codes-to-generic-S.patch
+ubuntu/lp-1967814-scsi-Add-mapping-for-generic-SCSI_HOST-status-to-sen.patch
+ubuntu/lp-1967814-scsi-inline-sg_io_sense_from_errno-into-the-callers.patch
+ubuntu/lp-1967814-scsi-fix-sense-code-for-EREMOTEIO.patch
+CVE-2021-3507.patch
+CVE-2021-4206.patch
+CVE-2021-4207.patch
+CVE-2022-26353.patch
+CVE-2022-26354.patch
 
 # Exoscale
 exoscale/pre-bionic-256k-ipxe-efi-roms-2.11.patch
