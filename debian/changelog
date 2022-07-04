@@ -1,3 +1,44 @@
+qemu (1:4.2-3ubuntu6.23+exo2) UNRELEASED; urgency=medium
+
+  * Import 1:4.2-3ubuntu6.22 and 1:4.2-3ubuntu6.23
+  * Retain debian/patches/exoscale/pre-bionic-256k-ipxe-efi-roms-2.11.patch
+
+ -- Alessandro Ratti <alessandro@exoscale.com>  Mon, 04 Jul 2022 15:04:13 +0000
+
+qemu (1:4.2-3ubuntu6.23) focal-security; urgency=medium
+
+  * SECURITY UPDATE: heap overflow in floppy disk emulator
+    - debian/patches/CVE-2021-3507.patch: prevent end-of-track overrun in
+      hw/block/fdc.c.
+    - CVE-2021-3507
+  * SECURITY UPDATE: integer overflow in QXL display device emulation
+    - debian/patches/CVE-2021-4206.patch: check width and height in
+      hw/display/qxl-render.c, hw/display/vmware_vga.c, ui/cursor.c.
+    - CVE-2021-4206
+  * SECURITY UPDATE: heap overflow in QXL display device emulation
+    - debian/patches/CVE-2021-4207.patch: fix race condition in qxl_cursor
+      in hw/display/qxl-render.c.
+    - CVE-2021-4207
+  * SECURITY UPDATE: memory leakage in virtio-net device
+    - debian/patches/CVE-2022-26353.patch: fix map leaking on error during
+      receive in hw/net/virtio-net.c.
+    - CVE-2022-26353
+  * SECURITY UPDATE: memory leakage in vhost-vsock device
+    - debian/patches/CVE-2022-26354.patch: detach the virqueue element in
+      case of error in hw/virtio/vhost-vsock.c.
+    - CVE-2022-26354
+
+ -- Marc Deslauriers <marc.deslauriers@ubuntu.com>  Thu, 09 Jun 2022 11:35:04 -0400
+
+qemu (1:4.2-3ubuntu6.22) focal; urgency=medium
+
+  * d/p/u/lp-1967814-*: avoid interpreting failed scsi requests as
+    good which could lead to silent data corruption (LP: #1967814)
+    This refactors handling of sense codes and SCSI status to be able
+    detect, handle and pass that information to the guest as needed.
+
+ -- Christian Ehrhardt <christian.ehrhardt@canonical.com>  Wed, 06 Apr 2022 14:24:56 +0200
+
 qemu (1:4.2-3ubuntu6.21+exo2) UNRELEASED; urgency=medium
 
   * Import 1:4.2-3ubuntu6.21
