@@ -1,3 +1,10 @@
+qemu (1:6.2+dfsg-2ubuntu6.5+exo2) UNRELEASED; urgency=medium
+
+  * Fix qemu-system-x86_64: Size mismatch: 0000:00:03.0/virtio-net-pci.rom:
+    0x40000 != 0x80000 
+
+ -- Alessandro Ratti <alessandro@exoscale.com>  Tue, 08 Nov 2022 16:13:43 +0000
+
 qemu (1:6.2+dfsg-2ubuntu6.5) jammy; urgency=medium
 
   * d/p/u/lp-1981339-*: Fix s390x emulation of newer kernels (LP: #1981339)
