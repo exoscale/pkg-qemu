@@ -14,7 +14,7 @@ Forwarded: no
 
 --- a/hw/i386/pc_piix.c
 +++ b/hw/i386/pc_piix.c
-@@ -326,7 +326,6 @@ static void pc_compat_2_2_fn(MachineStat
+@@ -328,7 +328,6 @@ static void pc_compat_2_2_fn(MachineStat
  static void pc_compat_2_1_fn(MachineState *machine)
  {
      pc_compat_2_2_fn(machine);
@@ -22,10 +22,10 @@ Forwarded: no
  }
  
  static void pc_compat_2_0_fn(MachineState *machine)
---- a/target/i386/cpu.c
-+++ b/target/i386/cpu.c
-@@ -2953,7 +2953,6 @@ static PropValue kvm_default_props[] = {
-     { "x2apic", "on" },
+--- a/target/i386/kvm/kvm-cpu.c
++++ b/target/i386/kvm/kvm-cpu.c
+@@ -130,7 +130,6 @@ static PropValue kvm_default_props[] = {
+     { "kvm-msi-ext-dest-id", "off" },
      { "acpi", "off" },
      { "monitor", "off" },
 -    { "svm", "off" },

@@ -7,38 +7,38 @@ instead of deriving it at runtime from executable path.
 This way it is possible to move qemu binary to another directory
 and it will still work.
 
---- a/os-posix.c
-+++ b/os-posix.c
-@@ -72,6 +72,7 @@ void os_setup_signal_handling(void)
-     sigaction(SIGTERM, &act, NULL);
- }
+diff --git a/softmmu/datadir.c b/softmmu/datadir.c
+--- a/softmmu/datadir.c
++++ b/softmmu/datadir.c
+@@ -94,12 +94,14 @@ void qemu_add_default_firmwarepath(void)
+  */
+ static char *find_datadir(void)
+ {
++#if 0
+     g_autofree char *dir = NULL;
  
-+#if 0 /* we use a fixed configured data path */
- /* Find a likely location for support files using the location of the binary.
-    For installed binaries this will be "$bindir/../share/qemu".  When
-    running from the build tree this will be "$bindir/../pc-bios".  */
-@@ -107,6 +108,7 @@ char *os_find_datadir(void)
- }
- #undef SHARE_SUFFIX
- #undef BUILD_SUFFIX
+     dir = g_build_filename(qemu_get_exec_dir(), "pc-bios", NULL);
+     if (g_file_test(dir, G_FILE_TEST_IS_DIR)) {
+         return g_steal_pointer(&dir);
+     }
 +#endif
  
- void os_set_proc_name(const char *s)
+     return get_relocated_path(CONFIG_QEMU_DATADIR);
+ }
+diff --git a/util/cutils.c b/util/cutils.c
+index c9b91e7535..ba1d291e07 100644
+--- a/util/cutils.c
++++ b/util/cutils.c
+@@ -1022,4 +1022,7 @@ static inline const char *next_component(const char *dir, int *p_len)
+ char *get_relocated_path(const char *dir)
  {
---- a/vl.c
-+++ b/vl.c
-@@ -3051,1 +3051,1 @@ int main(int argc, char **argv, char **e
--    char *dir, **dirs;
-+    char **dirs;
-@@ -4170,11 +4170,6 @@ int main(int argc, char **argv, char **e
++#if 1	/* for Debian we dont need paths to be relocable */
++    return g_strdup(dir);
++#else
+     size_t prefix_len = strlen(CONFIG_PREFIX);
+     const char *bindir = CONFIG_BINDIR;
+@@ -1057,3 +1060,4 @@ char *get_relocated_path(const char *dir)
      }
-     g_strfreev(dirs);
- 
--    /* try to find datadir relative to the executable path */
--    dir = os_find_datadir();
--    qemu_add_data_dir(dir);
--    g_free(dir);
--
-     /* add the datadir specified when building */
-     qemu_add_data_dir(CONFIG_QEMU_DATADIR);
- 
+     return g_string_free(result, false);
++#endif
+ }

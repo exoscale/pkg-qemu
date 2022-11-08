@@ -1,0 +1,62 @@
+From b67b6c7ce4d56bb76a523eb63feb4a1978b05351 Mon Sep 17 00:00:00 2001
+From: Richard Henderson <richard.henderson@linaro.org>
+Date: Sat, 2 Jul 2022 11:32:25 +0530
+Subject: [PATCH] target/s390x: Remove DISAS_GOTO_TB
+
+There is nothing to distinguish this from DISAS_NORETURN.
+
+Signed-off-by: Richard Henderson <richard.henderson@linaro.org>
+Message-Id: <20220702060228.420454-2-richard.henderson@linaro.org>
+Signed-off-by: Thomas Huth <thuth@redhat.com>
+
+Origin: upstream, https://git.qemu.org/?p=qemu.git;a=commit;h=b67b6c7ce4d56bb76a523eb63feb
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/1981339
+Last-Update: 2022-09-13
+
+---
+ target/s390x/tcg/translate.c | 8 ++------
+ 1 file changed, 2 insertions(+), 6 deletions(-)
+
+diff --git a/target/s390x/tcg/translate.c b/target/s390x/tcg/translate.c
+index fd2433d625..e38ae9ce09 100644
+--- a/target/s390x/tcg/translate.c
++++ b/target/s390x/tcg/translate.c
+@@ -1123,9 +1123,6 @@ typedef struct {
+    exiting the TB.  */
+ #define DISAS_PC_UPDATED        DISAS_TARGET_0
+ 
+-/* We have emitted one or more goto_tb.  No fixup required.  */
+-#define DISAS_GOTO_TB           DISAS_TARGET_1
+-
+ /* We have updated the PC and CC values.  */
+ #define DISAS_PC_CC_UPDATED     DISAS_TARGET_2
+ 
+@@ -1189,7 +1186,7 @@ static DisasJumpType help_goto_direct(DisasContext *s, uint64_t dest)
+         tcg_gen_goto_tb(0);
+         tcg_gen_movi_i64(psw_addr, dest);
+         tcg_gen_exit_tb(s->base.tb, 0);
+-        return DISAS_GOTO_TB;
++        return DISAS_NORETURN;
+     } else {
+         tcg_gen_movi_i64(psw_addr, dest);
+         per_branch(s, false);
+@@ -1258,7 +1255,7 @@ static DisasJumpType help_branch(DisasContext *s, DisasCompare *c,
+             tcg_gen_movi_i64(psw_addr, dest);
+             tcg_gen_exit_tb(s->base.tb, 1);
+ 
+-            ret = DISAS_GOTO_TB;
++            ret = DISAS_NORETURN;
+         } else {
+             /* Fallthru can use goto_tb, but taken branch cannot.  */
+             /* Store taken branch destination before the brcond.  This
+@@ -6634,7 +6631,6 @@ static void s390x_tr_tb_stop(DisasContextBase *dcbase, CPUState *cs)
+     DisasContext *dc = container_of(dcbase, DisasContext, base);
+ 
+     switch (dc->base.is_jmp) {
+-    case DISAS_GOTO_TB:
+     case DISAS_NORETURN:
+         break;
+     case DISAS_TOO_MANY:
+-- 
+2.37.3
+
