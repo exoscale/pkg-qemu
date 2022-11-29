@@ -1,0 +1,28 @@
+From c3bfad729f4ae9acfa405106cfc41f94f792d8ec Mon Sep 17 00:00:00 2001
+From: Alessandro Ratti <alessandro.ratti@exoscale.ch>
+Date: Tue, 29 Nov 2022 16:15:36 +0000
+Subject: [PATCH] VNC: allow websocket connections over AF_UNIX sockets
+
+---
+ ui/vnc.c | 5 -----
+ 1 file changed, 5 deletions(-)
+
+diff --git a/ui/vnc.c b/ui/vnc.c
+index af02522e8..1066f007d 100644
+--- a/ui/vnc.c
++++ b/ui/vnc.c
+@@ -3716,11 +3716,6 @@ static int vnc_display_get_address(const char *addrstr,
+         addr->type = SOCKET_ADDRESS_TYPE_UNIX;
+         addr->u.q_unix.path = g_strdup(addrstr + 5);
+ 
+-        if (websocket) {
+-            error_setg(errp, "UNIX sockets not supported with websock");
+-            goto cleanup;
+-        }
+-
+         if (to) {
+             error_setg(errp, "Port range not support with UNIX socket");
+             goto cleanup;
+-- 
+2.25.1
+

@@ -49,3 +49,4 @@ ubuntu/lp-1981339-target-s390x-Exit-tb-after-executing-ex_value.patch
 
 # Exoscale
 exoscale/pre-bionic-256k-ipxe-efi-roms-2.11.patch
+exoscale/0001-VNC-allow-websocket-connections-over-AF_UNIX-sockets.patch

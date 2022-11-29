@@ -1,7 +1,8 @@
-qemu (1:6.2+dfsg-2ubuntu6.5+exo2) UNRELEASED; urgency=medium
+qemu (1:6.2+dfsg-2ubuntu6.5+exo3) UNRELEASED; urgency=medium
 
   * Fix qemu-system-x86_64: Size mismatch: 0000:00:03.0/virtio-net-pci.rom:
     0x40000 != 0x80000 
+  * Adds Pyr patch for VNC
 
  -- Alessandro Ratti <alessandro@exoscale.com>  Tue, 08 Nov 2022 16:13:43 +0000
 
