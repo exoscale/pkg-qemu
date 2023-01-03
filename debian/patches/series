@@ -337,6 +337,9 @@ CVE-2021-4206.patch
 CVE-2021-4207.patch
 CVE-2022-26353.patch
 CVE-2022-26354.patch
+CVE-2021-3750.patch
+CVE-2022-0216-1.patch
+CVE-2022-0216-2.patch
 
 # Exoscale
 exoscale/pre-bionic-256k-ipxe-efi-roms-2.11.patch

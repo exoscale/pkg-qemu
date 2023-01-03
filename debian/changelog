@@ -1,3 +1,23 @@
+qemu (1:4.2-3ubuntu6.24+exo2) UNRELEASED; urgency=medium
+
+  * Import :4.2-3ubuntu6.24
+  * Retain debian/patches/exoscale/pre-bionic-256k-ipxe-efi-roms-2.11.patch
+
+ -- Alessandro Ratti <alessandro@exoscale.com>  Tue, 03 Jan 2023 14:00:09 +0000
+
+qemu (1:4.2-3ubuntu6.24) focal-security; urgency=medium
+
+  * SECURITY UPDATE: DMA reentrancy issue
+    - debian/patches/CVE-2021-3750.patch: Introduce MemTxAttrs::memory
+      field and MEMTX_ACCESS_ERROR
+    - CVE-2021-3750
+  * SECURITY UPDATE: use-after-free vulnerability
+    - debian/patches/CVE-2022-0216-*.patch: fix use-after-free in
+      lsi_do_msgout
+    - CVE-2022-0216
+
+ -- Nishit Majithia <nishit.majithia@canonical.com>  Thu, 08 Dec 2022 14:45:56 +0530
+
 qemu (1:4.2-3ubuntu6.23+exo2) UNRELEASED; urgency=medium
 
   * Import 1:4.2-3ubuntu6.22 and 1:4.2-3ubuntu6.23
