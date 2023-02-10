@@ -1,0 +1,56 @@
+From 70a700db3bd14bfc83156102c2c7792a35a70a06 Mon Sep 17 00:00:00 2001
+From: Matheus Ferst <matheus.ferst@eldorado.org.br>
+Date: Thu, 13 Jan 2022 14:04:55 -0300
+Subject: [PATCH 3/3] tests/tcg/ppc64le: change signal_save_restore_xer to use
+ SIGTRAP
+
+BugLink: https://bugs.launchpad.net/bugs/1980896
+
+Now that linux-user delivers the signal on tw, we can change
+signal_save_restore_xer to use SIGTRAP instead of SIGILL.
+
+Suggested-by: Richard Henderson <richard.henderson@linaro.org>
+Reviewed-by: Richard Henderson <richard.henderson@linaro.org>
+Signed-off-by: Matheus Ferst <matheus.ferst@eldorado.org.br>
+Message-Id: <20220113170456.1796911-3-matheus.ferst@eldorado.org.br>
+Signed-off-by: Laurent Vivier <laurent@vivier.eu>
+(cherry picked from commit 62089c849d49f92823c68624720cdac8fa4b43e0)
+Signed-off-by: You-Sheng Yang (vicamo) <vicamo@gmail.com>
+---
+ tests/tcg/ppc64le/signal_save_restore_xer.c | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/tests/tcg/ppc64le/signal_save_restore_xer.c b/tests/tcg/ppc64le/signal_save_restore_xer.c
+index e4f8a07dd7..9227f4f455 100644
+--- a/tests/tcg/ppc64le/signal_save_restore_xer.c
++++ b/tests/tcg/ppc64le/signal_save_restore_xer.c
+@@ -11,7 +11,7 @@
+ 
+ uint64_t saved;
+ 
+-void sigill_handler(int sig, siginfo_t *si, void *ucontext)
++void sigtrap_handler(int sig, siginfo_t *si, void *ucontext)
+ {
+     ucontext_t *uc = ucontext;
+     uc->uc_mcontext.regs->nip += 4;
+@@ -23,14 +23,14 @@ int main(void)
+ {
+     uint64_t initial = XER_CA | XER_CA32, restored;
+     struct sigaction sa = {
+-        .sa_sigaction = sigill_handler,
++        .sa_sigaction = sigtrap_handler,
+         .sa_flags = SA_SIGINFO
+     };
+ 
+-    sigaction(SIGILL, &sa, NULL);
++    sigaction(SIGTRAP, &sa, NULL);
+ 
+     asm("mtspr 1, %1\n\t"
+-        ".long 0x0\n\t"
++        "trap\n\t"
+         "mfspr %0, 1\n\t"
+         : "=r" (restored)
+         : "r" (initial));
+-- 
+2.34.1
+

@@ -1,2 +1,0 @@
-#!/bin/sh
-exec qemu-system-s390x -enable-kvm "$@"

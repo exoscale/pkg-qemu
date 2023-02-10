@@ -1,0 +1,39 @@
+From 3d8111fd3bf7298486bcf1a72013b44c9044104e Mon Sep 17 00:00:00 2001
+From: Richard Henderson <richard.henderson@linaro.org>
+Date: Sat, 2 Jul 2022 11:32:28 +0530
+Subject: [PATCH] target/s390x: Exit tb after executing ex_value
+
+When EXECUTE sets ex_value to interrupt the constructed instruction,
+we implicitly disable interrupts so that the value is not corrupted.
+Exit to the main loop after execution, so that we re-evaluate any
+pending interrupts.
+
+Reported-by: Sven Schnelle <svens@linux.ibm.com>
+Signed-off-by: Richard Henderson <richard.henderson@linaro.org>
+Message-Id: <20220702060228.420454-5-richard.henderson@linaro.org>
+Signed-off-by: Thomas Huth <thuth@redhat.com>
+
+Origin: upstream, https://git.qemu.org/?p=qemu.git;a=commit;h=3d8111fd3bf7298486bcf1a72013
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/1981339
+Last-Update: 2022-09-13
+
+---
+ target/s390x/tcg/translate.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/target/s390x/tcg/translate.c b/target/s390x/tcg/translate.c
+index eac59c3dd1..e2ee005671 100644
+--- a/target/s390x/tcg/translate.c
++++ b/target/s390x/tcg/translate.c
+@@ -6593,7 +6593,7 @@ static void s390x_tr_init_disas_context(DisasContextBase *dcbase, CPUState *cs)
+ 
+     dc->cc_op = CC_OP_DYNAMIC;
+     dc->ex_value = dc->base.tb->cs_base;
+-    dc->exit_to_mainloop = (dc->base.tb->flags & FLAG_MASK_PER);
++    dc->exit_to_mainloop = (dc->base.tb->flags & FLAG_MASK_PER) || dc->ex_value;
+ }
+ 
+ static void s390x_tr_tb_start(DisasContextBase *db, CPUState *cs)
+-- 
+2.37.3
+

@@ -1,0 +1,38 @@
+From df345ed93437657e404412b08e26bbc2bea528e8 Mon Sep 17 00:00:00 2001
+From: Matheus Ferst <matheus.ferst@eldorado.org.br>
+Date: Thu, 13 Jan 2022 14:04:54 -0300
+Subject: [PATCH 2/3] linux-user/ppc: deliver SIGTRAP on POWERPC_EXCP_TRAP
+
+BugLink: https://bugs.launchpad.net/bugs/1980896
+
+Handle POWERPC_EXCP_TRAP in cpu_loop to deliver SIGTRAP on tw[i]/td[i].
+The si_code comes from do_program_check in the kernel source file
+arch/powerpc/kernel/traps.c
+
+Reviewed-by: Richard Henderson <richard.henderson@linaro.org>
+Signed-off-by: Matheus Ferst <matheus.ferst@eldorado.org.br>
+Message-Id: <20220113170456.1796911-2-matheus.ferst@eldorado.org.br>
+Signed-off-by: Laurent Vivier <laurent@vivier.eu>
+(cherry picked from commit 083fe9a12d2025bb719ce8fb8cef86266f9bdddd)
+Signed-off-by: You-Sheng Yang (vicamo) <vicamo@gmail.com>
+---
+ linux-user/ppc/cpu_loop.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/linux-user/ppc/cpu_loop.c b/linux-user/ppc/cpu_loop.c
+index bb20300da9..08bd0acefb 100644
+--- a/linux-user/ppc/cpu_loop.c
++++ b/linux-user/ppc/cpu_loop.c
+@@ -188,7 +188,8 @@ void cpu_loop(CPUPPCState *env)
+                 }
+                 break;
+             case POWERPC_EXCP_TRAP:
+-                cpu_abort(cs, "Tried to call a TRAP\n");
++                si_signo = TARGET_SIGTRAP;
++                si_code = TARGET_TRAP_BRKPT;
+                 break;
+             default:
+                 /* Should not happen ! */
+-- 
+2.34.1
+
