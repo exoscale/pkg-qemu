@@ -46,6 +46,10 @@ ubuntu/lp-1981339-target-s390x-Remove-DISAS_GOTO_TB.patch
 ubuntu/lp-1981339-target-s390x-Remove-DISAS_PC_STALE.patch
 ubuntu/lp-1981339-target-s390x-Remove-DISAS_PC_STALE_NOCHAIN.patch
 ubuntu/lp-1981339-target-s390x-Exit-tb-after-executing-ex_value.patch
+CVE-2021-3750.patch
+CVE-2022-0216-1.patch
+CVE-2022-0216-2.patch
+CVE-2022-3165.patch
 
 # Exoscale
 exoscale/pre-bionic-256k-ipxe-efi-roms-2.11.patch
