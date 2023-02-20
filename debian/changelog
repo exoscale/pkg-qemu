@@ -1,3 +1,28 @@
+qemu (1:6.2+dfsg-2ubuntu6.6+exo3) UNRELEASED; urgency=medium
+
+  * EXOSCALE SAUCE (no-up): Fix qemu-system-x86_64:
+    Size mismatch: 0000:00:03.0/virtio-net-pci.rom: 0x40000 != 0x80000
+  * EXOSCALE SAUCE (no-up): VNC Allow websocket connections over AF_UNIX sockets
+
+ -- Alessandro Ratti <alessandro@exoscale.com>  Tue, 14 Feb 2023 15:19:12 +0000
+
+qemu (1:6.2+dfsg-2ubuntu6.6) jammy-security; urgency=medium
+
+  * SECURITY UPDATE: DMA reentrancy issue
+    - debian/patches/CVE-2021-3750.patch: Introduce MemTxAttrs::memory
+      field and MEMTX_ACCESS_ERROR
+    - CVE-2021-3750
+  * SECURITY UPDATE: use-after-free vulnerability
+    - debian/patches/CVE-2022-0216-*.patch: fix use-after-free in
+      lsi_do_msgout
+    - CVE-2022-0216
+  * SECURITY UPDATE: integer underflow vulnerability
+    - debian/patches/CVE-2022-3165.patch: fix integer underflow in
+      vnc_client_cut_text_ext
+    - CVE-2022-3165
+
+ -- Nishit Majithia <nishit.majithia@canonical.com>  Thu, 08 Dec 2022 14:47:27 +0530
+
 qemu (1:6.2+dfsg-2ubuntu6.5+exo3) UNRELEASED; urgency=medium
 
   * Fix qemu-system-x86_64: Size mismatch: 0000:00:03.0/virtio-net-pci.rom:
