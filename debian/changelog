@@ -1,3 +1,38 @@
+qemu (1:6.2+dfsg-2ubuntu6.8+exo3) UNRELEASED; urgency=medium
+
+  * Import 1:6.2+dfsg-2ubuntu6.8
+  * EXOSCALE SAUCE (no-up): Fix qemu-system-x86_64:
+    Size mismatch: 0000:00:03.0/virtio-net-pci.rom: 0x40000 != 0x80000
+  * EXOSCALE SAUCE (no-up): VNC Allow websocket connections over AF_UNIX
+    sockets
+
+ -- Alessandro Ratti <alessandro@exoscale.com>  Tue, 06 Jun 2023 16:41:24 +0000
+
+qemu (1:6.2+dfsg-2ubuntu6.8) jammy; urgency=medium
+
+  * d/p/u/lp-1999885-s390x-tod-kvm-don-t-save-restore-the-TOD-in-PV-guest.patch:
+    avoid timer issues in s390x secure execution guests (LP: #1999885)
+  * d/p/u/lp-2011832-*: fix emulation issues in mips and powerpc (LP: #2011832)
+
+ -- Christian Ehrhardt <christian.ehrhardt@canonical.com>  Thu, 23 Mar 2023 08:18:28 +0100
+
+qemu (1:6.2+dfsg-2ubuntu6.7) jammy; urgency=medium
+
+  [ Brett Milford ]
+  * d/p/u/lp1994002-migration-Read-state-once.patch: Fix for libvirt
+    error 'migration was active, but no RAM info was set' (LP: #1994002)
+
+  [ Mauricio Faria de Oliveira ]
+  * d/p/u/lp2009048-vfio_map_dma_einval_amd_iommu_1tb.patch: Add hint
+    to VFIO_MAP_DMA error on AMD IOMMU for VMs with ~1TB+ RAM (LP: #2009048)
+  * d/rules: move "Disable LTO on non-amd64" before buildflags.mk on Jammy.
+
+  [ Michal Maloszewski ]
+  * d/rules: Disable LTO on non-amd 64 architectures to prevent QEMU
+    coroutines from failing (LP: #1921664)
+
+ -- Mauricio Faria de Oliveira <mfo@canonical.com>  Mon, 06 Mar 2023 17:00:46 -0300
+
 qemu (1:6.2+dfsg-2ubuntu6.6+exo3) UNRELEASED; urgency=medium
 
   * EXOSCALE SAUCE (no-up): Fix qemu-system-x86_64:

@@ -1,0 +1,54 @@
+From 7fc235c67f6c136ceba2305bcf2609c46a74620d Mon Sep 17 00:00:00 2001
+From: Ni Hui <shuizhuyuanluo@126.com>
+Date: Tue, 3 May 2022 21:07:06 +0800
+Subject: [PATCH] target/mips: Fix df_extract_val() and df_extract_df() dfe
+ lookup
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Actually look into dfe structure data so that df_extract_val() and
+df_extract_df() can return immediate and datafield other than BYTE.
+
+Fixes: 4701d23aef ("target/mips: Convert MSA BIT instruction format to decodetree")
+Signed-off-by: Ni Hui <shuizhuyuanluo@126.com>
+Reviewed-by: Richard Henderson <richard.henderson@linaro.org>
+Reviewed-by: Philippe Mathieu-Daudé <f4bug@amsat.org>
+Message-Id: <20220503130708.272850-2-shuizhuyuanluo@126.com>
+Signed-off-by: Philippe Mathieu-Daudé <f4bug@amsat.org>
+
+Origin: upstream, https://gitlab.com/qemu-project/qemu/-/commit/7fc235c67f6
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/2011832
+Last-Update: 2023-03-23
+
+---
+ target/mips/tcg/msa_translate.c | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/target/mips/tcg/msa_translate.c b/target/mips/tcg/msa_translate.c
+index 76307102f29..aa45bae0aa5 100644
+--- a/target/mips/tcg/msa_translate.c
++++ b/target/mips/tcg/msa_translate.c
+@@ -68,8 +68,8 @@ struct dfe {
+ static int df_extract_val(DisasContext *ctx, int x, const struct dfe *s)
+ {
+     for (unsigned i = 0; i < 4; i++) {
+-        if (extract32(x, s->start, s->length) == s->mask) {
+-            return extract32(x, 0, s->start);
++        if (extract32(x, s[i].start, s[i].length) == s[i].mask) {
++            return extract32(x, 0, s[i].start);
+         }
+     }
+     return -1;
+@@ -82,7 +82,7 @@ static int df_extract_val(DisasContext *ctx, int x, const struct dfe *s)
+ static int df_extract_df(DisasContext *ctx, int x, const struct dfe *s)
+ {
+     for (unsigned i = 0; i < 4; i++) {
+-        if (extract32(x, s->start, s->length) == s->mask) {
++        if (extract32(x, s[i].start, s[i].length) == s[i].mask) {
+             return i;
+         }
+     }
+-- 
+2.40.0
+

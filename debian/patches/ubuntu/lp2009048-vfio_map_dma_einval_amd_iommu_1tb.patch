@@ -1,0 +1,49 @@
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/2009048
+Description: Add hint to VFIO_MAP_DMA/EINVAL on AMD IOMMU for VMs with ~1TB+ RAM
+Author: Mauricio Faria de Oliveira <mfo@canonical.com>
+Forwarded: not-needed
+Last-Update: 2023-03-02
+
+Index: qemu/hw/vfio/common.c
+===================================================================
+--- qemu.orig/hw/vfio/common.c
++++ qemu/hw/vfio/common.c
+@@ -516,6 +516,38 @@ static int vfio_dma_map(VFIOContainer *c
+         return 0;
+     }
+ 
++    /*
++     * (LP: #2009048)
++     * x86_64: provide a hint if VFIO_IOMMU_DMA_MAP fails due to overlap with
++     * the reserved region (EINVAL) below 1T on AMD IOMMU (check for AMD CPU);
++     * that happens if the VM memory is ~ 1T or more (resolved with qemu 7.1).
++     *
++     * """
++     * AMD systems with an IOMMU have an additional hole close to the
++     * 1Tb, which are special GPAs that cannot be DMA mapped. Depending
++     * on kernel version, VFIO may or may not let you DMA map those ranges.
++     * Starting Linux v5.4 we validate it, and can't create guests on AMD machines
++     * with certain memory sizes. [...]
++     * """
++     *
++     * References:
++     * commit 8504f129450b ("i386/pc: relocate 4g start to 1T where applicable")
++     * commit 4ab4c33014b4 ("hw/i386: add 4g boundary start to X86MachineState")
++     */
++#ifdef TARGET_X86_64
++#define AMD_HT_START	0xfd00000000ULL
++#define PC_4GB_START	0x0100000000ULL
++    if (errno == EINVAL && iova == PC_4GB_START &&
++        size > (AMD_HT_START - PC_4GB_START) &&
++        IS_AMD_CPU(&(X86_CPU(first_cpu))->env)) {
++        error_report("VFIO_MAP_DMA failed: %s (hint: AMD IOMMU: reduce VM ram)",
++                     strerror(errno));
++        return -errno;
++    }
++#undef AMD_HT_START
++#undef PC_4GB_START
++#endif
++
+     error_report("VFIO_MAP_DMA failed: %s", strerror(errno));
+     return -errno;
+ }
