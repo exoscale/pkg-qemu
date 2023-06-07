@@ -50,6 +50,12 @@ CVE-2021-3750.patch
 CVE-2022-0216-1.patch
 CVE-2022-0216-2.patch
 CVE-2022-3165.patch
+ubuntu/lp1994002-migration-Read-state-once.patch
+ubuntu/lp2009048-vfio_map_dma_einval_amd_iommu_1tb.patch
+ubuntu/lp-1999885-s390x-tod-kvm-don-t-save-restore-the-TOD-in-PV-guest.patch
+ubuntu/lp-2011832-target-ppc-Fix-xs-max-min-cj-dp-to-use-VSX-registers.patch
+ubuntu/lp-2011832-target-mips-Fix-df_extract_val-and-df_extract_df-dfe.patch
+ubuntu/lp-2011832-target-mips-Fix-FTRUNC_S-and-FTRUNC_U-trans-helper.patch
 
 # Exoscale
 exoscale/pre-bionic-256k-ipxe-efi-roms-2.11.patch

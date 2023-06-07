@@ -9,6 +9,17 @@ SHELL = /bin/sh -e
 include /usr/share/dpkg/pkg-info.mk
 # get DEB_HOST_ARCH DEB_HOST_ARCH_OS DEB_HOST_GNU_TYPE DEB_HOST_MULTIARCH DEB_BUILD_GNU_TYPE
 include /usr/share/dpkg/architecture.mk
+
+# Disable LTO on non-amd64 builds, see:
+# https://bugs.launchpad.net/ubuntu/+source/qemu/+bug/1921664
+# https://bugzilla.redhat.com/show_bug.cgi?id=1952483
+# [jammy backport: export before include buildflags.mk;
+#  binary-arch (configure) is not run in a child process (dh) as in
+#  kinetic, so it needs the new/non-LTO $(CFLAGS) in this process.]
+ifneq ($(DEB_HOST_ARCH),amd64)
+  export DEB_BUILD_MAINT_OPTIONS += optimize=-lto
+endif
+
 # get CFLAGS LDFLAGS etc
 include /usr/share/dpkg/buildflags.mk
 

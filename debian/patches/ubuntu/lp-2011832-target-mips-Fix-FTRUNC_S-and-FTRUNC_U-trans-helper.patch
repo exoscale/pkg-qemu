@@ -1,0 +1,43 @@
+From 1d29f899e7f2ae9bd1bc3eb0c59e72fe932f53a6 Mon Sep 17 00:00:00 2001
+From: Ni Hui <shuizhuyuanluo@126.com>
+Date: Tue, 3 May 2022 22:42:41 +0800
+Subject: [PATCH] target/mips: Fix FTRUNC_S and FTRUNC_U trans helper
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Fix the FTRUNC_S and FTRUNC_U trans helper problem.
+
+Fixes: 5c5b64000c ("target/mips: Convert MSA 2RF instruction format to decodetree")
+Signed-off-by: nihui <shuizhuyuanluo@126.com>
+Reviewed-by: Richard Henderson <richard.henderson@linaro.org>
+Reviewed-by: Philippe Mathieu-Daudé <f4bug@amsat.org>
+Message-Id: <20220503144241.289239-1-shuizhuyuanluo@126.com>
+Signed-off-by: Philippe Mathieu-Daudé <f4bug@amsat.org>
+
+Origin: upstream, https://gitlab.com/qemu-project/qemu/-/commit/1d29f899e7f
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/2011832
+Last-Update: 2023-03-23
+
+---
+ target/mips/tcg/msa_translate.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/target/mips/tcg/msa_translate.c b/target/mips/tcg/msa_translate.c
+index 0b3dd0957c2..1bcdbb11215 100644
+--- a/target/mips/tcg/msa_translate.c
++++ b/target/mips/tcg/msa_translate.c
+@@ -752,8 +752,8 @@ static bool trans_msa_2rf(DisasContext *ctx, arg_msa_r *a,
+ }
+ 
+ TRANS(FCLASS,   trans_msa_2rf, gen_helper_msa_fclass_df);
+-TRANS(FTRUNC_S, trans_msa_2rf, gen_helper_msa_fclass_df);
+-TRANS(FTRUNC_U, trans_msa_2rf, gen_helper_msa_ftrunc_s_df);
++TRANS(FTRUNC_S, trans_msa_2rf, gen_helper_msa_ftrunc_s_df);
++TRANS(FTRUNC_U, trans_msa_2rf, gen_helper_msa_ftrunc_u_df);
+ TRANS(FSQRT,    trans_msa_2rf, gen_helper_msa_fsqrt_df);
+ TRANS(FRSQRT,   trans_msa_2rf, gen_helper_msa_frsqrt_df);
+ TRANS(FRCP,     trans_msa_2rf, gen_helper_msa_frcp_df);
+-- 
+2.40.0
+
