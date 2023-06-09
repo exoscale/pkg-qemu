@@ -1,3 +1,20 @@
+qemu (1:6.2+dfsg-2ubuntu6.9+exo3) UNRELEASED; urgency=medium
+
+  * Import 1:6.2+dfsg-2ubuntu6.9
+  * EXOSCALE SAUCE (no-up): Fix qemu-system-x86_64:
+    Size mismatch: 0000:00:03.0/virtio-net-pci.rom: 0x40000 != 0x80000
+  * EXOSCALE SAUCE (no-up): VNC Allow websocket connections over AF_UNIX
+    sockets
+
+ -- Alessandro Ratti <alessandro@exoscale.com>  Fri, 09 Jun 2023 12:49:23 +0000
+
+qemu (1:6.2+dfsg-2ubuntu6.9) jammy; urgency=medium
+
+  * d/p/u/lp-2019766-target-arm-kvm-Retry-KVM_CREATE_VM-call-if-it-fails-.patch:
+    ARM: Retry KVM_CREATE_VM when it returns EINTR (LP: #2019766)
+
+ -- dann frazier <dannf@ubuntu.com>  Tue, 16 May 2023 14:59:54 -0600
+
 qemu (1:6.2+dfsg-2ubuntu6.8+exo3) UNRELEASED; urgency=medium
 
   * Import 1:6.2+dfsg-2ubuntu6.8

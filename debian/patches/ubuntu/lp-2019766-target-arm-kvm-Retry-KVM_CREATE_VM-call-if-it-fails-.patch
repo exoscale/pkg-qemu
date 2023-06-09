@@ -1,0 +1,45 @@
+From bbde13cd14ad4eec18529ce0bf5876058464e124 Mon Sep 17 00:00:00 2001
+From: Peter Maydell <peter.maydell@linaro.org>
+Date: Fri, 30 Sep 2022 12:38:24 +0100
+Subject: [PATCH] target/arm/kvm: Retry KVM_CREATE_VM call if it fails EINTR
+
+Occasionally the KVM_CREATE_VM ioctl can return EINTR, even though
+there is no pending signal to be taken. In commit 94ccff13382055
+we added a retry-on-EINTR loop to the KVM_CREATE_VM call in the
+generic KVM code. Adopt the same approach for the use of the
+ioctl in the Arm-specific KVM code (where we use it to create a
+scratch VM for probing for various things).
+
+For more information, see the mailing list thread:
+https://lore.kernel.org/qemu-devel/8735e0s1zw.wl-maz@kernel.org/
+
+Reported-by: Vitaly Chikunov <vt@altlinux.org>
+Signed-off-by: Peter Maydell <peter.maydell@linaro.org>
+Reviewed-by: Vitaly Chikunov <vt@altlinux.org>
+Reviewed-by: Eric Auger <eric.auger@redhat.com>
+Acked-by: Marc Zyngier <maz@kernel.org>
+Message-id: 20220930113824.1933293-1-peter.maydell@linaro.org
+
+Origin: upstream, https://gitlab.com/qemu-project/qemu/-/commit/bbde13cd14a
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/2019766
+Last-Update: 2023-05-16
+
+---
+ target/arm/kvm.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+Index: qemu-6.2+dfsg/target/arm/kvm.c
+===================================================================
+--- qemu-6.2+dfsg.orig/target/arm/kvm.c
++++ qemu-6.2+dfsg/target/arm/kvm.c
+@@ -80,7 +80,9 @@ bool kvm_arm_create_scratch_host_vcpu(co
+     if (max_vm_pa_size < 0) {
+         max_vm_pa_size = 0;
+     }
+-    vmfd = ioctl(kvmfd, KVM_CREATE_VM, max_vm_pa_size);
++    do {
++        vmfd = ioctl(kvmfd, KVM_CREATE_VM, max_vm_pa_size);
++    } while (vmfd == -1 && errno == EINTR);
+     if (vmfd < 0) {
+         goto err;
+     }
