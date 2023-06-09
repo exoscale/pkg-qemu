@@ -56,6 +56,7 @@ ubuntu/lp-1999885-s390x-tod-kvm-don-t-save-restore-the-TOD-in-PV-guest.patch
 ubuntu/lp-2011832-target-ppc-Fix-xs-max-min-cj-dp-to-use-VSX-registers.patch
 ubuntu/lp-2011832-target-mips-Fix-df_extract_val-and-df_extract_df-dfe.patch
 ubuntu/lp-2011832-target-mips-Fix-FTRUNC_S-and-FTRUNC_U-trans-helper.patch
+ubuntu/lp-2019766-target-arm-kvm-Retry-KVM_CREATE_VM-call-if-it-fails-.patch
 
 # Exoscale
 exoscale/pre-bionic-256k-ipxe-efi-roms-2.11.patch
