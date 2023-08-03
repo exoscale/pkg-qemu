@@ -1,3 +1,32 @@
+qemu (1:6.2+dfsg-2ubuntu6.11+exo3) UNRELEASED; urgency=medium
+
+  * Import 1:6.2+dfsg-2ubuntu6.11
+  * EXOSCALE SAUCE (no-up): Fix qemu-system-x86_64:
+    Size mismatch: 0000:00:03.0/virtio-net-pci.rom: 0x40000 != 0x80000
+  * EXOSCALE SAUCE (no-up): VNC Allow websocket connections over AF_UNIX
+    sockets
+
+ -- Alessandro Ratti <alessandro@exoscale.com>  Thu, 03 Aug 2023 12:53:23 +0000
+
+qemu (1:6.2+dfsg-2ubuntu6.11) jammy-security; urgency=medium
+
+  * SECURITY UPDATE: user-after-free issue
+    - debian/patches/CVE-2022-1050.patch: Protect against buggy or
+      malicious guest driver
+    - CVE-2022-1050
+  * SECURITY UPDATE: Out-of-bounds read
+    - debian/patches/CVE-2022-4144-*.patch: Have qxl_log_command Return
+      early if no log_cmd handler; Document qxl_phys2virt(); Pass requested
+      buffer size to qxl_phys2virt(); Avoid buffer overrun in qxl_phys2virt;
+      Assert memory slot fits in preallocated MemoryRegion
+    - CVE-2022-4144
+  * SECURITY UPDATE: reentrancy problem
+    - debian/patches/CVE-2023-0330.patch: Fix reentrancy issues in the LSI
+      controller
+    - CVE-2023-0330
+
+ -- Nishit Majithia <nishit.majithia@canonical.com>  Tue, 13 Jun 2023 17:03:25 +0530
+
 qemu (1:6.2+dfsg-2ubuntu6.10+exo3) UNRELEASED; urgency=medium
 
   * Import 1:6.2+dfsg-2ubuntu6.10
