@@ -1,3 +1,22 @@
+qemu (1:6.2+dfsg-2ubuntu6.12+exo3) UNRELEASED; urgency=medium
+
+  * Import 1:6.2+dfsg-2ubuntu6.12
+  * EXOSCALE SAUCE (no-up): Fix qemu-system-x86_64:
+    Size mismatch: 0000:00:03.0/virtio-net-pci.rom: 0x40000 != 0x80000
+  * EXOSCALE SAUCE (no-up): VNC Allow websocket connections over AF_UNIX
+    sockets
+
+ -- Alessandro Ratti <alessandro@exoscale.com>  Thu, 03 Aug 2023 15:55:02 +0000
+
+qemu (1:6.2+dfsg-2ubuntu6.12) jammy; urgency=medium
+
+  [ Chengen Du ]
+  * d/p/u/lp2025591-block-use-the-request-length-for-iov-alignment.patch:
+    Fix boot error on the HWE 6.2 kernel with direct IO (eg, cache=none)
+    if the logical block size is smaller than in the host (LP: #2025591)
+
+ -- Mauricio Faria de Oliveira <mfo@canonical.com>  Mon, 03 Jul 2023 18:00:25 -0300
+
 qemu (1:6.2+dfsg-2ubuntu6.11+exo3) UNRELEASED; urgency=medium
 
   * Import 1:6.2+dfsg-2ubuntu6.11
