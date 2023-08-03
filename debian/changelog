@@ -1,3 +1,21 @@
+qemu (1:6.2+dfsg-2ubuntu6.10+exo3) UNRELEASED; urgency=medium
+
+  * Import 1:6.2+dfsg-2ubuntu6.10
+  * EXOSCALE SAUCE (no-up): Fix qemu-system-x86_64:
+    Size mismatch: 0000:00:03.0/virtio-net-pci.rom: 0x40000 != 0x80000
+  * EXOSCALE SAUCE (no-up): VNC Allow websocket connections over AF_UNIX
+    sockets
+
+ -- Alessandro Ratti <alessandro@exoscale.com>  Thu, 03 Aug 2023 10:51:51 +0000
+
+qemu (1:6.2+dfsg-2ubuntu6.10) jammy; urgency=medium
+
+  * d/p/u/allow-repeating-hot-unplug-requests.patch: Allow repeating
+    hot-unplug requests by making ACPI PCI able to requeue them.
+    (LP: #2018733)
+
+ -- Sergio Durigan Junior <sergio.durigan@canonical.com>  Fri, 26 May 2023 17:40:31 -0400
+
 qemu (1:6.2+dfsg-2ubuntu6.9+exo3) UNRELEASED; urgency=medium
 
   * Import 1:6.2+dfsg-2ubuntu6.9

@@ -1,0 +1,74 @@
+From 0f689cf5ada4d5df5ab95c7f7aa9fc221afa855d Mon Sep 17 00:00:00 2001
+From: Igor Mammedov <imammedo@redhat.com>
+Date: Tue, 18 Apr 2023 11:04:49 +0200
+Subject: [PATCH] acpi: pcihp: allow repeating hot-unplug requests
+
+with Q35 using ACPI PCI hotplug by default, user's request to unplug
+device is ignored when it's issued before guest OS has been booted.
+And any additional attempt to request device hot-unplug afterwards
+results in following error:
+
+  "Device XYZ is already in the process of unplug"
+
+arguably it can be considered as a regression introduced by [2],
+before which it was possible to issue unplug request multiple
+times.
+
+Accept new uplug requests after timeout (1ms). This brings ACPI PCI
+hotplug on par with native PCIe unplug behavior [1] and allows user
+to repeat unplug requests at propper times.
+Set expire timeout to arbitrary 1msec so user won't be able to
+flood guest with SCI interrupts by calling device_del in tight loop.
+
+PS:
+ACPI spec doesn't mandate what OSPM can do with GPEx.status
+bits set before it's booted => it's impl. depended.
+Status bits may be retained (I tested with one Windows version)
+or cleared (Linux since 2.6 kernel times) during guest's ACPI
+subsystem initialization.
+Clearing status bits (though not wrong per se) hides the unplug
+event from guest, and it's upto user to repeat device_del later
+when guest is able to handle unplug requests.
+
+1) 18416c62e3 ("pcie: expire pending delete")
+2)
+Fixes: cce8944cc9ef ("qdev-monitor: Forbid repeated device_del")
+Signed-off-by: Igor Mammedov <imammedo@redhat.com>
+Acked-by: Gerd Hoffmann <kraxel@redhat.com>
+CC: mst@redhat.com
+CC: anisinha@redhat.com
+CC: jusual@redhat.com
+CC: kraxel@redhat.com
+Message-Id: <20230418090449.2155757-1-imammedo@redhat.com>
+Reviewed-by: Michael S. Tsirkin <mst@redhat.com>
+Signed-off-by: Michael S. Tsirkin <mst@redhat.com>
+Reviewed-by: Ani Sinha <anisinha@redhat.com>
+
+Origin: upstream, https://gitlab.com/qemu-project/qemu/-/commit/0f689cf5ada4
+Bug: https://gitlab.com/libvirt/libvirt/-/issues/309
+Bug-Ubuntu: https://bugs.launchpad.net/ubuntu/+source/qemu/+bug/2018733
+---
+ hw/acpi/pcihp.c | 10 ++++++++++
+ 1 file changed, 10 insertions(+)
+
+Index: qemu/hw/acpi/pcihp.c
+===================================================================
+--- a/hw/acpi/pcihp.c	2023-05-26 16:00:52.488394876 -0400
++++ b/hw/acpi/pcihp.c	2023-05-26 16:00:52.488394876 -0400
+@@ -420,6 +420,16 @@
+      * acpi_pcihp_eject_slot() when the operation is completed.
+      */
+     pdev->qdev.pending_deleted_event = true;
++    /* if unplug was requested before OSPM is initialized,
++     * linux kernel will clear GPE0.sts[] bits during boot, which effectively
++     * hides unplug event. And than followup qmp_device_del() calls remain
++     * blocked by above flag permanently.
++     * Unblock qmp_device_del() by setting expire limit, so user can
++     * repeat unplug request later when OSPM has been booted.
++     */
++    pdev->qdev.pending_deleted_expires_ms =
++        qemu_clock_get_ms(QEMU_CLOCK_VIRTUAL); /* 1 msec */
++
+     s->acpi_pcihp_pci_status[bsel].down |= (1U << slot);
+     acpi_send_event(DEVICE(hotplug_dev), ACPI_PCI_HOTPLUG_STATUS);
+ }
