@@ -65,6 +65,7 @@ CVE-2022-4144-3.patch
 CVE-2022-4144-4.patch
 CVE-2022-4144-5.patch
 CVE-2023-0330.patch
+ubuntu/lp2025591-block-use-the-request-length-for-iov-alignment.patch
 
 # Exoscale
 exoscale/pre-bionic-256k-ipxe-efi-roms-2.11.patch
