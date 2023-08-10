@@ -70,3 +70,4 @@ ubuntu/lp2025591-block-use-the-request-length-for-iov-alignment.patch
 # Exoscale
 exoscale/pre-bionic-256k-ipxe-efi-roms-2.11.patch
 exoscale/0001-VNC-allow-websocket-connections-over-AF_UNIX-sockets.patch
+exoscale/0002-i386-acpi-restore-device-paths-for-6.2-vms.patch
