@@ -1,0 +1,103 @@
+From 4a8d21ba50fc8625c3bd51dab903872952f95718 Mon Sep 17 00:00:00 2001
+From: Matthew Rosato <mjrosato@linux.ibm.com>
+Date: Fri, 28 Oct 2022 15:47:56 -0400
+Subject: [PATCH] s390x/pci: RPCIT second pass when mappings exhausted
+
+If we encounter a new mapping while the number of available DMA entries
+in vfio is 0, we are currently skipping that mapping which is a problem
+if we manage to free up DMA space after that within the same RPCIT --
+we will return to the guest with CC0 and have not mapped everything
+within the specified range.  This issue was uncovered while testing
+changes to the s390 linux kernel iommu/dma code, where a different
+usage pattern was employed (new mappings start at the end of the
+aperture and work back towards the front, making us far more likely
+to encounter new mappings before invalidated mappings during a
+global refresh).
+
+Fix this by tracking whether any mappings were skipped due to vfio
+DMA limit hitting 0; when this occurs, we still continue the range
+and unmap/map anything we can - then we must re-run the range again
+to pickup anything that was missed.  This must occur in a loop until
+all requests are satisfied (success) or we detect that we are still
+unable to complete all mappings (return ZPCI_RPCIT_ST_INSUFF_RES).
+
+Link: https://lore.kernel.org/linux-s390/20221019144435.369902-1-schnelle@linux.ibm.com/
+Fixes: 37fa32de70 ("s390x/pci: Honor DMA limits set by vfio")
+Reported-by: Niklas Schnelle <schnelle@linux.ibm.com>
+Signed-off-by: Matthew Rosato <mjrosato@linux.ibm.com>
+Message-Id: <20221028194758.204007-2-mjrosato@linux.ibm.com>
+Reviewed-by: Eric Farman <farman@linux.ibm.com>
+Signed-off-by: Thomas Huth <thuth@redhat.com>
+
+Origin: upstream, https://gitlab.com/qemu-project/qemu/commit/4a8d21ba50
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/1853307
+Last-Update: 2023-07-04
+
+---
+ hw/s390x/s390-pci-inst.c | 29 ++++++++++++++++++++++-------
+ 1 file changed, 22 insertions(+), 7 deletions(-)
+
+Index: qemu/hw/s390x/s390-pci-inst.c
+===================================================================
+--- qemu.orig/hw/s390x/s390-pci-inst.c	2023-07-04 20:50:34.728177177 -0400
++++ qemu/hw/s390x/s390-pci-inst.c	2023-07-04 20:50:34.724177197 -0400
+@@ -677,8 +677,9 @@
+     S390PCIBusDevice *pbdev;
+     S390PCIIOMMU *iommu;
+     S390IOTLBEntry entry;
+-    hwaddr start, end;
++    hwaddr start, end, sstart;
+     uint32_t dma_avail;
++    bool again;
+ 
+     if (env->psw.mask & PSW_MASK_PSTATE) {
+         s390_program_interrupt(env, PGM_PRIVILEGED, ra);
+@@ -691,7 +692,7 @@
+     }
+ 
+     fh = env->regs[r1] >> 32;
+-    start = env->regs[r2];
++    sstart = start = env->regs[r2];
+     end = start + env->regs[r2 + 1];
+ 
+     pbdev = s390_pci_find_dev_by_fh(s390_get_phb(), fh);
+@@ -732,6 +733,9 @@
+         goto err;
+     }
+ 
++ retry:
++    start = sstart;
++    again = false;
+     while (start < end) {
+         error = s390_guest_io_table_walk(iommu->g_iota, start, &entry);
+         if (error) {
+@@ -739,13 +743,24 @@
+         }
+ 
+         start += entry.len;
+-        while (entry.iova < start && entry.iova < end &&
+-               (dma_avail > 0 || entry.perm == IOMMU_NONE)) {
+-            dma_avail = s390_pci_update_iotlb(iommu, &entry);
+-            entry.iova += TARGET_PAGE_SIZE;
+-            entry.translated_addr += TARGET_PAGE_SIZE;
++        while (entry.iova < start && entry.iova < end) {
++            if (dma_avail > 0 || entry.perm == IOMMU_NONE) {
++                dma_avail = s390_pci_update_iotlb(iommu, &entry);
++                entry.iova += TARGET_PAGE_SIZE;
++                entry.translated_addr += TARGET_PAGE_SIZE;
++            } else {
++                /*
++                 * We are unable to make a new mapping at this time, continue
++                 * on and hopefully free up more space.  Then attempt another
++                 * pass.
++                 */
++                again = true;
++                break;
++            }
+         }
+     }
++    if (again && dma_avail > 0)
++        goto retry;
+ err:
+     if (error) {
+         pbdev->state = ZPCI_FS_ERROR;

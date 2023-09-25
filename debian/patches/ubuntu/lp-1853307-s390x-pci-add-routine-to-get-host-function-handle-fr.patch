@@ -1,0 +1,167 @@
+From 21fa15298d88db2050a713cdf79c10cb0e09146f Mon Sep 17 00:00:00 2001
+From: Matthew Rosato <mjrosato@linux.ibm.com>
+Date: Fri, 2 Sep 2022 13:27:31 -0400
+Subject: [PATCH] s390x/pci: add routine to get host function handle from CLP
+ info
+
+In order to interface with the underlying host zPCI device, we need
+to know its function handle. Add a routine to grab this from the
+vfio CLP capabilities chain.
+
+Signed-off-by: Matthew Rosato <mjrosato@linux.ibm.com>
+Reviewed-by: Pierre Morel <pmorel@linux.ibm.com>
+Message-Id: <20220902172737.170349-3-mjrosato@linux.ibm.com>
+[thuth: Replace free(info) with g_free(info)]
+Signed-off-by: Thomas Huth <thuth@redhat.com>
+
+Origin: upstream, https://gitlab.com/qemu-project/qemu/commit/21fa15298d
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/1853307
+Last-Update: 2023-07-04
+
+---
+ hw/s390x/s390-pci-vfio.c         | 83 ++++++++++++++++++++++++++------
+ include/hw/s390x/s390-pci-vfio.h |  5 ++
+ 2 files changed, 72 insertions(+), 16 deletions(-)
+
+Index: qemu/hw/s390x/s390-pci-vfio.c
+===================================================================
+--- qemu.orig/hw/s390x/s390-pci-vfio.c	2023-07-04 20:49:59.000000000 -0400
++++ qemu/hw/s390x/s390-pci-vfio.c	2023-07-04 20:51:00.000000000 -0400
+@@ -124,6 +124,27 @@
+     pbdev->zpci_fn.pft = 0;
+ }
+ 
++static bool get_host_fh(S390PCIBusDevice *pbdev, struct vfio_device_info *info,
++                        uint32_t *fh)
++{
++    struct vfio_info_cap_header *hdr;
++    struct vfio_device_info_cap_zpci_base *cap;
++    VFIOPCIDevice *vpci = container_of(pbdev->pdev, VFIOPCIDevice, pdev);
++
++    hdr = vfio_get_device_info_cap(info, VFIO_DEVICE_INFO_CAP_ZPCI_BASE);
++
++    /* Can only get the host fh with version 2 or greater */
++    if (hdr == NULL || hdr->version < 2) {
++        trace_s390_pci_clp_cap(vpci->vbasedev.name,
++                               VFIO_DEVICE_INFO_CAP_ZPCI_BASE);
++        return false;
++    }
++    cap = (void *) hdr;
++
++    *fh = cap->fh;
++    return true;
++}
++
+ static void s390_pci_read_group(S390PCIBusDevice *pbdev,
+                                 struct vfio_device_info *info)
+ {
+@@ -217,25 +238,13 @@
+     memcpy(pbdev->zpci_fn.pfip, cap->pfip, CLP_PFIP_NR_SEGMENTS);
+ }
+ 
+-/*
+- * This function will issue the VFIO_DEVICE_GET_INFO ioctl and look for
+- * capabilities that contain information about CLP features provided by the
+- * underlying host.
+- * On entry, defaults have already been placed into the guest CLP response
+- * buffers.  On exit, defaults will have been overwritten for any CLP features
+- * found in the capability chain; defaults will remain for any CLP features not
+- * found in the chain.
+- */
+-void s390_pci_get_clp_info(S390PCIBusDevice *pbdev)
++static struct vfio_device_info *get_device_info(S390PCIBusDevice *pbdev,
++                                                uint32_t argsz)
+ {
+-    g_autofree struct vfio_device_info *info = NULL;
++    struct vfio_device_info *info = g_malloc0(argsz);
+     VFIOPCIDevice *vfio_pci;
+-    uint32_t argsz;
+     int fd;
+ 
+-    argsz = sizeof(*info);
+-    info = g_malloc0(argsz);
+-
+     vfio_pci = container_of(pbdev->pdev, VFIOPCIDevice, pdev);
+     fd = vfio_pci->vbasedev.fd;
+ 
+@@ -250,7 +259,8 @@
+ 
+     if (ioctl(fd, VFIO_DEVICE_GET_INFO, info)) {
+         trace_s390_pci_clp_dev_info(vfio_pci->vbasedev.name);
+-        return;
++        g_free(info);
++        return NULL;
+     }
+ 
+     if (info->argsz > argsz) {
+@@ -259,6 +269,47 @@
+         goto retry;
+     }
+ 
++    return info;
++}
++
++/*
++ * Get the host function handle from the vfio CLP capabilities chain.  Returns
++ * true if a fh value was placed into the provided buffer.  Returns false
++ * if a fh could not be obtained (ioctl failed or capabilitiy version does
++ * not include the fh)
++ */
++bool s390_pci_get_host_fh(S390PCIBusDevice *pbdev, uint32_t *fh)
++{
++    g_autofree struct vfio_device_info *info = NULL;
++
++    assert(fh);
++
++    info = get_device_info(pbdev, sizeof(*info));
++    if (!info) {
++        return false;
++    }
++
++    return get_host_fh(pbdev, info, fh);
++}
++
++/*
++ * This function will issue the VFIO_DEVICE_GET_INFO ioctl and look for
++ * capabilities that contain information about CLP features provided by the
++ * underlying host.
++ * On entry, defaults have already been placed into the guest CLP response
++ * buffers.  On exit, defaults will have been overwritten for any CLP features
++ * found in the capability chain; defaults will remain for any CLP features not
++ * found in the chain.
++ */
++void s390_pci_get_clp_info(S390PCIBusDevice *pbdev)
++{
++    g_autofree struct vfio_device_info *info = NULL;
++
++    info = get_device_info(pbdev, sizeof(*info));
++    if (!info) {
++        return;
++    }
++
+     /*
+      * Find the CLP features provided and fill in the guest CLP responses.
+      * Always call s390_pci_read_base first as information from this could
+Index: qemu/include/hw/s390x/s390-pci-vfio.h
+===================================================================
+--- qemu.orig/include/hw/s390x/s390-pci-vfio.h	2023-07-04 20:38:39.000000000 -0400
++++ qemu/include/hw/s390x/s390-pci-vfio.h	2023-07-04 20:49:59.000000000 -0400
+@@ -20,6 +20,7 @@
+ S390PCIDMACount *s390_pci_start_dma_count(S390pciState *s,
+                                           S390PCIBusDevice *pbdev);
+ void s390_pci_end_dma_count(S390pciState *s, S390PCIDMACount *cnt);
++bool s390_pci_get_host_fh(S390PCIBusDevice *pbdev, uint32_t *fh);
+ void s390_pci_get_clp_info(S390PCIBusDevice *pbdev);
+ #else
+ static inline bool s390_pci_update_dma_avail(int fd, unsigned int *avail)
+@@ -33,6 +34,10 @@
+ }
+ static inline void s390_pci_end_dma_count(S390pciState *s,
+                                           S390PCIDMACount *cnt) { }
++static inline bool s390_pci_get_host_fh(S390PCIBusDevice *pbdev, uint32_t *fh)
++{
++    return false;
++}
+ static inline void s390_pci_get_clp_info(S390PCIBusDevice *pbdev) { }
+ #endif
+ 

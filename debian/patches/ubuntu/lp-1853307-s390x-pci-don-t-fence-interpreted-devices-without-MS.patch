@@ -1,0 +1,48 @@
+From 15d0e7942d3b31ff71d8e0e8cec3a8203214f19b Mon Sep 17 00:00:00 2001
+From: Matthew Rosato <mjrosato@linux.ibm.com>
+Date: Fri, 2 Sep 2022 13:27:33 -0400
+Subject: [PATCH] s390x/pci: don't fence interpreted devices without MSI-X
+
+Lack of MSI-X support is not an issue for interpreted passthrough
+devices, so let's let these in.  This will allow, for example, ISM
+devices to be passed through -- but only when interpretation is
+available and being used.
+
+Signed-off-by: Matthew Rosato <mjrosato@linux.ibm.com>
+Reviewed-by: Thomas Huth <thuth@redhat.com>
+Reviewed-by: Pierre Morel <pmorel@linux.ibm.com>
+Message-Id: <20220902172737.170349-5-mjrosato@linux.ibm.com>
+Signed-off-by: Thomas Huth <thuth@redhat.com>
+
+Origin: upstream, https://gitlab.com/qemu-project/qemu/commit/15d0e7942d
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/1853307
+Last-Update: 2023-07-04
+
+---
+ hw/s390x/s390-pci-bus.c | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+
+Index: qemu/hw/s390x/s390-pci-bus.c
+===================================================================
+--- qemu.orig/hw/s390x/s390-pci-bus.c	2023-07-04 20:50:34.692177357 -0400
++++ qemu/hw/s390x/s390-pci-bus.c	2023-07-04 20:51:00.000000000 -0400
+@@ -881,6 +881,10 @@
+ 
+ static void s390_pci_msix_free(S390PCIBusDevice *pbdev)
+ {
++    if (pbdev->msix.entries == 0) {
++        return;
++    }
++
+     memory_region_del_subregion(&pbdev->iommu->mr, &pbdev->msix_notify_mr);
+     object_unparent(OBJECT(&pbdev->msix_notify_mr));
+ }
+@@ -1093,7 +1097,7 @@
+             pbdev->interp = false;
+         }
+ 
+-        if (s390_pci_msix_init(pbdev)) {
++        if (s390_pci_msix_init(pbdev) && !pbdev->interp) {
+             error_setg(errp, "MSI-X support is mandatory "
+                        "in the S390 architecture");
+             return;
