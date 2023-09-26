@@ -1,0 +1,40 @@
+From a4663f1a5506626175fc64c86e52135587c36872 Mon Sep 17 00:00:00 2001
+From: Paolo Bonzini <pbonzini@redhat.com>
+Date: Thu, 11 Nov 2021 12:06:00 +0100
+Subject: [PATCH] virtio-gpu: do not byteswap padding
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+In Linux 5.16, the padding of struct virtio_gpu_ctrl_hdr has become a
+single-byte field followed by a uint8_t[3] array of padding bytes,
+and virtio_gpu_ctrl_hdr_bswap does not compile anymore.
+
+Signed-off-by: Paolo Bonzini <pbonzini@redhat.com>
+Acked-by: Cornelia Huck <cohuck@redhat.com>
+Reviewed-by: Alex Bennée <alex.bennee@linaro.org>
+Reviewed-by: Michael S. Tsirkin <mst@redhat.com>
+Reviewed-by: Philippe Mathieu-Daudé <philmd@redhat.com>
+Message-Id: <20211111110604.207376-2-pbonzini@redhat.com>
+Signed-off-by: Paolo Bonzini <pbonzini@redhat.com>
+
+Origin: upstream, https://gitlab.com/qemu-project/qemu/commit/a4663f1a55
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/1853307
+Last-Update: 2023-07-04
+
+---
+ include/hw/virtio/virtio-gpu-bswap.h | 1 -
+ 1 file changed, 1 deletion(-)
+
+Index: qemu/include/hw/virtio/virtio-gpu-bswap.h
+===================================================================
+--- qemu.orig/include/hw/virtio/virtio-gpu-bswap.h	2023-07-04 20:38:39.000000000 -0400
++++ qemu/include/hw/virtio/virtio-gpu-bswap.h	2023-07-04 20:49:59.000000000 -0400
+@@ -24,7 +24,6 @@
+     le32_to_cpus(&hdr->flags);
+     le64_to_cpus(&hdr->fence_id);
+     le32_to_cpus(&hdr->ctx_id);
+-    le32_to_cpus(&hdr->padding);
+ }
+ 
+ static inline void

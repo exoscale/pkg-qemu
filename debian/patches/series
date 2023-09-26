@@ -66,8 +66,29 @@ CVE-2022-4144-4.patch
 CVE-2022-4144-5.patch
 CVE-2023-0330.patch
 ubuntu/lp2025591-block-use-the-request-length-for-iov-alignment.patch
+ubuntu/lp-1853307-virtio-gpu-do-not-byteswap-padding.patch
+ubuntu/lp-1853307-linux-headers-update-to-5.16-rc1.patch
+ubuntu/lp-1853307-update-linux-headers-Add-asm-riscv-kvm.h.patch
+ubuntu/lp-1853307-linux-headers-Update-headers-to-v5.17-rc1.patch
+ubuntu/lp-1853307-linux-headers-include-missing-changes-from-5.17.patch
+ubuntu/lp-1853307-linux-headers-Update-to-v5.18-rc6.patch
+ubuntu/lp-1853307-linux-headers-Add-vduse.h.patch
+ubuntu/lp-1853307-kvm-add-support-for-boolean-statistics.patch
+ubuntu/lp-1853307-hw-i386-pass-RNG-seed-via-setup_data-entry.patch
+ubuntu/lp-1853307-s390x-pci-use-a-reserved-ID-for-the-default-PCI-grou.patch
+ubuntu/lp-1853307-s390x-pci-add-supported-DT-information-to-clp-respon.patch
+ubuntu/lp-1853307-configure-Add-Wno-gnu-variable-sized-type-not-at-end.patch
+ubuntu/lp-1853307-Update-linux-headers-to-v6.0-rc4.patch
+ubuntu/lp-1853307-s390x-pci-add-routine-to-get-host-function-handle-fr.patch
+ubuntu/lp-1853307-s390x-pci-enable-for-load-store-interpretation.patch
+ubuntu/lp-1853307-s390x-pci-don-t-fence-interpreted-devices-without-MS.patch
+ubuntu/lp-1853307-s390x-pci-enable-adapter-event-notification-for-inte.patch
+ubuntu/lp-1853307-s390x-pci-let-intercept-devices-have-separate-PCI-gr.patch
+ubuntu/lp-1853307-s390x-pci-reflect-proper-maxstbl-for-groups-of-inter.patch
+ubuntu/lp-1853307-s390x-pci-RPCIT-second-pass-when-mappings-exhausted.patch
+ubuntu/lp-1853307-s390x-pci-shrink-DMA-aperture-to-be-bound-by-vfio-DM.patch
+ubuntu/lp-1853307-s390x-pci-reset-ISM-passthrough-devices-on-shutdown-.patch
 
 # Exoscale
 exoscale/pre-bionic-256k-ipxe-efi-roms-2.11.patch
 exoscale/0001-VNC-allow-websocket-connections-over-AF_UNIX-sockets.patch
-exoscale/0002-i386-acpi-restore-device-paths-for-6.2-vms.patch

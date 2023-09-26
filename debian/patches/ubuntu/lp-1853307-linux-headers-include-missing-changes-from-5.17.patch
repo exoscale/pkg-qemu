@@ -1,0 +1,50 @@
+From 1ea5208febcc068449b63282d72bb719ab67a466 Mon Sep 17 00:00:00 2001
+From: Paolo Bonzini <pbonzini@redhat.com>
+Date: Tue, 22 Feb 2022 17:58:11 +0100
+Subject: [PATCH] linux-headers: include missing changes from 5.17
+
+Signed-off-by: Paolo Bonzini <pbonzini@redhat.com>
+
+Origin: upstream, https://gitlab.com/qemu-project/qemu/commit/1ea5208feb
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/1853307
+Last-Update: 2023-07-04
+
+---
+ linux-headers/asm-x86/kvm.h | 3 +++
+ linux-headers/linux/kvm.h   | 4 ++++
+ 2 files changed, 7 insertions(+)
+
+Index: qemu/linux-headers/asm-x86/kvm.h
+===================================================================
+--- qemu.orig/linux-headers/asm-x86/kvm.h	2023-07-04 20:49:59.000000000 -0400
++++ qemu/linux-headers/asm-x86/kvm.h	2023-07-04 20:51:04.000000000 -0400
+@@ -452,6 +452,9 @@
+ 
+ #define KVM_STATE_VMX_PREEMPTION_TIMER_DEADLINE	0x00000001
+ 
++/* attributes for system fd (group 0) */
++#define KVM_X86_XCOMP_GUEST_SUPP	0
++
+ struct kvm_vmx_nested_state_data {
+ 	__u8 vmcs12[KVM_STATE_NESTED_VMX_VMCS_SIZE];
+ 	__u8 shadow_vmcs12[KVM_STATE_NESTED_VMX_VMCS_SIZE];
+Index: qemu/linux-headers/linux/kvm.h
+===================================================================
+--- qemu.orig/linux-headers/linux/kvm.h	2023-07-04 20:49:59.000000000 -0400
++++ qemu/linux-headers/linux/kvm.h	2023-07-04 20:51:10.000000000 -0400
+@@ -1133,6 +1133,7 @@
+ #define KVM_CAP_VM_MOVE_ENC_CONTEXT_FROM 206
+ #define KVM_CAP_VM_GPA_BITS 207
+ #define KVM_CAP_XSAVE2 208
++#define KVM_CAP_SYS_ATTRIBUTES 209
+ 
+ #ifdef KVM_CAP_IRQ_ROUTING
+ 
+@@ -2047,4 +2048,7 @@
+ 
+ #define KVM_GET_STATS_FD  _IO(KVMIO,  0xce)
+ 
++/* Available with KVM_CAP_XSAVE2 */
++#define KVM_GET_XSAVE2		  _IOR(KVMIO,  0xcf, struct kvm_xsave)
++
+ #endif /* __LINUX_KVM_H */

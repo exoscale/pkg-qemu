@@ -1,0 +1,53 @@
+From 94abf6cf290d849681a6d374c73fff1032a4c672 Mon Sep 17 00:00:00 2001
+From: "Jason A. Donenfeld" <Jason@zx2c4.com>
+Date: Thu, 21 Jul 2022 14:56:36 +0200
+Subject: [PATCH 2/2] hw/i386: pass RNG seed via setup_data entry
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Tiny machines optimized for fast boot time generally don't use EFI,
+which means a random seed has to be supplied some other way. For this
+purpose, Linux (â‰¥5.20) supports passing a seed in the setup_data table
+with SETUP_RNG_SEED, specially intended for hypervisors, kexec, and
+specialized bootloaders. The linked commit shows the upstream kernel
+implementation.
+
+At Paolo's request, we don't pass these to versioned machine types â‰¤7.0.
+
+Link: https://git.kernel.org/tip/tip/c/68b8e9713c8
+Cc: Marcel Apfelbaum <marcel.apfelbaum@gmail.com>
+Cc: Paolo Bonzini <pbonzini@redhat.com>
+Cc: Richard Henderson <richard.henderson@linaro.org>
+Cc: Eduardo Habkost <eduardo@habkost.net>
+Cc: Peter Maydell <peter.maydell@linaro.org>
+Cc: Philippe Mathieu-Daudé <f4bug@amsat.org>
+Cc: Laurent Vivier <laurent@vivier.eu>
+Reviewed-by: Michael S. Tsirkin <mst@redhat.com>
+Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
+Message-Id: <20220721125636.446842-1-Jason@zx2c4.com>
+Signed-off-by: Paolo Bonzini <pbonzini@redhat.com>
+(backported from commit 67f7e426e53833a5db75b0d813e8d537b8a75bd2)
+[MR: only backport the standard-headers change]
+Signed-off-by: Matthew Rosato <mjrosato@linux.ibm.com>
+
+Origin: backport, https://gitlab.com/qemu-project/qemu/commit/67f7e426e5
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/1853307
+Last-Update: 2023-07-04
+
+---
+ include/standard-headers/asm-x86/bootparam.h | 1 +
+ 1 file changed, 1 insertion(+)
+
+Index: qemu/include/standard-headers/asm-x86/bootparam.h
+===================================================================
+--- qemu.orig/include/standard-headers/asm-x86/bootparam.h	2023-07-04 20:38:39.000000000 -0400
++++ qemu/include/standard-headers/asm-x86/bootparam.h	2023-07-04 20:51:04.000000000 -0400
+@@ -10,6 +10,7 @@
+ #define SETUP_EFI			4
+ #define SETUP_APPLE_PROPERTIES		5
+ #define SETUP_JAILHOUSE			6
++#define SETUP_RNG_SEED			9
+ 
+ #define SETUP_INDIRECT			(1<<31)
+ 

@@ -1,0 +1,41 @@
+From 9ee8f7e46a7d42ede69a4780200129bf1acb0d01 Mon Sep 17 00:00:00 2001
+From: Matthew Rosato <mjrosato@linux.ibm.com>
+Date: Fri, 2 Sep 2022 13:27:36 -0400
+Subject: [PATCH] s390x/pci: reflect proper maxstbl for groups of interpreted
+ devices
+
+The maximum supported store block length might be different depending
+on whether the instruction is interpretively executed (firmware-reported
+maximum) or handled via userspace intercept (host kernel API maximum).
+Choose the best available value during group creation.
+
+Signed-off-by: Matthew Rosato <mjrosato@linux.ibm.com>
+Reviewed-by: Pierre Morel <pmorel@linux.ibm.com>
+Message-Id: <20220902172737.170349-8-mjrosato@linux.ibm.com>
+Signed-off-by: Thomas Huth <thuth@redhat.com>
+
+Origin: upstream, https://gitlab.com/qemu-project/qemu/commit/9ee8f7e46a
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/1853307
+Last-Update: 2023-07-04
+
+---
+ hw/s390x/s390-pci-vfio.c | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+
+Index: qemu/hw/s390x/s390-pci-vfio.c
+===================================================================
+--- qemu.orig/hw/s390x/s390-pci-vfio.c	2023-07-04 20:50:34.720177217 -0400
++++ qemu/hw/s390x/s390-pci-vfio.c	2023-07-04 20:50:56.000000000 -0400
+@@ -213,7 +213,11 @@
+         resgrp->msia = cap->msi_addr;
+         resgrp->mui = cap->mui;
+         resgrp->i = cap->noi;
+-        resgrp->maxstbl = cap->maxstbl;
++        if (pbdev->interp && hdr->version >= 2) {
++            resgrp->maxstbl = cap->imaxstbl;
++        } else {
++            resgrp->maxstbl = cap->maxstbl;
++        }
+         resgrp->version = cap->version;
+         resgrp->dtsm = ZPCI_DTSM;
+     }

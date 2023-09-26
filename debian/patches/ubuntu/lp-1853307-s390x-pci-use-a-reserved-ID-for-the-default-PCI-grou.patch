@@ -1,0 +1,38 @@
+From b2892a2b9d45d25b909108ca633d19f9d8d673f5 Mon Sep 17 00:00:00 2001
+From: Matthew Rosato <mjrosato@linux.ibm.com>
+Date: Fri, 3 Dec 2021 09:27:03 -0500
+Subject: [PATCH] s390x/pci: use a reserved ID for the default PCI group
+
+The current default PCI group being used can technically collide with a
+real group ID passed from a hostdev.  Let's instead use a group ID that
+comes from a special pool (0xF0-0xFF) that is architected to be reserved
+for simulated devices.
+
+Fixes: 28dc86a072 ("s390x/pci: use a PCI Group structure")
+Signed-off-by: Matthew Rosato <mjrosato@linux.ibm.com>
+Reviewed-by: Eric Farman <farman@linux.ibm.com>
+Reviewed-by: Pierre Morel <pmorel@linux.ibm.com>
+Message-Id: <20211203142706.427279-2-mjrosato@linux.ibm.com>
+Signed-off-by: Thomas Huth <thuth@redhat.com>
+
+Origin: upstream, https://gitlab.com/qemu-project/qemu/commit/b2892a2b9d
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/1853307
+Last-Update: 2023-07-04
+
+---
+ include/hw/s390x/s390-pci-bus.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+Index: qemu/include/hw/s390x/s390-pci-bus.h
+===================================================================
+--- qemu.orig/include/hw/s390x/s390-pci-bus.h	2023-07-04 20:38:39.000000000 -0400
++++ qemu/include/hw/s390x/s390-pci-bus.h	2023-07-04 20:51:06.000000000 -0400
+@@ -313,7 +313,7 @@
+ } ZpciFmb;
+ QEMU_BUILD_BUG_MSG(offsetof(ZpciFmb, fmt0) != 48, "padding in ZpciFmb");
+ 
+-#define ZPCI_DEFAULT_FN_GRP 0x20
++#define ZPCI_DEFAULT_FN_GRP 0xFF
+ typedef struct S390PCIGroup {
+     ClpRspQueryPciGrp zpci_group;
+     int id;
