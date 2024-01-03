@@ -1,3 +1,21 @@
+qemu (1:6.2+dfsg-2ubuntu6.14+exo3) UNRELEASED; urgency=medium
+
+  * Import 1:6.2+dfsg-2ubuntu6.14
+  * EXOSCALE SAUCE (no-up): Fix qemu-system-x86_64:
+    Size mismatch: 0000:00:03.0/virtio-net-pci.rom: 0x40000 != 0x80000
+  * EXOSCALE SAUCE (no-up): VNC Allow websocket connections over AF_UNIX sockets
+
+ -- Alessandro Ratti <alessandro@exoscale.com>  Wed, 03 Jan 2024 14:03:16 +0000
+
+qemu (1:6.2+dfsg-2ubuntu6.14) jammy; urgency=medium
+
+  * d/u/lp-2033957-virtiofsd-Fix-breakage-due-to-fuse_init_in.patch:
+    Fix virtiofsd breakage due to fuse_init_in size change, which
+    happened because of the Linux kernel 5.17 headers that were
+    imported in a previous patch. (LP: #2033957)
+
+ -- Sergio Durigan Junior <sergio.durigan@canonical.com>  Tue, 05 Sep 2023 22:58:36 -0400
+
 qemu (1:6.2+dfsg-2ubuntu6.13+exo3) UNRELEASED; urgency=medium
 
   * Amend commit 1a6b0ee3b (SC: #73907)

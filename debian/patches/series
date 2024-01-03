@@ -88,6 +88,7 @@ ubuntu/lp-1853307-s390x-pci-reflect-proper-maxstbl-for-groups-of-inter.patch
 ubuntu/lp-1853307-s390x-pci-RPCIT-second-pass-when-mappings-exhausted.patch
 ubuntu/lp-1853307-s390x-pci-shrink-DMA-aperture-to-be-bound-by-vfio-DM.patch
 ubuntu/lp-1853307-s390x-pci-reset-ISM-passthrough-devices-on-shutdown-.patch
+ubuntu/lp-2033957-virtiofsd-Fix-breakage-due-to-fuse_init_in.patch
 
 # Exoscale
 exoscale/pre-bionic-256k-ipxe-efi-roms-2.11.patch
