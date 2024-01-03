@@ -1,3 +1,18 @@
+qemu (1:6.2+dfsg-2ubuntu6.15+exo3) UNRELEASED; urgency=medium
+
+  * Import 1:6.2+dfsg-2ubuntu6.15
+  * EXOSCALE SAUCE (no-up): Fix qemu-system-x86_64:
+    Size mismatch: 0000:00:03.0/virtio-net-pci.rom: 0x40000 != 0x80000
+  * EXOSCALE SAUCE (no-up): VNC Allow websocket connections over AF_UNIX sockets
+
+ -- Alessandro Ratti <alessandro@exoscale.com>  Wed, 03 Jan 2024 16:33:56 +0000
+
+qemu (1:6.2+dfsg-2ubuntu6.15) jammy; urgency=medium
+
+  * d/rules: remove --no-start for qemu-guest-agent (LP: #2028124)
+
+ -- Mitchell Dzurick <mitchell.dzurick@canonical.com>  Fri, 15 Sep 2023 14:39:05 -0400
+
 qemu (1:6.2+dfsg-2ubuntu6.14+exo3) UNRELEASED; urgency=medium
 
   * Import 1:6.2+dfsg-2ubuntu6.14
