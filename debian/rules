@@ -426,7 +426,7 @@ binary-arch: $(addprefix install-, ${qemu-builds})
 	# install and enable qemu-kvm.service
 	dh_installsystemd -a -pqemu-system-common --no-restart-on-upgrade --name=qemu-kvm
 	dh_installinit -a -pqemu-guest-agent
-	dh_installsystemd -a -pqemu-guest-agent --no-start --no-enable
+	dh_installsystemd -a -pqemu-guest-agent --no-enable
 # default-enable /run/qemu mount only on ubuntu,
 # on debian let it be manually controlled and off by default
 	dh_installsystemd -a -pqemu-block-extra --no-restart-on-upgrade --name=run-qemu.mount \
