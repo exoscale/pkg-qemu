@@ -1,3 +1,54 @@
+qemu (1:6.2+dfsg-2ubuntu6.16+exo3) UNRELEASED; urgency=medium
+
+  * Import 1:6.2+dfsg-2ubuntu6.16
+  * EXOSCALE SAUCE (no-up): Fix qemu-system-x86_64:
+    Size mismatch: 0000:00:03.0/virtio-net-pci.rom: 0x40000 != 0x80000
+  * EXOSCALE SAUCE (no-up): VNC Allow websocket connections over AF_UNIX sockets
+
+ -- Alessandro Ratti <alessandro@exoscale.com>  Fri, 19 Jan 2024 14:23:57 +0000
+
+qemu (1:6.2+dfsg-2ubuntu6.16) jammy-security; urgency=medium
+
+  * SECURITY UPDATE: infinite loop in USB xHCI controller
+    - debian/patches/CVE-2020-14394.patch: fix unbounded loop in
+      hw/usb/hcd-xhci.c.
+    - CVE-2020-14394
+  * SECURITY UPDATE: OOB read in RDMA device
+    - debian/patches/CVE-2023-1544.patch: protect against buggy or
+      malicious guest driver in hw/rdma/vmw/pvrdma_main.c.
+    - CVE-2023-1544
+  * SECURITY UPDATE: 9pfs special file access
+    - debian/patches/CVE-2023-2861.patch: prevent opening special files in
+      fsdev/virtfs-proxy-helper.c, hw/9pfs/9p-util.h.
+    - CVE-2023-2861
+  * SECURITY UPDATE: heap overflow in crypto device
+    - debian/patches/CVE-2023-3180.patch: verify src&dst buffer length for
+      sym request in hw/virtio/virtio-crypto.c.
+    - CVE-2023-3180
+  * SECURITY UPDATE: infinite loop in VNC server
+    - debian/patches/CVE-2023-3255.patch: fix infinite loop in
+      inflate_buffer in ui/vnc-clipboard.c.
+    - CVE-2023-3255
+  * SECURITY UPDATE: race in virtio-net hot-unplug
+    - debian/patches/CVE-2023-3301.patch: do not cleanup the vdpa/vhost-net
+      structures if peer nic is present in net/vhost-vdpa.c.
+    - CVE-2023-3301
+  * SECURITY UPDATE: DoS in VNC server
+    - debian/patches/CVE-2023-3354.patch: remove io watch if TLS channel is
+      closed during handshake in include/io/channel-tls.h,
+      io/channel-tls.c.
+    - CVE-2023-3354
+  * SECURITY UPDATE: disk offset 0 access
+    - debian/patches/CVE-2023-5088.patch: cancel async DMA operation before
+      resetting state in hw/ide/core.c.
+    - CVE-2023-5088
+  * SECURITY UPDATE: DoS in Intel HD Audio device
+    - debian/patches/CVE-2021-3611-*.patch: add MemTxAttrs argument to
+      DMA functions and use it in hw/audio/intel-hda.c.
+    - CVE-2021-3611
+
+ -- Marc Deslauriers <marc.deslauriers@ubuntu.com>  Thu, 30 Nov 2023 09:53:27 -0500
+
 qemu (1:6.2+dfsg-2ubuntu6.15+exo3) UNRELEASED; urgency=medium
 
   * Import 1:6.2+dfsg-2ubuntu6.15
