@@ -438,6 +438,10 @@ binary-arch: $(addprefix install-, ${qemu-builds})
 	dh_fixperms -a
 	dh_shlibdeps -a
 	dh_installdeb -a
+	# On jammy dh_installsystemd will always restart a mount unit, no matter
+	# the options we pass - hence we post-modify it in the maint scripts to
+	# match the required behavior.
+	sed -i -E 's/(\s*)(deb-systemd-invoke\s*\$$_dh_action.*run-qemu.mount.*$$)/\1# LP: 2051153 Do not restart mount units\n\1# \2/' debian/qemu-block-extra/DEBIAN/postinst
 ifeq ($(enable_linux_user),enable)
 # after shlibdeps finished, grab ${shlibs:Depends} from -user package
 # and transform it into Built-Using field for -user-static.
